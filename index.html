@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -292,6 +291,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="field"><label>Jenis Kelamin</label>
         <select id="d-jk"><option value="">-- Pilih --</option><option>Laki-laki</option><option>Perempuan</option><option>Lainnya / Prefer not to say</option></select>
       </div>
+      <div class="field"><label>Apakah kamu mempunyai penyakit kronis?</label><input type="text" id="d-pk" placeholder="Contoh: Saya memiliki penyakit jantung"></div>
+      <div class="field"><label>Apakah kamu memiliki pasangan yang tinggal serumah? Kosongkan jika kamu belum menikah</label><input type="text" id="d-ps" placeholder="Contoh: Ada"></div>
+      <div class="field"><label>Berapa orang anak yang tinggal serumah? Kosongkan jika kamu belum menikah</label><input type="text" id="d-as" placeholder="Contoh: 1"></div>
       <div class="brow"><button class="btn-sm bp" onclick="submitData()">Lanjutkan →</button></div>
     </div>
 
@@ -549,7 +551,7 @@ async function doLogout(){
 }
 
 /* ════════ STATE ════════ */
-const S={nama:'',usia:0,jk:'',tahap:'',avail:[],preScore:0,postScore:0,thIdx:0,hist:[],phase:''};
+const S={nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',tahap:'',avail:[],preScore:0,postScore:0,thIdx:0,hist:[],phase:''};
 
 /* ════════ DATA PHQ ════════ */
 const PHQ={
@@ -601,7 +603,7 @@ function renderSteps(ai){
 /* ════════ APP LAUNCH ════════ */
 function launchApp(){
   if(!_currentUser){toast('⚠️ Silakan login terlebih dahulu');goPage('login');return;}
-  Object.assign(S,{nama:'',usia:0,jk:'',tahap:'',avail:[],preScore:0,postScore:0,thIdx:0,hist:[],phase:''});
+  Object.assign(S,{nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',tahap:'',avail:[],preScore:0,postScore:0,thIdx:0,hist:[],phase:''});
   goPage('app');
   renderSteps(0);
   showSc('sc-data');
@@ -622,7 +624,12 @@ function submitData(){
   const jk=document.getElementById('d-jk').value;
   if(!nm||!us||!jk){toast('⚠️ Lengkapi semua data');return;}
   if(us<5||us>120){toast('⚠️ Usia tidak valid');return;}
-  S.nama=nm;S.usia=us;S.jk=jk;
+  S.nama=nm;
+  S.usia=us;
+  S.jk=jk;
+  S.penyakit=document.getElementById('d-pk').value.trim()||'-';
+  S.pasangan=document.getElementById('d-ps').value.trim()||'-';
+  S.jumlahAnak=document.getElementById('d-as').value.trim()||'-';
   renderSteps(1);
   buildTahap();
 }
@@ -816,6 +823,9 @@ async function showFinal(){
         nickname: S.nama,
         age: S.usia,
         gender: S.jk,
+        chronic_disease: S.penyakit,
+        has_partner: S.pasangan,
+        children_count: S.jumlahAnak,
         updated_at: new Date().toISOString()
       }, {onConflict:'user_id'});
 
@@ -826,6 +836,9 @@ async function showFinal(){
         nickname: S.nama,
         age: S.usia,
         gender: S.jk,
+        chronic_disease: S.penyakit,
+        has_partner: S.pasangan,
+        children_count: S.jumlahAnak,
         pre_score: ps,
         post_score: ss,
         score_delta: d,
