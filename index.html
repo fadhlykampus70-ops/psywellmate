@@ -107,7 +107,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:12px 12px 12px 4px;padding:1rem 1.2rem;margin-bottom:1.1rem;line-height:1.7;font-size:.9rem}
 .tq-label{font-size:.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem}
 .chat-hist{margin-bottom:.9rem;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
-.ch-u{background:var(--primary-soft);border:1px solid var(--primary);border-radius:10px 10px 4px 10px;padding:.7rem .95rem;font-size:.84rem;color:var(--white);align-self:flex-end;max-width:92%}
+.ch-u{background:var(--primary-soft);border:1px solid var(--primary);border-radius:10px 10px 4px 10px;padding:.7rem .95rem;font-size:.84rem;color:var(--white);align-self:flex-end;max-width:92%;word-break:break-word;overflow-wrap:anywhere}
 .chat-iw{position:relative;margin-top:.6rem}
 .chat-ta{width:100%;padding:11px 46px 11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:74px;transition:.2s;line-height:1.5}
 .chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
@@ -769,12 +769,64 @@ function sendCurhat(){
 
 function toggleMic(){
   if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){toast('Browser tidak mendukung fitur suara. Silakan ketik.');return;}
-  if(_isRec){_rec&&_rec.stop();_isRec=false;document.getElementById('mic-btn').classList.remove('rec');document.getElementById('mic-hint').textContent='Tekan 🎤 untuk merekam suara, atau ketik langsung di bawah';return;}
+
+  // Jika sedang rekam → stop
+  if(_isRec){
+    _isRec=false;
+    _rec&&_rec.stop();
+    document.getElementById('mic-btn').classList.remove('rec');
+    document.getElementById('mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';
+    return;
+  }
+
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  _rec=new SR();_rec.lang='id-ID';_rec.continuous=true;_rec.interimResults=true;
-  _rec.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;document.getElementById('curhat-ta').value=t;};
-  _rec.onend=()=>{_isRec=false;document.getElementById('mic-btn').classList.remove('rec');document.getElementById('mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';};
-  _rec.start();_isRec=true;
+  _rec=new SR();
+  _rec.lang='id-ID';
+  _rec.continuous=true;
+  _rec.interimResults=true;
+
+  let _finalText=''; // akumulasi hasil final saja
+
+  _rec.onresult=e=>{
+    let interim='';
+    // Iterasi hanya result baru (dari lastResultIndex jika ada, atau dari 0)
+    for(let i=0;i<e.results.length;i++){
+      if(e.results[i].isFinal){
+        // Tambahkan ke final hanya jika belum masuk (cek via resultIndex)
+        if(i>=(_rec._lastFinalIdx||0)){
+          _finalText+=e.results[i][0].transcript;
+          _rec._lastFinalIdx=i+1;
+        }
+      } else {
+        interim+=e.results[i][0].transcript;
+      }
+    }
+    // Tampilkan final + interim di textarea agar user bisa melihat progress
+    document.getElementById('curhat-ta').value=(_finalText+interim).trim();
+  };
+
+  _rec.onerror=err=>{
+    // 'no-speech' dan 'aborted' adalah error normal, abaikan
+    if(err.error==='no-speech'||err.error==='aborted') return;
+    toast('⚠️ Mikrofon error: '+err.error);
+    _isRec=false;
+    document.getElementById('mic-btn').classList.remove('rec');
+  };
+
+  _rec.onend=()=>{
+    // Pastikan textarea berisi teks final (bukan interim)
+    if(_finalText.trim()){
+      document.getElementById('curhat-ta').value=_finalText.trim();
+    }
+    _isRec=false;
+    document.getElementById('mic-btn').classList.remove('rec');
+    document.getElementById('mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';
+  };
+
+  _finalText='';
+  _rec._lastFinalIdx=0;
+  _rec.start();
+  _isRec=true;
   document.getElementById('mic-btn').classList.add('rec');
   document.getElementById('mic-hint').textContent='🔴 Sedang merekam… ceritakan perasaanmu';
 }
