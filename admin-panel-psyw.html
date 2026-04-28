@@ -539,6 +539,7 @@ let _currentTranscriptData = null;
 let _currentTranscriptSession = null;
 const PAGE_SIZE = 15;
 let _userPage = 1, _sessPage = 1;
+let _sessMap = {};
 
 /* ════════════════════════════════════
    LOGIN
@@ -703,8 +704,13 @@ function renderUsers(filter=''){
     <td style="color:var(--muted);font-size:.75rem">${u.email||'—'}</td>
     <td><span class="badge ${u.role==='admin'?'b-orange':'b-blue'}">${u.role||'user'}</span></td>
     <td style="color:var(--muted);font-size:.75rem">${fmtDateShort(u.created_at)}</td>
-    <td><button class="btn btn-p btn-sm" onclick="viewUserDetail('${u.id}')">Detail</button></td>
+    <td><button class="btn btn-p btn-sm vu-btn" data-id="${u.id}">Detail</button></td>
   </tr>`).join('');
+
+  // Event listener aman untuk tombol detail user
+  tbody.querySelectorAll('.vu-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>viewUserDetail(btn.dataset.id));
+  });
 
   renderPagi('user-pagi', _userPage, total, (p)=>{ _userPage=p; renderUsers(document.getElementById('user-search').value); });
 }
@@ -736,11 +742,23 @@ async function viewUserDetail(uid){
         </div>
         <div style="display:flex;gap:6px;align-items:center">
           ${statusBadge(s.status)}
-          <button class="btn btn-p btn-sm" onclick="openTranscriptWithConfirm('${s.id}','${(s.nickname||'').replace(/'/g,'\\'')}','${s.user_id}')">Transkrip</button>
+          <button class="btn btn-p btn-sm tr-user-btn" data-sessid="${s.id}" data-userid="${s.user_id}">Transkrip</button>
         </div>
       </div>`).join('') : '<div style="color:var(--muted);font-size:.8rem">Belum ada sesi</div>'}
   `;
   openModal('modal-user');
+
+  // Event listener untuk tombol transkrip di modal user detail
+  setTimeout(()=>{
+    document.querySelectorAll('.tr-user-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const sessId=btn.dataset.sessid;
+        const userId=btn.dataset.userid;
+        const s=_allSessions.find(x=>x.id===sessId);
+        openTranscriptWithConfirm(sessId, s?.nickname||'', userId);
+      });
+    });
+  }, 50);
 }
 
 /* ════════════════════════════════════
@@ -760,6 +778,10 @@ function renderSessions(filter=''){
 
   if(!slice.length){ tbody.innerHTML=`<tr><td colspan="10" class="tbl-empty">Tidak ada data</td></tr>`; return; }
 
+  // Simpan ke map agar bisa diakses dari event listener
+  _sessMap = {};
+  slice.forEach(s=>{ _sessMap[s.id]=s; });
+
   tbody.innerHTML = slice.map((s,i)=>{
     const d = (s.pre_score||0)-(s.post_score||0);
     const deltaHtml = s.status==='completed'
@@ -775,9 +797,17 @@ function renderSessions(filter=''){
       <td>${deltaHtml}</td>
       <td>${statusBadge(s.status)}</td>
       <td style="white-space:nowrap;color:var(--muted);font-size:.72rem">${fmtDateShort(s.created_at)}</td>
-      <td><button class="btn btn-p btn-sm" onclick="openTranscriptWithConfirm('${s.id}','${(s.nickname||'').replace(/'/g,'\\'')}','${s.user_id}')">Transkrip</button></td>
+      <td><button class="btn btn-p btn-sm tr-sess-btn" data-id="${s.id}">Transkrip</button></td>
     </tr>`;
   }).join('');
+
+  // Event listener aman — tidak ada karakter yang bisa rusak
+  tbody.querySelectorAll('.tr-sess-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const s=_sessMap[btn.dataset.id];
+      if(s) openTranscriptWithConfirm(s.id, s.nickname||'', s.user_id);
+    });
+  });
 
   renderPagi('sess-pagi', _sessPage, total, (p)=>{ _sessPage=p; renderSessions(document.getElementById('sess-search').value); });
 }
@@ -1070,18 +1100,38 @@ async function init(){
   try{
     const {data:{session}} = await sb.auth.getSession();
     if(session?.user){
-      const {data:prof} = await sb.from('profiles').select('*').eq('id',session.user.id).single();
-      if(prof?.role==='admin'){
+      const {data:prof, error:profErr} = await sb.from('profiles')
+        .select('*').eq('id',session.user.id).single();
+
+      if(!profErr && prof?.role==='admin'){
+        // Sesi aktif dan role admin — langsung masuk dashboard
         _cu = session.user;
         document.getElementById('tb-user').textContent = prof.full_name || session.user.email;
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         startSessionTimeout();
         loadAllData();
+      } else {
+        // Ada sesi aktif tapi bukan admin — logout sesi itu, tampilkan login
+        await sb.auth.signOut();
+        showLoginPage();
       }
+    } else {
+      // Tidak ada sesi aktif — tampilkan login
+      showLoginPage();
     }
-  }catch(e){}
-  document.getElementById('pg-loader').classList.add('hide');
+  } catch(e){
+    console.error('Init error:', e);
+    showLoginPage();
+  } finally {
+    // Pastikan loading selalu hilang apapun yang terjadi
+    document.getElementById('pg-loader').classList.add('hide');
+  }
+}
+
+function showLoginPage(){
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
 }
 
 init();
