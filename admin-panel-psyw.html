@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsyWellMate — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--surface3:#252d40;
+  --border:#2a3347;--border2:#334060;
+  --primary:#4f8ef7;--primary-soft:rgba(79,142,247,.12);
+  --accent:#f7a14f;--accent-soft:rgba(247,161,79,.12);
+  --green:#3ecf8e;--green-soft:rgba(62,207,142,.12);
+  --amber:#f5c842;--amber-soft:rgba(245,200,66,.12);
+  --red:#f56565;--red-soft:rgba(245,101,101,.12);
+  --text:#e2e8f8;--muted:#6b7a99;--white:#f0f4ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* LOGIN PAGE */
+#login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+#login-page::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(79,142,247,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(247,161,79,.06) 0%,transparent 50%)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:400px;position:relative;z-index:1;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.login-logo{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--primary);margin-bottom:.3rem;text-align:center}
+.login-logo span{color:var(--accent)}
+.login-badge{text-align:center;margin-bottom:1.8rem}
+.login-badge .lb{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);border:1px solid rgba(247,161,79,.2);color:var(--accent);font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:20px}
+.lfield{margin-bottom:.9rem}
+.lfield label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase}
+.lfield input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;transition:.2s}
+.lfield input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
+.err-box{background:var(--red-soft);border:1px solid rgba(245,101,101,.25);border-radius:7px;padding:.65rem .9rem;font-size:.78rem;color:var(--red);margin-bottom:.9rem;display:none}
+.lock-box{background:var(--amber-soft);border:1px solid rgba(245,200,66,.25);border-radius:7px;padding:.65rem .9rem;font-size:.78rem;color:var(--amber);margin-bottom:.9rem;display:none}
+.lbtn{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}.lbtn:hover{opacity:.87}.lbtn:disabled{opacity:.4;cursor:not-allowed}
+.attempt-info{text-align:center;margin-top:.85rem;font-size:.73rem;color:var(--muted)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* DASHBOARD LAYOUT */
+#dashboard{display:none;min-height:100vh}
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
+.tb-logo{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--primary)}.tb-logo span{color:var(--accent)}
+.tb-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);border:1px solid rgba(247,161,79,.2);color:var(--accent);font-size:.65rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:12px}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-user{font-size:.78rem;color:var(--muted)}
+.tb-logout{padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.75rem;cursor:pointer;transition:.2s}.tb-logout:hover{border-color:var(--red);color:var(--red)}
+.timeout-bar{height:2px;background:var(--primary);transition:width 1s linear;position:fixed;top:56px;left:0;z-index:99}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:1rem 0;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sn{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:.82rem;color:var(--muted);cursor:pointer;transition:.2s;border-left:2px solid transparent}.sn:hover{background:var(--surface2);color:var(--text)}.sn.act{color:var(--primary);border-left-color:var(--primary);background:var(--primary-soft)}
+.sn-icon{font-size:1rem;width:18px;text-align:center}
+.sn-sep{height:1px;background:var(--border);margin:.6rem 1rem}
+.main{flex:1;padding:1.5rem;overflow-y:auto}
+
+/* PANELS */
+.panel{display:none;animation:fup .3s ease both}
+.panel.active{display:block}
+@keyframes fup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem}
+.stat-val{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--white);line-height:1}
+.stat-lbl{font-size:.72rem;color:var(--muted);margin-top:.3rem;text-transform:uppercase;letter-spacing:.5px}
+.stat-sub{font-size:.75rem;margin-top:.4rem}
+
+/* TABLE */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tbl-head{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tbl-title{font-size:.9rem;font-weight:600;color:var(--white)}
+.tbl-actions{display:flex;gap:8px;flex-wrap:wrap}
+.search-inp{padding:7px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.78rem;outline:none;width:200px;transition:.2s}.search-inp:focus{border-color:var(--primary)}
+table{width:100%;border-collapse:collapse}
+th{padding:9px 14px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:var(--surface2);text-align:left;white-space:nowrap}
+td{padding:10px 14px;font-size:.8rem;border-top:1px solid var(--border);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.015)}
+.tbl-empty{text-align:center;padding:2.5rem;color:var(--muted);font-size:.82rem}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:.68rem;font-weight:600}
+.b-green{background:var(--green-soft);color:var(--green)}
+.b-amber{background:var(--amber-soft);color:var(--amber)}
+.b-red{background:var(--red-soft);color:var(--red)}
+.b-blue{background:var(--primary-soft);color:var(--primary)}
+.b-orange{background:rgba(247,161,79,.12);color:var(--accent)}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:7px;border:none;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+.btn-p{background:var(--primary);color:#fff}.btn-p:hover{opacity:.85}
+.btn-o{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-o:hover{border-color:var(--primary);color:var(--primary)}
+.btn-g{background:var(--green-soft);color:var(--green);border:1px solid rgba(62,207,142,.2)}.btn-g:hover{opacity:.85}
+.btn-a{background:var(--accent-soft);color:var(--accent);border:1px solid rgba(247,161,79,.2)}.btn-a:hover{opacity:.85}
+.btn-r{background:var(--red-soft);color:var(--red);border:1px solid rgba(245,101,101,.2)}.btn-r:hover{opacity:.85}
+.btn-sm{padding:5px 10px;font-size:.7rem}
+
+/* SECTION HEADER */
+.sec-hd{margin-bottom:1.2rem}
+.sec-hd h2{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--white);margin-bottom:.2rem}
+.sec-hd p{font-size:.8rem;color:var(--muted)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:680px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:fup .25s ease}
+.modal-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-size:.92rem;font-weight:600;color:var(--white)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;transition:.2s}.modal-close:hover{background:var(--surface2);color:var(--text)}
+.modal-body{padding:1.2rem 1.4rem;overflow-y:auto;flex:1}
+.modal-foot{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+
+/* TRANSCRIPT */
+.tr-sesi{margin-bottom:1.2rem}
+.tr-sesi-head{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:.65rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.tr-item{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.55rem}
+.tr-q{font-size:.72rem;color:var(--muted);margin-bottom:.3rem;line-height:1.4}
+.tr-a{font-size:.82rem;color:var(--text);line-height:1.6}
+.tr-nlp{display:flex;gap:5px;flex-wrap:wrap;margin-top:.4rem}
+.nlp-tag{padding:2px 8px;border-radius:8px;font-size:.62rem;font-weight:600}
+.n-pos{background:var(--green-soft);color:var(--green)}
+.n-neg{background:var(--red-soft);color:var(--red)}
+.n-neu{background:rgba(107,122,153,.12);color:var(--muted)}
+.n-emo{background:var(--accent-soft);color:var(--accent)}
+.n-top{background:var(--primary-soft);color:var(--primary)}
+
+/* CONFIRM MODAL */
+.confirm-modal{max-width:420px}
+.confirm-icon{font-size:2.2rem;text-align:center;margin-bottom:.6rem}
+.confirm-title{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--white);text-align:center;margin-bottom:.5rem}
+.confirm-text{font-size:.82rem;color:var(--muted);text-align:center;line-height:1.65}
+
+/* DETAIL CARDS */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem}
+.detail-item{background:var(--surface2);border-radius:8px;padding:.75rem .9rem}
+.detail-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:.25rem}
+.detail-val{font-size:.88rem;color:var(--text);font-weight:500}
+
+/* SCORE RING */
+.ring-wrap{width:80px;height:80px;position:relative;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:600;font-family:'DM Serif Display',serif}
+
+/* LOG TABLE */
+.log-action{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:6px}
+.la-login{background:var(--green-soft);color:var(--green)}
+.la-view{background:var(--primary-soft);color:var(--primary)}
+.la-export{background:var(--accent-soft);color:var(--accent)}
+.la-transcript{background:rgba(167,139,250,.12);color:#a78bfa}
+
+/* INFO BOX */
+.ibox{background:var(--primary-soft);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:.75rem 1rem;font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.ibox strong{color:var(--primary)}
+
+/* PAGINATION */
+.pagi{display:flex;align-items:center;gap:6px;margin-top:1rem;justify-content:flex-end}
+.pagi-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.75rem;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center}.pagi-btn:hover{border-color:var(--primary);color:var(--primary)}.pagi-btn.act{background:var(--primary);border-color:var(--primary);color:#fff}
+.pagi-info{font-size:.72rem;color:var(--muted)}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 18px;border-radius:8px;font-size:.8rem;opacity:0;transition:.3s;pointer-events:none;z-index:999;transform:translateY(10px)}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* LOADING */
+#pg-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:10px}
+#pg-loader.hide{display:none}
+.lo-spin{width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--primary);border-radius:50%;animation:sp .7s linear infinite}
+.lo-txt{font-size:.78rem;color:var(--muted)}
+
+@media(max-width:640px){
+  .sidebar{display:none}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .detail-grid{grid-template-columns:1fr}
+  table{font-size:.72rem}
+  th,td{padding:7px 10px}
+}
+</style>
+</head>
+<body>
+
+<div id="pg-loader">
+  <div class="lo-spin"></div>
+  <div class="lo-txt">Memuat panel admin…</div>
+</div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">Psy<span>Well</span>Mate</div>
+    <div class="login-badge"><span class="lb">🛡️ Admin Panel</span></div>
+    <div class="err-box" id="lg-err"></div>
+    <div class="lock-box" id="lg-lock"></div>
+    <div class="lfield"><label>Email Admin</label><input type="email" id="lg-e" placeholder="admin@psywellmate.com" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+    <div class="lfield"><label>Password</label><input type="password" id="lg-p" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+    <button class="lbtn" id="lg-btn" onclick="doAdminLogin()">Masuk ke Panel Admin</button>
+    <div class="attempt-info" id="attempt-info"></div>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashboard">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="tb-logo">Psy<span>Well</span>Mate</div>
+      <div class="tb-badge">🛡️ Admin</div>
+    </div>
+    <div class="tb-right">
+      <div class="timeout-bar" id="timeout-bar" style="width:100%"></div>
+      <span class="tb-user" id="tb-user"></span>
+      <button class="tb-logout" onclick="doAdminLogout()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sn act" onclick="showPanel('overview')" id="sn-overview"><span class="sn-icon">📊</span> Overview</div>
+      <div class="sn" onclick="showPanel('users')" id="sn-users"><span class="sn-icon">👥</span> Data User</div>
+      <div class="sn" onclick="showPanel('sessions')" id="sn-sessions"><span class="sn-icon">🗂️</span> Sesi Terapi</div>
+      <div class="sn" onclick="showPanel('phq')" id="sn-phq"><span class="sn-icon">🧪</span> Skor PHQ</div>
+      <div class="sn-sep"></div>
+      <div class="sn" onclick="showPanel('export')" id="sn-export"><span class="sn-icon">📥</span> Export Data</div>
+      <div class="sn" onclick="showPanel('logs')" id="sn-logs"><span class="sn-icon">🔍</span> Log Aktivitas</div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div class="panel active" id="panel-overview">
+        <div class="sec-hd">
+          <h2>Overview</h2>
+          <p>Ringkasan data keseluruhan platform PsyWellMate</p>
+        </div>
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card"><div class="stat-val" id="st-users">—</div><div class="stat-lbl">Total User</div></div>
+          <div class="stat-card"><div class="stat-val" id="st-sess">—</div><div class="stat-lbl">Total Sesi</div></div>
+          <div class="stat-card"><div class="stat-val" id="st-done">—</div><div class="stat-lbl">Sesi Selesai</div><div class="stat-sub"><span class="badge b-green" id="st-done-pct">—</span></div></div>
+          <div class="stat-card"><div class="stat-val" id="st-avg">—</div><div class="stat-lbl">Rata-rata Skor Pre</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head"><div class="tbl-title">Sesi Terapi Terbaru</div></div>
+          <table><thead><tr><th>User</th><th>Usia</th><th>Tahap</th><th>Skor Pre</th><th>Skor Post</th><th>Status</th><th>Tanggal</th></tr></thead>
+          <tbody id="recent-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- DATA USER -->
+      <div class="panel" id="panel-users">
+        <div class="sec-hd"><h2>Data User</h2><p>Semua pengguna terdaftar di platform</p></div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Daftar User <span class="badge b-blue" id="user-count">0</span></div>
+            <div class="tbl-actions">
+              <input class="search-inp" type="text" placeholder="Cari nama / username…" oninput="filterUsers(this.value)" id="user-search">
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>Nama</th><th>Username</th><th>Email</th><th>Role</th><th>Bergabung</th><th>Aksi</th></tr></thead>
+          <tbody id="users-tbody"></tbody></table>
+          <div class="pagi" id="user-pagi"></div>
+        </div>
+      </div>
+
+      <!-- SESI TERAPI -->
+      <div class="panel" id="panel-sessions">
+        <div class="sec-hd"><h2>Sesi Terapi</h2><p>Semua sesi terapi yang pernah dijalankan</p></div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Daftar Sesi <span class="badge b-blue" id="sess-count">0</span></div>
+            <div class="tbl-actions">
+              <input class="search-inp" type="text" placeholder="Cari nama pasien…" oninput="filterSessions(this.value)" id="sess-search">
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>Pasien</th><th>Usia</th><th>Tahap</th><th>Skor Pre</th><th>Skor Post</th><th>Delta</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <tbody id="sessions-tbody"></tbody></table>
+          <div class="pagi" id="sess-pagi"></div>
+        </div>
+      </div>
+
+      <!-- SKOR PHQ -->
+      <div class="panel" id="panel-phq">
+        <div class="sec-hd"><h2>Skor PHQ</h2><p>Data asesmen depresi seluruh user</p></div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Data PHQ <span class="badge b-blue" id="phq-count">0</span></div>
+          </div>
+          <table><thead><tr><th>#</th><th>Pasien</th><th>Tahap</th><th>Fase</th><th>Skor</th><th>Severity</th><th>Tanggal</th></tr></thead>
+          <tbody id="phq-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- EXPORT -->
+      <div class="panel" id="panel-export">
+        <div class="sec-hd"><h2>Export Data</h2><p>Unduh data terapi dalam format yang dibutuhkan</p></div>
+        <div class="ibox"><strong>Panduan:</strong> CSV cocok untuk analisis data di Excel/Google Sheets. PDF cocok untuk laporan atau arsip klinis formal.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:600px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.3rem">
+            <div style="font-size:1.6rem;margin-bottom:.5rem">📊</div>
+            <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-bottom:.3rem">Export CSV</div>
+            <div style="font-size:.75rem;color:var(--muted);line-height:1.55;margin-bottom:1rem">Untuk analisis data, statistik, dan pengolahan lebih lanjut di spreadsheet. File bisa dibuka langsung di Excel atau Google Sheets.</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="btn btn-g" onclick="exportCSV('sessions')">⬇ Sesi Terapi (.csv)</button>
+              <button class="btn btn-g" onclick="exportCSV('phq')">⬇ Skor PHQ (.csv)</button>
+              <button class="btn btn-g" onclick="exportCSV('users')">⬇ Data User (.csv)</button>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.3rem">
+            <div style="font-size:1.6rem;margin-bottom:.5rem">📄</div>
+            <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-bottom:.3rem">Export PDF</div>
+            <div style="font-size:.75rem;color:var(--muted);line-height:1.55;margin-bottom:1rem">Untuk laporan formal dan arsip klinis. Format rapi dan siap cetak. Cocok untuk dokumentasi profesional.</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="btn btn-a" onclick="exportPDF('sessions')">⬇ Laporan Sesi (.pdf)</button>
+              <button class="btn btn-a" onclick="exportPDF('phq')">⬇ Laporan PHQ (.pdf)</button>
+              <button class="btn btn-a" onclick="exportPDF('summary')">⬇ Ringkasan Klinis (.pdf)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG AKTIVITAS -->
+      <div class="panel" id="panel-logs">
+        <div class="sec-hd"><h2>Log Aktivitas</h2><p>Rekam jejak semua aktivitas admin</p></div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Log <span class="badge b-blue" id="log-count">0</span></div>
+            <div class="tbl-actions">
+              <button class="btn btn-r btn-sm" onclick="clearOldLogs()">Hapus Log Lama</button>
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>Admin</th><th>Aksi</th><th>Target User</th><th>Detail</th><th>Waktu</th></tr></thead>
+          <tbody id="logs-tbody"></tbody></table>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /dashboard -->
+
+<!-- MODAL: DETAIL USER -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="mu-title">Detail User</div>
+      <button class="modal-close" onclick="closeModal('modal-user')">✕</button>
+    </div>
+    <div class="modal-body" id="mu-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-user')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KONFIRMASI TRANSKRIP -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal confirm-modal">
+    <div class="modal-body" style="padding:1.8rem">
+      <div class="confirm-icon">🔒</div>
+      <div class="confirm-title">Akses Data Pribadi</div>
+      <p class="confirm-text">Anda akan mengakses transkrip sesi terapi yang berisi informasi pribadi dan sensitif pasien.<br><br>Pastikan akses ini hanya untuk keperluan klinis yang sah.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-confirm')">Batal</button>
+      <button class="btn btn-p" id="confirm-ok-btn">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TRANSKRIP SESI -->
+<div class="modal-overlay" id="modal-transcript">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="mt-title">Transkrip Sesi</div>
+      <button class="modal-close" onclick="closeModal('modal-transcript')">✕</button>
+    </div>
+    <div class="modal-body" id="mt-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-transcript')">Tutup</button>
+      <button class="btn btn-a" onclick="exportTranscriptPDF()">⬇ PDF Transkrip</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════
+   SUPABASE
+════════════════════════════════════ */
+const SUPABASE_URL = 'https://xxcxygdssveddjonwxat.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4Y3h5Z2Rzc3ZlZGRqb253eGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MjcxMTYsImV4cCI6MjA5MjMwMzExNn0.u1QqZpj2n5v8lhCGaqxZCKmVbGtWxukXZ-yJmAASDbI';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ════════════════════════════════════
+   RATE LIMITING (localStorage)
+════════════════════════════════════ */
+const MAX_ATTEMPTS = 5;
+const LOCK_DURATION = 15 * 60 * 1000; // 15 menit
+
+function getAttempts(){ return JSON.parse(localStorage.getItem('adm_attempts')||'{"count":0,"lockedAt":null}'); }
+function saveAttempts(obj){ localStorage.setItem('adm_attempts',JSON.stringify(obj)); }
+
+function isLocked(){
+  const a = getAttempts();
+  if(a.lockedAt){
+    const elapsed = Date.now() - a.lockedAt;
+    if(elapsed < LOCK_DURATION) return Math.ceil((LOCK_DURATION - elapsed)/60000);
+    // Lock sudah expired, reset
+    saveAttempts({count:0,lockedAt:null});
+  }
+  return false;
+}
+
+function recordFailedAttempt(){
+  const a = getAttempts();
+  a.count++;
+  if(a.count >= MAX_ATTEMPTS) a.lockedAt = Date.now();
+  saveAttempts(a);
+  return a.count;
+}
+
+function resetAttempts(){ saveAttempts({count:0,lockedAt:null}); }
+
+function updateAttemptUI(){
+  const locked = isLocked();
+  const a = getAttempts();
+  const info = document.getElementById('attempt-info');
+  const lockBox = document.getElementById('lg-lock');
+  const btn = document.getElementById('lg-btn');
+
+  if(locked){
+    lockBox.textContent = `⏳ Terlalu banyak percobaan gagal. Coba lagi dalam ${locked} menit.`;
+    lockBox.style.display = 'block';
+    btn.disabled = true;
+    info.textContent = '';
+  } else {
+    lockBox.style.display = 'none';
+    btn.disabled = false;
+    if(a.count > 0){
+      info.textContent = `Percobaan gagal: ${a.count}/${MAX_ATTEMPTS}`;
+    } else {
+      info.textContent = '';
+    }
+  }
+}
+
+/* ════════════════════════════════════
+   SESSION TIMEOUT (60 menit)
+════════════════════════════════════ */
+const TIMEOUT_MS = 60 * 60 * 1000;
+let _timeoutTimer = null;
+let _timeoutStart = null;
+
+function startSessionTimeout(){
+  clearTimeout(_timeoutTimer);
+  _timeoutStart = Date.now();
+  updateTimeoutBar();
+  _timeoutTimer = setTimeout(()=>{
+    toast('⏰ Sesi berakhir karena tidak aktif. Silakan login kembali.');
+    setTimeout(()=>doAdminLogout(), 1500);
+  }, TIMEOUT_MS);
+}
+
+function resetSessionTimeout(){
+  if(_cu) startSessionTimeout();
+}
+
+function updateTimeoutBar(){
+  if(!_timeoutStart) return;
+  const bar = document.getElementById('timeout-bar');
+  const elapsed = Date.now() - _timeoutStart;
+  const pct = Math.max(0, 100 - (elapsed/TIMEOUT_MS)*100);
+  bar.style.width = pct + '%';
+  bar.style.background = pct > 50 ? 'var(--primary)' : pct > 20 ? 'var(--amber)' : 'var(--red)';
+  if(elapsed < TIMEOUT_MS) requestAnimationFrame(updateTimeoutBar);
+}
+
+// Reset timeout saat ada aktivitas
+['click','keydown','mousemove','scroll'].forEach(e=>{
+  document.addEventListener(e, ()=>{ if(_cu) resetSessionTimeout(); }, {passive:true});
+});
+
+/* ════════════════════════════════════
+   UTILS
+════════════════════════════════════ */
+function toast(m,d=3000){
+  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),d);
+}
+
+function showErr(id,msg){
+  const el=document.getElementById(id);el.textContent=msg;el.style.display='block';
+  setTimeout(()=>el.style.display='none',5000);
+}
+
+function fmtDate(d){
+  if(!d) return '—';
+  return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function fmtDateShort(d){
+  if(!d) return '—';
+  return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function sevBadge(sev){
+  if(!sev) return '—';
+  const cls = sev.includes('Minimal')?'b-green':sev.includes('Ringan')?'b-blue':sev.includes('Sedang')?'b-orange':'b-red';
+  return `<span class="badge ${cls}">${sev}</span>`;
+}
+
+function stageBadge(s){
+  const map={anak:'🌱 Anak',dewasa:'🌿 Dewasa',lansia:'🍂 Lansia'};
+  return `<span class="badge b-blue">${map[s]||s}</span>`;
+}
+
+function statusBadge(s){
+  return s==='completed'
+    ?'<span class="badge b-green">✓ Selesai</span>'
+    :'<span class="badge b-amber">⏳ Berlangsung</span>';
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+/* ════════════════════════════════════
+   STATE
+════════════════════════════════════ */
+let _cu = null;
+let _allUsers = [], _allSessions = [], _allPHQ = [], _allLogs = [];
+let _currentTranscriptData = null;
+let _currentTranscriptSession = null;
+const PAGE_SIZE = 15;
+let _userPage = 1, _sessPage = 1;
+
+/* ════════════════════════════════════
+   LOGIN
+════════════════════════════════════ */
+async function doAdminLogin(){
+  const locked = isLocked();
+  if(locked){ toast('⏳ Akun terkunci. Coba lagi dalam '+locked+' menit.'); return; }
+
+  const e = document.getElementById('lg-e').value.trim();
+  const p = document.getElementById('lg-p').value;
+  if(!e||!p){ showErr('lg-err','⚠️ Isi email dan password'); return; }
+
+  const btn = document.getElementById('lg-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Memverifikasi…';
+
+  try{
+    const {data, error} = await sb.auth.signInWithPassword({email:e, password:p});
+    if(error) throw error;
+
+    // Cek role admin
+    const {data:prof, error:profErr} = await sb.from('profiles').select('*').eq('id',data.user.id).single();
+    if(profErr || !prof || prof.role !== 'admin'){
+      await sb.auth.signOut();
+      throw new Error('Akun ini tidak memiliki hak akses admin.');
+    }
+
+    resetAttempts();
+    _cu = data.user;
+    document.getElementById('tb-user').textContent = prof.full_name || e;
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    // Log aktivitas login
+    await logActivity('login', null, 'Login ke admin panel');
+    startSessionTimeout();
+    loadAllData();
+
+  } catch(err){
+    const cnt = recordFailedAttempt();
+    updateAttemptUI();
+    btn.disabled = false;
+    btn.innerHTML = 'Masuk ke Panel Admin';
+    if(cnt >= MAX_ATTEMPTS){
+      showErr('lg-err', `❌ ${MAX_ATTEMPTS}x gagal. Akun terkunci 15 menit.`);
+    } else {
+      showErr('lg-err', `❌ ${err.message} (${cnt}/${MAX_ATTEMPTS})`);
+    }
+  }
+}
+
+async function doAdminLogout(){
+  if(_cu) await logActivity('login', null, 'Logout dari admin panel');
+  clearTimeout(_timeoutTimer);
+  await sb.auth.signOut();
+  _cu = null;
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('lg-p').value = '';
+  toast('Sampai jumpa 👋');
+}
+
+/* ════════════════════════════════════
+   LOG AKTIVITAS
+════════════════════════════════════ */
+async function logActivity(action, targetUser, detail){
+  if(!_cu) return;
+  try{
+    await sb.from('admin_logs').insert({
+      admin_id: _cu.id,
+      admin_email: _cu.email,
+      action, target_user: targetUser||null,
+      detail: detail||null,
+      created_at: new Date().toISOString()
+    });
+  } catch(e){}
+}
+
+/* ════════════════════════════════════
+   LOAD ALL DATA
+════════════════════════════════════ */
+async function loadAllData(){
+  try{
+    // Load semua data paralel
+    const [usersRes, sessRes, phqRes, logsRes] = await Promise.all([
+      sb.from('profiles').select('*').order('created_at',{ascending:false}),
+      sb.from('therapy_sessions').select('*').order('created_at',{ascending:false}),
+      sb.from('phq_assessments').select('*').order('created_at',{ascending:false}),
+      sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(200)
+    ]);
+
+    _allUsers = usersRes.data?.filter(u=>u.role!=='admin') || [];
+    _allSessions = sessRes.data || [];
+    _allPHQ = phqRes.data || [];
+    _allLogs = logsRes.data || [];
+
+    renderOverview();
+    renderUsers();
+    renderSessions();
+    renderPHQ();
+    renderLogs();
+
+  } catch(err){
+    toast('⚠️ Gagal memuat data: '+err.message);
+  }
+}
+
+/* ════════════════════════════════════
+   RENDER OVERVIEW
+════════════════════════════════════ */
+function renderOverview(){
+  document.getElementById('st-users').textContent = _allUsers.length;
+  document.getElementById('st-sess').textContent = _allSessions.length;
+  const done = _allSessions.filter(s=>s.status==='completed').length;
+  document.getElementById('st-done').textContent = done;
+  document.getElementById('st-done-pct').textContent = _allSessions.length ? Math.round(done/_allSessions.length*100)+'%' : '0%';
+
+  const preScores = _allSessions.filter(s=>s.pre_score!=null).map(s=>s.pre_score);
+  const avg = preScores.length ? (preScores.reduce((a,b)=>a+b,0)/preScores.length).toFixed(1) : '—';
+  document.getElementById('st-avg').textContent = avg;
+
+  const recent = _allSessions.slice(0,8);
+  const tbody = document.getElementById('recent-tbody');
+  if(!recent.length){ tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">Belum ada data</td></tr>`; return; }
+
+  // Buat map user_id → nama
+  const userMap = {};
+  _allUsers.forEach(u=>userMap[u.id]=u.full_name);
+
+  tbody.innerHTML = recent.map(s=>`<tr>
+    <td>${s.nickname||userMap[s.user_id]||'—'}</td>
+    <td>${s.age||'—'}</td>
+    <td>${stageBadge(s.stage)}</td>
+    <td>${s.pre_score!=null?s.pre_score:'—'}</td>
+    <td>${s.post_score&&s.status==='completed'?s.post_score:'—'}</td>
+    <td>${statusBadge(s.status)}</td>
+    <td style="white-space:nowrap;color:var(--muted)">${fmtDateShort(s.created_at)}</td>
+  </tr>`).join('');
+}
+
+/* ════════════════════════════════════
+   RENDER USERS
+════════════════════════════════════ */
+let _filteredUsers = [];
+function renderUsers(filter=''){
+  _filteredUsers = filter
+    ? _allUsers.filter(u=>(u.full_name||'').toLowerCase().includes(filter.toLowerCase())||(u.username||'').toLowerCase().includes(filter.toLowerCase()))
+    : [..._allUsers];
+
+  document.getElementById('user-count').textContent = _filteredUsers.length;
+  const total = Math.ceil(_filteredUsers.length/PAGE_SIZE);
+  if(_userPage > total) _userPage = Math.max(1,total);
+  const slice = _filteredUsers.slice((_userPage-1)*PAGE_SIZE, _userPage*PAGE_SIZE);
+  const tbody = document.getElementById('users-tbody');
+
+  if(!slice.length){ tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">Tidak ada data</td></tr>`; return; }
+
+  tbody.innerHTML = slice.map((u,i)=>`<tr>
+    <td style="color:var(--muted)">${(_userPage-1)*PAGE_SIZE+i+1}</td>
+    <td><strong style="color:var(--white)">${u.full_name||'—'}</strong></td>
+    <td style="color:var(--muted)">@${u.username||'—'}</td>
+    <td style="color:var(--muted);font-size:.75rem">${u.email||'—'}</td>
+    <td><span class="badge ${u.role==='admin'?'b-orange':'b-blue'}">${u.role||'user'}</span></td>
+    <td style="color:var(--muted);font-size:.75rem">${fmtDateShort(u.created_at)}</td>
+    <td><button class="btn btn-p btn-sm" onclick="viewUserDetail('${u.id}')">Detail</button></td>
+  </tr>`).join('');
+
+  renderPagi('user-pagi', _userPage, total, (p)=>{ _userPage=p; renderUsers(document.getElementById('user-search').value); });
+}
+
+function filterUsers(v){ _userPage=1; renderUsers(v); }
+
+async function viewUserDetail(uid){
+  await logActivity('view_user', uid, 'Melihat detail user');
+  const user = _allUsers.find(u=>u.id===uid);
+  const userSessions = _allSessions.filter(s=>s.user_id===uid);
+  const userPHQ = _allPHQ.filter(p=>p.user_id===uid);
+
+  document.getElementById('mu-title').textContent = 'Detail: '+(user?.full_name||uid);
+  const body = document.getElementById('mu-body');
+
+  body.innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-lbl">Nama Lengkap</div><div class="detail-val">${user?.full_name||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Username</div><div class="detail-val">@${user?.username||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Email</div><div class="detail-val">${user?.email||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Bergabung</div><div class="detail-val">${fmtDateShort(user?.created_at)}</div></div>
+    </div>
+    <div style="font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.65rem">Riwayat Sesi (${userSessions.length})</div>
+    ${userSessions.length ? userSessions.map(s=>`
+      <div style="background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:.78rem;color:var(--white);margin-bottom:.25rem">${stageBadge(s.stage)} ${s.nickname||'—'} · ${s.age||'—'} tahun</div>
+          <div style="font-size:.72rem;color:var(--muted)">${fmtDateShort(s.created_at)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${statusBadge(s.status)}
+          <button class="btn btn-p btn-sm" onclick="openTranscriptWithConfirm('${s.id}','${(s.nickname||'').replace(/'/g,'\\'')}','${s.user_id}')">Transkrip</button>
+        </div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:.8rem">Belum ada sesi</div>'}
+  `;
+  openModal('modal-user');
+}
+
+/* ════════════════════════════════════
+   RENDER SESSIONS
+════════════════════════════════════ */
+let _filteredSessions = [];
+function renderSessions(filter=''){
+  _filteredSessions = filter
+    ? _allSessions.filter(s=>(s.nickname||'').toLowerCase().includes(filter.toLowerCase()))
+    : [..._allSessions];
+
+  document.getElementById('sess-count').textContent = _filteredSessions.length;
+  const total = Math.ceil(_filteredSessions.length/PAGE_SIZE);
+  if(_sessPage > total) _sessPage = Math.max(1,total);
+  const slice = _filteredSessions.slice((_sessPage-1)*PAGE_SIZE, _sessPage*PAGE_SIZE);
+  const tbody = document.getElementById('sessions-tbody');
+
+  if(!slice.length){ tbody.innerHTML=`<tr><td colspan="10" class="tbl-empty">Tidak ada data</td></tr>`; return; }
+
+  tbody.innerHTML = slice.map((s,i)=>{
+    const d = (s.pre_score||0)-(s.post_score||0);
+    const deltaHtml = s.status==='completed'
+      ? d>0 ? `<span style="color:var(--green)">↓${d}</span>` : d<0 ? `<span style="color:var(--accent)">↑${Math.abs(d)}</span>` : `<span style="color:var(--amber)">±0</span>`
+      : '—';
+    return`<tr>
+      <td style="color:var(--muted)">${(_sessPage-1)*PAGE_SIZE+i+1}</td>
+      <td><strong style="color:var(--white)">${s.nickname||'—'}</strong></td>
+      <td>${s.age||'—'}</td>
+      <td>${stageBadge(s.stage)}</td>
+      <td>${s.pre_score!=null?s.pre_score:'—'}</td>
+      <td>${s.status==='completed'&&s.post_score!=null?s.post_score:'—'}</td>
+      <td>${deltaHtml}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td style="white-space:nowrap;color:var(--muted);font-size:.72rem">${fmtDateShort(s.created_at)}</td>
+      <td><button class="btn btn-p btn-sm" onclick="openTranscriptWithConfirm('${s.id}','${(s.nickname||'').replace(/'/g,'\\'')}','${s.user_id}')">Transkrip</button></td>
+    </tr>`;
+  }).join('');
+
+  renderPagi('sess-pagi', _sessPage, total, (p)=>{ _sessPage=p; renderSessions(document.getElementById('sess-search').value); });
+}
+
+function filterSessions(v){ _sessPage=1; renderSessions(v); }
+
+/* ════════════════════════════════════
+   TRANSKRIP
+════════════════════════════════════ */
+function openTranscriptWithConfirm(sessId, nickname, userId){
+  openModal('modal-confirm');
+  document.getElementById('confirm-ok-btn').onclick = async()=>{
+    closeModal('modal-confirm');
+    await loadTranscript(sessId, nickname, userId);
+  };
+}
+
+async function loadTranscript(sessId, nickname, userId){
+  await logActivity('view_transcript', userId, `Membuka transkrip sesi ${sessId} — ${nickname}`);
+
+  const {data:progress, error} = await sb.from('life_review_progress')
+    .select('*').eq('session_id', sessId)
+    .order('session_number',{ascending:true})
+    .order('question_index',{ascending:true});
+
+  const sess = _allSessions.find(s=>s.id===sessId);
+  _currentTranscriptData = progress || [];
+  _currentTranscriptSession = sess;
+
+  document.getElementById('mt-title').textContent = `Transkrip — ${nickname||'—'} (${fmtDateShort(sess?.created_at)})`;
+
+  const body = document.getElementById('mt-body');
+  if(!progress || progress.length===0){
+    body.innerHTML = '<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.85rem">Belum ada jawaban tersimpan untuk sesi ini.</div>';
+    openModal('modal-transcript');
+    return;
+  }
+
+  // Kelompokkan per nomor sesi
+  const grouped = {};
+  progress.forEach(p=>{ if(!grouped[p.session_number]) grouped[p.session_number]=[]; grouped[p.session_number].push(p); });
+
+  const SESI_NAMES = {1:'Kondisi Saat Ini',2:'Masa Anak-Anak',3:'Masa Remaja',4:'Masa Dewasa',5:'Masa Tua',6:'Sesi Penutup'};
+
+  body.innerHTML = Object.entries(grouped).map(([sNum, items])=>`
+    <div class="tr-sesi">
+      <div class="tr-sesi-head">Sesi ${sNum} — ${SESI_NAMES[sNum]||'—'}</div>
+      ${items.map(p=>`
+        <div class="tr-item">
+          <div class="tr-q">❓ ${p.question_text||'—'}</div>
+          <div class="tr-a">${p.answer_text||'<em style="color:var(--muted)">Belum dijawab</em>'}</div>
+          ${p.nlp_sentiment?`<div class="tr-nlp">
+            <span class="nlp-tag ${p.nlp_sentiment==='positif'?'n-pos':p.nlp_sentiment==='negatif'?'n-neg':'n-neu'}">${p.nlp_sentiment}</span>
+            ${p.nlp_emotion&&p.nlp_emotion!=='netral'?`<span class="nlp-tag n-emo">${p.nlp_emotion}</span>`:''}
+            ${(p.nlp_topics||[]).map(t=>`<span class="nlp-tag n-top">${t}</span>`).join('')}
+          </div>`:''}
+          ${p.ai_response?`<div style="font-size:.75rem;color:var(--primary);margin-top:.35rem;font-style:italic">💬 ${p.ai_response}</div>`:''}
+        </div>`).join('')}
+    </div>`).join('');
+
+  openModal('modal-transcript');
+}
+
+/* ════════════════════════════════════
+   RENDER PHQ
+════════════════════════════════════ */
+function renderPHQ(){
+  document.getElementById('phq-count').textContent = _allPHQ.length;
+  const tbody = document.getElementById('phq-tbody');
+
+  // Buat map user_id → nama dari sessions
+  const nameMap = {};
+  _allSessions.forEach(s=>{ if(s.user_id&&s.nickname) nameMap[s.user_id]=s.nickname; });
+
+  if(!_allPHQ.length){ tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">Belum ada data PHQ</td></tr>`; return; }
+
+  tbody.innerHTML = _allPHQ.slice(0,50).map((p,i)=>`<tr>
+    <td style="color:var(--muted)">${i+1}</td>
+    <td>${nameMap[p.user_id]||p.user_id?.slice(0,8)||'—'}</td>
+    <td>${stageBadge(p.stage)}</td>
+    <td><span class="badge ${p.phase==='pre'?'b-blue':'b-green'}">${p.phase==='pre'?'Awal':'Akhir'}</span></td>
+    <td style="font-weight:600;color:var(--white)">${p.score!=null?p.score:'—'}</td>
+    <td>${sevBadge(p.severity)}</td>
+    <td style="color:var(--muted);font-size:.72rem">${fmtDateShort(p.created_at)}</td>
+  </tr>`).join('');
+}
+
+/* ════════════════════════════════════
+   RENDER LOGS
+════════════════════════════════════ */
+function renderLogs(){
+  document.getElementById('log-count').textContent = _allLogs.length;
+  const tbody = document.getElementById('logs-tbody');
+  if(!_allLogs.length){ tbody.innerHTML=`<tr><td colspan="6" class="tbl-empty">Belum ada log</td></tr>`; return; }
+
+  const actionClass = {login:'la-login',view_user:'la-view',view_transcript:'la-transcript',export:'la-export'};
+  tbody.innerHTML = _allLogs.map((l,i)=>`<tr>
+    <td style="color:var(--muted)">${i+1}</td>
+    <td style="font-size:.75rem;color:var(--muted)">${l.admin_email||'—'}</td>
+    <td><span class="log-action ${actionClass[l.action]||'la-view'}">${l.action||'—'}</span></td>
+    <td style="font-size:.75rem;color:var(--muted)">${l.target_user||'—'}</td>
+    <td style="font-size:.75rem;color:var(--muted)">${l.detail||'—'}</td>
+    <td style="font-size:.72rem;color:var(--muted);white-space:nowrap">${fmtDate(l.created_at)}</td>
+  </tr>`).join('');
+}
+
+async function clearOldLogs(){
+  if(!confirm('Hapus log lebih dari 30 hari yang lalu?')) return;
+  const cutoff = new Date(Date.now() - 30*24*60*60*1000).toISOString();
+  await sb.from('admin_logs').delete().lt('created_at', cutoff);
+  toast('✅ Log lama berhasil dihapus');
+  await logActivity('export', null, 'Menghapus log lama');
+  loadAllData();
+}
+
+/* ════════════════════════════════════
+   PAGINATION
+════════════════════════════════════ */
+function renderPagi(containerId, current, total, onPageChange){
+  const el = document.getElementById(containerId);
+  if(total <= 1){ el.innerHTML=''; return; }
+  let h = `<span class="pagi-info">Hal ${current} / ${total}</span>`;
+  h += `<button class="pagi-btn" onclick="(${onPageChange.toString()})(${Math.max(1,current-1)})" ${current<=1?'disabled':''}>‹</button>`;
+  const start = Math.max(1, current-2), end = Math.min(total, current+2);
+  for(let p=start;p<=end;p++) h += `<button class="pagi-btn ${p===current?'act':''}" onclick="(${onPageChange.toString()})(${p})">${p}</button>`;
+  h += `<button class="pagi-btn" onclick="(${onPageChange.toString()})(${Math.min(total,current+1)})" ${current>=total?'disabled':''}>›</button>`;
+  el.innerHTML = h;
+}
+
+/* ════════════════════════════════════
+   EXPORT CSV
+════════════════════════════════════ */
+async function exportCSV(type){
+  await logActivity('export', null, `Export CSV: ${type}`);
+  let rows = [], headers = [], filename = '';
+
+  if(type==='sessions'){
+    headers = ['Nama','Usia','Jenis Kelamin','Tahap','Penyakit Kronis','Pasangan','Anak','Skor Pre','Severity Pre','Skor Post','Severity Post','Delta','Status','Tanggal'];
+    rows = _allSessions.map(s=>[s.nickname||'',s.age||'',s.gender||'',s.stage||'',s.chronic_disease||'',s.has_partner||'',s.children_count||'',s.pre_score!=null?s.pre_score:'',s.severity_pre||'',s.post_score!=null?s.post_score:'',s.severity_post||'',s.score_delta!=null?s.score_delta:'',s.status||'',fmtDateShort(s.created_at)]);
+    filename = 'psywellmate_sesi_'+Date.now();
+  } else if(type==='phq'){
+    headers = ['User ID','Tahap','Fase','Skor','Severity','Tanggal'];
+    rows = _allPHQ.map(p=>[p.user_id||'',p.stage||'',p.phase||'',p.score!=null?p.score:'',p.severity||'',fmtDateShort(p.created_at)]);
+    filename = 'psywellmate_phq_'+Date.now();
+  } else if(type==='users'){
+    headers = ['Nama','Username','Email','Role','Bergabung'];
+    rows = _allUsers.map(u=>[u.full_name||'',u.username||'',u.email||'',u.role||'',fmtDateShort(u.created_at)]);
+    filename = 'psywellmate_users_'+Date.now();
+  }
+
+  const csvContent = [headers, ...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csvContent], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ CSV berhasil diunduh');
+}
+
+/* ════════════════════════════════════
+   EXPORT PDF
+════════════════════════════════════ */
+async function exportPDF(type){
+  await logActivity('export', null, `Export PDF: ${type}`);
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+
+  const now = new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.setTextColor(30,40,70);
+
+  if(type==='sessions'){
+    doc.text('Laporan Sesi Terapi — PsyWellMate', 14, 16);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100);
+    doc.text('Diekspor: '+now+' | Total: '+_allSessions.length+' sesi', 14, 22);
+    doc.autoTable({
+      startY:26, styles:{fontSize:7,cellPadding:2},
+      headStyles:{fillColor:[30,60,120],textColor:255,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[245,248,255]},
+      head:[['#','Nama','Usia','Tahap','Skor Pre','Severity Pre','Skor Post','Severity Post','Delta','Status','Tanggal']],
+      body:_allSessions.map((s,i)=>[(i+1),(s.nickname||'—'),(s.age||'—'),(s.stage||'—'),(s.pre_score!=null?s.pre_score:'—'),(s.severity_pre||'—'),(s.post_score!=null?s.post_score:'—'),(s.severity_post||'—'),(s.score_delta!=null?s.score_delta:'—'),(s.status||'—'),fmtDateShort(s.created_at)])
+    });
+    doc.save('psywellmate_sesi_'+Date.now()+'.pdf');
+
+  } else if(type==='phq'){
+    doc.text('Laporan Skor PHQ — PsyWellMate', 14, 16);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100);
+    doc.text('Diekspor: '+now+' | Total: '+_allPHQ.length+' asesmen', 14, 22);
+    doc.autoTable({
+      startY:26, styles:{fontSize:7,cellPadding:2},
+      headStyles:{fillColor:[30,60,120],textColor:255},
+      alternateRowStyles:{fillColor:[245,248,255]},
+      head:[['#','Tahap','Fase','Skor','Severity','Tanggal']],
+      body:_allPHQ.map((p,i)=>[(i+1),(p.stage||'—'),(p.phase||'—'),(p.score!=null?p.score:'—'),(p.severity||'—'),fmtDateShort(p.created_at)])
+    });
+    doc.save('psywellmate_phq_'+Date.now()+'.pdf');
+
+  } else if(type==='summary'){
+    doc.text('Ringkasan Klinis — PsyWellMate', 14, 16);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100);
+    doc.text('Diekspor: '+now, 14, 22);
+    const done = _allSessions.filter(s=>s.status==='completed');
+    const preScores = done.map(s=>s.pre_score||0);
+    const postScores = done.map(s=>s.post_score||0);
+    const avgPre = preScores.length ? (preScores.reduce((a,b)=>a+b,0)/preScores.length).toFixed(2) : 0;
+    const avgPost = postScores.length ? (postScores.reduce((a,b)=>a+b,0)/postScores.length).toFixed(2) : 0;
+    doc.autoTable({
+      startY:26, styles:{fontSize:9,cellPadding:3},
+      headStyles:{fillColor:[30,60,120],textColor:255},
+      head:[['Metrik','Nilai']],
+      body:[
+        ['Total User Terdaftar', _allUsers.length],
+        ['Total Sesi Terapi', _allSessions.length],
+        ['Sesi Selesai', done.length],
+        ['Sesi Berlangsung', _allSessions.filter(s=>s.status==='ongoing').length],
+        ['Persentase Penyelesaian', _allSessions.length ? Math.round(done.length/_allSessions.length*100)+'%' : '0%'],
+        ['Rata-rata Skor PHQ Pre', avgPre],
+        ['Rata-rata Skor PHQ Post', avgPost],
+        ['Rata-rata Penurunan Skor', (avgPre-avgPost).toFixed(2)],
+        ['Total Asesmen PHQ', _allPHQ.length],
+      ]
+    });
+    doc.save('psywellmate_ringkasan_'+Date.now()+'.pdf');
+  }
+
+  toast('✅ PDF berhasil diunduh');
+}
+
+async function exportTranscriptPDF(){
+  if(!_currentTranscriptData || !_currentTranscriptSession) return;
+  await logActivity('export', _currentTranscriptSession.user_id, 'Export PDF transkrip sesi '+_currentTranscriptSession.id);
+
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm',format:'a4'});
+  const sess = _currentTranscriptSession;
+  const SESI_NAMES = {1:'Kondisi Saat Ini',2:'Masa Anak-Anak',3:'Masa Remaja',4:'Masa Dewasa',5:'Masa Tua',6:'Sesi Penutup'};
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(20,40,80);
+  doc.text('Transkrip Sesi Terapi — PsyWellMate', 14, 16);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100);
+  doc.text(`Pasien: ${sess.nickname||'—'} | Usia: ${sess.age||'—'} | Tahap: ${sess.stage||'—'} | Tanggal: ${new Date(sess.created_at).toLocaleDateString('id-ID')}`, 14, 23);
+  doc.text(`Skor PHQ Pre: ${sess.pre_score!=null?sess.pre_score:'—'} (${sess.severity_pre||'—'}) → Post: ${sess.post_score!=null?sess.post_score:'—'} (${sess.severity_post||'—'})`, 14, 29);
+
+  let y = 36;
+  let lastSesi = null;
+
+  for(const item of _currentTranscriptData){
+    if(item.session_number !== lastSesi){
+      if(y > 250){ doc.addPage(); y = 16; }
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(30,60,120);
+      doc.text(`Sesi ${item.session_number} — ${SESI_NAMES[item.session_number]||''}`, 14, y);
+      y += 5; lastSesi = item.session_number;
+      doc.setDrawColor(180,200,240); doc.line(14, y, 196, y); y += 4;
+    }
+    if(y > 260){ doc.addPage(); y = 16; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(60,80,140);
+    const qLines = doc.splitTextToSize('P: '+(item.question_text||'—'), 175);
+    doc.text(qLines, 14, y); y += qLines.length * 4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(30,30,30);
+    const aLines = doc.splitTextToSize('J: '+(item.answer_text||'(tidak dijawab)'), 175);
+    if(y + aLines.length*4 > 270){ doc.addPage(); y=16; }
+    doc.text(aLines, 14, y); y += aLines.length*4 + 2;
+    if(item.nlp_sentiment){
+      doc.setFontSize(6.5); doc.setTextColor(120);
+      doc.text(`[${item.nlp_sentiment}${item.nlp_emotion&&item.nlp_emotion!=='netral'?' · '+item.nlp_emotion:''}${item.nlp_topics?.length?' · '+item.nlp_topics.join(', '):''}]`, 14, y);
+      y += 4;
+    }
+    y += 1;
+  }
+
+  doc.save('transkrip_'+sess.nickname+'_'+Date.now()+'.pdf');
+  toast('✅ PDF transkrip berhasil diunduh');
+}
+
+/* ════════════════════════════════════
+   PANEL NAVIGATION
+════════════════════════════════════ */
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sn').forEach(s=>s.classList.remove('act'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('sn-'+id).classList.add('act');
+}
+
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+async function init(){
+  updateAttemptUI();
+  try{
+    const {data:{session}} = await sb.auth.getSession();
+    if(session?.user){
+      const {data:prof} = await sb.from('profiles').select('*').eq('id',session.user.id).single();
+      if(prof?.role==='admin'){
+        _cu = session.user;
+        document.getElementById('tb-user').textContent = prof.full_name || session.user.email;
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        startSessionTimeout();
+        loadAllData();
+      }
+    }
+  }catch(e){}
+  document.getElementById('pg-loader').classList.add('hide');
+}
+
+init();
+</script>
+</body>
+</html>
