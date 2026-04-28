@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PsyWellMate — Terapi Mental Digital</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<!-- ══ SUPABASE SDK ══ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root{
   --bg:#f5f0eb;--surface:#ffffff;--surface2:#fdf8f4;--border:#e2d9d0;
@@ -28,7 +25,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .nb{padding:7px 15px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:.84rem;cursor:pointer;transition:.2s}.nb:hover{background:var(--surface2);color:var(--text)}.nb.act{color:var(--primary)}
 .nb-cta{padding:7px 18px;border-radius:6px;border:none;background:var(--primary);color:#fff;font-family:'Outfit',sans-serif;font-size:.84rem;font-weight:500;cursor:pointer;transition:.2s}.nb-cta:hover{opacity:.85}
 .upill{display:none;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px;font-size:.8rem}
-.uav{width:26px;height:26px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700}
+.uav{width:26px;height:26px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff}
 .upill button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;margin-left:2px}.upill button:hover{color:var(--red)}
 
 /* PAGES */
@@ -38,7 +35,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 /* HERO */
 .hero{max-width:860px;margin:0 auto;padding:5rem 2rem 2.5rem;text-align:center}
 .badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--primary);font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;margin-bottom:1.4rem}
-.hero h1{font-family:'Lora',serif;font-size:clamp(1.9rem,5.5vw,3.3rem);line-height:1.15;margin-bottom:1.1rem;color:var(--white)}.hero h1 em{color:var(--primary);font-style:italic}
+.hero h1{font-family:'Lora',serif;font-size:clamp(1.9rem,5.5vw,3.3rem);line-height:1.15;margin-bottom:1.1rem;color:var(--white)}
+.hero h1 em{color:var(--primary);font-style:italic}
 .hero p{font-size:1rem;color:var(--muted);max-width:500px;margin:0 auto 2.4rem;line-height:1.75;font-weight:300}
 .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn-solid{padding:12px 28px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:500;cursor:pointer;transition:.2s;box-shadow:0 4px 22px rgba(107,143,113,.28)}.btn-solid:hover{opacity:.87;transform:translateY(-1px)}
@@ -56,44 +54,40 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 /* AUTH */
 .auth-wrap{max-width:420px;margin:0 auto;padding:4rem 1.5rem}
 .acard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.2rem}
-.acard h2{font-family:'Lora',serif;font-size:1.5rem;color:var(--white);margin-bottom:.3rem}.acard .sub{color:var(--muted);font-size:.83rem;margin-bottom:1.65rem}
+.acard h2{font-family:'Lora',serif;font-size:1.5rem;color:var(--white);margin-bottom:.3rem}
+.acard .sub{color:var(--muted);font-size:.83rem;margin-bottom:1.65rem}
 .field{margin-bottom:.85rem}.field label{display:block;font-size:.76rem;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.3px}
-.field input,.field select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:.87rem;font-family:'Outfit',sans-serif;background:var(--surface2);color:var(--text);outline:none;transition:.2s}
-.field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
+.field input,.field select,.field textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:.87rem;font-family:'Outfit',sans-serif;background:var(--surface2);color:var(--text);outline:none;transition:.2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
 .field select option{background:var(--surface2)}
 .btn-full{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;margin-top:.2rem;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}.btn-full:hover{opacity:.87}.btn-full:disabled{opacity:.5;cursor:not-allowed}
 .asw{text-align:center;margin-top:1rem;font-size:.81rem;color:var(--muted)}.asw a{color:var(--primary);cursor:pointer;font-weight:500}.asw a:hover{text-decoration:underline}
 .divl{display:flex;align-items:center;gap:10px;margin:1.1rem 0}.divl hr{flex:1;border:none;border-top:1px solid var(--border)}.divl span{font-size:.7rem;color:var(--muted)}
-.err-box{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:7px;padding:.7rem .9rem;font-size:.8rem;color:var(--red);margin-bottom:.85rem;display:none}
-.ok-box{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:7px;padding:.7rem .9rem;font-size:.8rem;color:var(--green);margin-bottom:.85rem;display:none}
-
-/* SPINNER */
+.err-box{background:rgba(201,92,92,.1);border:1px solid rgba(201,92,92,.3);border-radius:7px;padding:.7rem .9rem;font-size:.8rem;color:var(--red);margin-bottom:.85rem;display:none}
+.ok-box{background:rgba(58,158,111,.1);border:1px solid rgba(58,158,111,.3);border-radius:7px;padding:.7rem .9rem;font-size:.8rem;color:var(--green);margin-bottom:.85rem;display:none}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* APP SHELL */
-.app-shell{max-width:660px;margin:0 auto;padding:2rem 1.5rem}
+.app-shell{max-width:680px;margin:0 auto;padding:2rem 1.5rem}
+
+/* STEP INDICATOR */
 .step-row{display:flex;align-items:flex-start;justify-content:center;gap:0;margin-bottom:2rem;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
-.sdot{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;color:var(--muted);transition:.3s;background:var(--surface);flex-shrink:0}
+.sdot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;color:var(--muted);transition:.3s;background:var(--surface);flex-shrink:0}
 .sdot.done{background:var(--primary);border-color:var(--primary);color:#fff}.sdot.active{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(196,132,90,.18)}
-.sline{flex:1;max-width:52px;height:2px;background:var(--border);transition:.3s;margin-top:13px;flex-shrink:0}.sline.done{background:var(--primary)}
-.swrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
-.slbl{font-size:.58rem;color:var(--muted);text-align:center;width:52px;line-height:1.3}
+.sline{flex:1;max-width:40px;height:2px;background:var(--border);transition:.3s;margin-top:12px;flex-shrink:0}.sline.done{background:var(--primary)}
+.swrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+.slbl{font-size:.54rem;color:var(--muted);text-align:center;width:48px;line-height:1.3}
 
 /* CARD */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.85rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.85rem;margin-bottom:1rem}
 .card h2{font-family:'Lora',serif;font-size:1.35rem;color:var(--white);margin-bottom:.45rem}
 .card .sub{color:var(--muted);font-size:.86rem;line-height:1.65;margin-bottom:1.4rem}
-
-/* STAGE TABS */
-.stabs{display:flex;gap:8px;margin-bottom:1.4rem;flex-wrap:wrap}
-.stab{flex:1;min-width:80px;padding:9px 6px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:.8rem;cursor:pointer;transition:.2s;text-align:center}
-.stab:hover:not(.disabled){border-color:var(--primary-soft);color:var(--text)}.stab.active{border-color:var(--primary);background:var(--primary-soft);color:var(--white);font-weight:500}.stab.disabled{opacity:.3;cursor:not-allowed}
 
 /* PHQ */
 .phq-q .qt{font-size:.9rem;color:var(--text);margin-bottom:.75rem;line-height:1.55;font-weight:500}
 .phq-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
-.popt{padding:9px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--muted);font-family:'Outfit',sans-serif;font-size:.78rem;cursor:pointer;transition:.2s;text-align:left;line-height:1.3}
+.popt{padding:10px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--muted);font-family:'Outfit',sans-serif;font-size:.78rem;cursor:pointer;transition:.2s;text-align:left;line-height:1.3}
 .popt:hover{border-color:var(--primary-soft);color:var(--text)}.popt.sel{border-color:var(--primary);background:var(--primary-soft);color:var(--white)}
 
 /* SCORE RING */
@@ -101,21 +95,51 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .ring-wrap svg{transform:rotate(-90deg)}
 .ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.65rem;font-weight:600;font-family:'Lora',serif}
 .sev-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:600;margin-bottom:.75rem}
-.sev-none{background:rgba(74,222,128,.12);color:var(--green)}.sev-mild{background:rgba(251,191,36,.12);color:var(--amber)}.sev-mod{background:rgba(251,146,60,.12);color:var(--orange)}.sev-sev{background:rgba(248,113,113,.12);color:var(--red)}
+.sev-none{background:rgba(58,158,111,.12);color:var(--green)}.sev-mild{background:rgba(212,154,42,.12);color:var(--amber)}.sev-mod{background:rgba(212,114,42,.12);color:var(--orange)}.sev-sev{background:rgba(201,92,92,.12);color:var(--red)}
 
-/* THERAPY */
-.tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:12px 12px 12px 4px;padding:1rem 1.2rem;margin-bottom:1.1rem;line-height:1.7;font-size:.9rem}
+/* PROGRESS BAR */
+.pbar-w{height:4px;background:var(--border);border-radius:4px;margin-bottom:1.4rem;overflow:hidden}
+.pbar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .4s ease}
+
+/* CHAT / THERAPY */
+.tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:12px 12px 12px 4px;padding:1rem 1.2rem;margin-bottom:.85rem;line-height:1.7;font-size:.9rem}
 .tq-label{font-size:.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem}
-.chat-hist{margin-bottom:.9rem;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
-.ch-u{background:var(--primary-soft);border:1px solid var(--primary);border-radius:10px 10px 4px 10px;padding:.7rem .95rem;font-size:.84rem;color:var(--white);align-self:flex-end;max-width:92%;word-break:break-word;overflow-wrap:anywhere}
+.ai-response{background:rgba(107,143,113,.08);border:1px solid rgba(107,143,113,.2);border-radius:8px;padding:.7rem 1rem;font-size:.83rem;color:var(--primary);line-height:1.6;margin-bottom:.85rem;font-style:italic}
+.chat-hist{margin-bottom:.9rem;max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.ch-u{background:var(--primary-soft);border:1px solid var(--primary);border-radius:10px 10px 4px 10px;padding:.7rem .95rem;font-size:.84rem;color:var(--white);align-self:flex-end;max-width:92%;word-break:break-word}
 .chat-iw{position:relative;margin-top:.6rem}
-.chat-ta{width:100%;padding:11px 46px 11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:74px;transition:.2s;line-height:1.5}
+.chat-ta{width:100%;padding:11px 46px 11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:80px;transition:.2s;line-height:1.5}
 .chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
 .send-btn{position:absolute;bottom:9px;right:9px;width:32px;height:32px;border-radius:6px;border:none;background:var(--primary);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s}.send-btn:hover{opacity:.85}.send-btn:disabled{opacity:.35;cursor:not-allowed}
-.mic-btn{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:1.2rem;cursor:pointer;transition:.2s;margin:0 auto .6rem}
-.mic-btn.rec{background:rgba(248,113,113,.15);border-color:var(--red);color:var(--red);animation:micpulse 1.1s infinite}
-@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 9px rgba(248,113,113,0)}}
-.mic-hint{font-size:.73rem;color:var(--muted);text-align:center;margin-bottom:.9rem}
+.mic-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:1.1rem;cursor:pointer;transition:.2s;margin:0 auto .5rem}
+.mic-btn.rec{background:rgba(201,92,92,.15);border-color:var(--red);color:var(--red);animation:micpulse 1.1s infinite}
+@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,92,92,.4)}50%{box-shadow:0 0 0 9px rgba(201,92,92,0)}}
+.mic-hint{font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:.85rem}
+
+/* TYPING DOTS */
+.tdots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);animation:td .8s infinite}.tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
+@keyframes td{0%,80%,100%{transform:scale(1);opacity:.4}40%{transform:scale(1.4);opacity:1}}
+
+/* NLP BADGE */
+.nlp-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:.5rem}
+.nlp-tag{padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600}
+.nlp-pos{background:rgba(58,158,111,.12);color:var(--green)}
+.nlp-neg{background:rgba(201,92,92,.12);color:var(--red)}
+.nlp-neu{background:rgba(140,126,118,.12);color:var(--muted)}
+.nlp-emo{background:rgba(196,132,90,.12);color:var(--accent)}
+.nlp-top{background:rgba(107,143,113,.12);color:var(--primary)}
+
+/* SESI INTRO CARD */
+.sesi-intro{text-align:center;padding:.5rem .25rem}
+.sesi-num{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem}
+.sesi-title{font-family:'Lora',serif;font-size:1.5rem;color:var(--white);margin-bottom:.75rem}
+.sesi-desc{color:var(--muted);line-height:1.8;font-size:.9rem;margin-bottom:1.4rem;max-width:480px;margin-inline:auto}
+.sesi-icon{font-size:2.5rem;margin-bottom:.75rem;display:block}
+
+/* RINGKASAN CARD */
+.ringkasan-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.65rem}
+.ringkasan-q{font-size:.76rem;font-weight:600;color:var(--accent);margin-bottom:.3rem;line-height:1.4}
+.ringkasan-a{font-size:.86rem;color:var(--text);line-height:1.6}
 
 /* APPRECIATION */
 .ap-card{text-align:center;padding:.75rem .25rem}
@@ -130,28 +154,25 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .cmp-box .cl{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.45rem}
 .cmp-box .cn{font-size:1.85rem;font-weight:600;font-family:'Lora',serif}
 
-/* PROGRESS BAR */
-.pbar-w{height:4px;background:var(--border);border-radius:4px;margin-bottom:1.4rem;overflow:hidden}
-.pbar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .4s ease}
-
 /* BUTTONS */
 .btn-sm{padding:9px 20px;border-radius:7px;border:none;font-family:'Outfit',sans-serif;font-size:.83rem;font-weight:500;cursor:pointer;transition:.2s}
 .bp{background:var(--primary);color:#fff}.bp:hover{opacity:.87}
 .bo{background:transparent;border:1.5px solid var(--border);color:var(--muted)}.bo:hover{border-color:var(--primary);color:var(--primary)}
 .brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.15rem}
 
-/* TYPING */
-.tdots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);animation:td .8s infinite}.tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
-@keyframes td{0%,80%,100%{transform:scale(1);opacity:.4}40%{transform:scale(1.4);opacity:1}}
-
 /* INFO BOX */
 .ibox{background:rgba(107,143,113,.07);border:1px solid rgba(107,143,113,.22);border-radius:8px;padding:.85rem 1rem;font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:1.1rem}
 .ibox strong{color:var(--primary)}
 
-/* SAVING INDICATOR */
+/* SAVE INDICATOR */
 .save-indicator{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--muted);margin-top:.6rem}
 .save-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:savepulse 1.5s infinite}
 @keyframes savepulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* STAGE TABS */
+.stabs{display:flex;gap:8px;margin-bottom:1.4rem;flex-wrap:wrap}
+.stab{flex:1;min-width:80px;padding:9px 6px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:.8rem;cursor:pointer;transition:.2s;text-align:center}
+.stab:hover:not(.disabled){border-color:var(--primary-soft);color:var(--text)}.stab.active{border-color:var(--primary);background:var(--primary-soft);color:var(--white);font-weight:500}.stab.disabled{opacity:.3;cursor:not-allowed}
 
 /* RIWAYAT */
 .riwayat-wrap{max-width:660px;margin:0 auto;padding:2rem 1.5rem}
@@ -173,18 +194,24 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 #loading-overlay.hide{display:none}
 .lo-spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:sp .8s linear infinite}
 .lo-txt{font-size:.82rem;color:var(--muted)}
+
+/* SESSION PROGRESS INDICATOR */
+.sess-prog{display:flex;gap:6px;margin-bottom:1.2rem;flex-wrap:wrap}
+.sess-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--muted);background:var(--surface);transition:.3s;cursor:default}
+.sess-dot.done{background:var(--primary);border-color:var(--primary);color:#fff}
+.sess-dot.active{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(196,132,90,.18)}
+.sess-dot.locked{opacity:.35}
 </style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
 <div id="loading-overlay">
   <div class="lo-spin"></div>
-  <div class="lo-txt">Memuat Psy-WellMate…</div>
+  <div class="lo-txt">Memuat PsyWellMate…</div>
 </div>
 
 <header class="topbar">
-  <div class="logo"></div>
+  <div class="logo">Psy<span>Well</span>Mate</div>
   <nav class="nav" id="nav-pub">
     <button class="nb act" onclick="goPage('beranda')">Beranda</button>
     <button class="nb" onclick="goPage('tentang')">Tentang</button>
@@ -203,17 +230,18 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 <div class="page active" id="page-beranda">
   <section class="hero">
     <div class="badge">✦ Kesehatan Mental Berbasis AI</div>
-    <h1><span style="color: #d4722a;">PSY-</span><span style="color: #3a9e6f;"><em>WELLMATE</em></span></h1>
-    <p>Ruang aman untuk bercerita &amp; pulih — hangat, privat, gratis.</p>
+    <h1>Ruang Aman untuk<br><em>Bercerita & Pulih</em></h1>
+    <p>Tes depresi klinis, sesi Life Review Therapy berbasis AI, dan perbandingan skor sebelum & sesudah — hangat, privat, gratis.</p>
     <div class="hero-btns">
       <button class="btn-solid" onclick="goPage('register')">Mulai Gratis Sekarang</button>
       <button class="btn-ghost" onclick="goPage('tentang')">Pelajari Lebih Lanjut</button>
     </div>
   </section>
   <div class="feat-grid">
-    <div class="fc"><div class="fi">🧪</div><h3>Tes Depresi Klinis</h3><p>Asesmen berbasis standar PHQ yang disesuaikan untuk 3 tahap kehidupan: Anak, Dewasa, dan Lansia.</p></div>
-    <div class="fc"><div class="fi">🎙️</div><h3>Terapi Kesejahteraan Mental Berbasis AI</h3><p>AI mengajukan pertanyaan terapeutik dan mendengarkan tanpa menghakimi. Kamu yang bercerita, AI yang menyimak.</p></div>
-    <div class="fc"><div class="fi">📊</div><h3>Perbandingan Skor</h3><p>Lihat apakah sesi bercerita berhasil menurunkan tingkat depresimu secara terukur dan nyata.</p></div>
+    <div class="fc"><div class="fi">🧪</div><h3>Tes Depresi Klinis</h3><p>Asesmen berbasis standar PHQ disesuaikan untuk 3 tahap kehidupan: Anak/Remaja, Dewasa, dan Lansia.</p></div>
+    <div class="fc"><div class="fi">🎙️</div><h3>Life Review Therapy</h3><p>Perjalanan terapeutik menelusuri pengalaman hidup — dari masa kecil hingga saat ini — dipandu AI yang hangat.</p></div>
+    <div class="fc"><div class="fi">📊</div><h3>Perbandingan Skor</h3><p>Lihat perubahan kondisi mentalmu secara terukur sebelum dan sesudah menjalani sesi terapi.</p></div>
+    <div class="fc"><div class="fi">🔒</div><h3>Privasi Penuh</h3><p>Data tersimpan aman di database terenkripsi. Hanya kamu yang bisa mengaksesnya.</p></div>
   </div>
 </div>
 
@@ -222,7 +250,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="about-wrap">
     <div class="sl">Tentang Kami</div>
     <h2>Dibuat dengan Empati, untuk Semua</h2>
-    <p>PsyWellMate menggabungkan psikologi klinis dengan Natural Language Processing. Alur terapi kami dirancang bersama psikolog: tes depresi awal → sesi bercerita terpandu → apresiasi emosional → tes ulang.</p>
+    <p>PsyWellMate menggabungkan psikologi klinis dengan pendekatan Life Review Therapy. Alur terapi kami dirancang bersama psikolog: tes depresi awal → sesi life review bertahap → apresiasi emosional → tes ulang.</p>
+    <p>Life Review Therapy adalah pendekatan terapeutik yang terbukti efektif, terutama untuk membantu seseorang menemukan makna dan nilai positif dari perjalanan hidupnya.</p>
     <p>Kami percaya bahwa kata-kata punya kekuatan menyembuhkan. Bercerita bukan tanda kelemahan — itu tanda keberanian.</p>
     <p style="color:var(--primary);font-style:italic;font-size:.88rem">* Aplikasi ini tidak menggantikan konsultasi profesional. Jika skor tinggi, kami sangat menyarankan menemui psikolog atau psikiater.</p>
   </div>
@@ -282,97 +311,122 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="app-shell">
     <div class="step-row" id="step-row"></div>
 
-    <!-- 1. Data Diri -->
+    <!-- SC: DATA DIRI -->
     <div id="sc-data" class="card" style="display:none">
       <h2>Data Diri 📋</h2>
-      <p class="sub">Kami menyesuaikan tes dan pertanyaan terapi berdasarkan profilmu.</p>
-      <div class="field"><label>Nama Panggilan</label><input type="text" id="d-nm" placeholder="Nama kamu"></div>
+      <p class="sub">Kami menyesuaikan sesi terapi berdasarkan profilmu.</p>
+      <div class="field"><label>Nama Panggilan</label><input type="text" id="d-nm" placeholder="Nama panggilanmu"></div>
       <div class="field"><label>Usia</label><input type="number" id="d-us" min="5" max="120" placeholder="Contoh: 22"></div>
       <div class="field"><label>Jenis Kelamin</label>
         <select id="d-jk"><option value="">-- Pilih --</option><option>Laki-laki</option><option>Perempuan</option><option>Lainnya / Prefer not to say</option></select>
       </div>
-      <div class="field"><label>Apakah kamu mempunyai penyakit kronis?</label><input type="text" id="d-pk" placeholder="Contoh: Saya memiliki penyakit jantung"></div>
-      <div class="field"><label>Apakah kamu memiliki pasangan yang tinggal serumah? Kosongkan jika kamu belum menikah</label><input type="text" id="d-ps" placeholder="Contoh: Ada"></div>
-      <div class="field"><label>Berapa orang anak yang tinggal serumah? Kosongkan jika kamu belum menikah</label><input type="text" id="d-as" placeholder="Contoh: 1"></div>
+      <div class="field"><label>Apakah memiliki penyakit kronis?</label><input type="text" id="d-pk" placeholder="Contoh: Hipertensi, Diabetes (kosongkan jika tidak ada)"></div>
+      <div class="field"><label>Apakah memiliki pasangan yang tinggal serumah?</label><input type="text" id="d-ps" placeholder="Contoh: Ada / Tidak ada"></div>
+      <div class="field"><label>Jumlah anak yang tinggal serumah</label><input type="text" id="d-as" placeholder="Contoh: 2 (kosongkan jika belum ada)"></div>
       <div class="brow"><button class="btn-sm bp" onclick="submitData()">Lanjutkan →</button></div>
     </div>
 
-    <!-- 2. Pilih Tahap -->
+    <!-- SC: PILIH TAHAP -->
     <div id="sc-tahap" class="card" style="display:none">
-      <h2>Pilih Tahap 🌱</h2>
+      <h2>Tahap Usia 🌱</h2>
       <p class="sub" id="tahap-sub"></p>
       <div class="ibox" id="tahap-ibox"></div>
       <div class="stabs" id="stabs"></div>
-      <div class="brow"><button class="btn-sm bp" onclick="beginTest('pre')">Mulai Tes Depresi →</button></div>
+      <div class="brow"><button class="btn-sm bp" onclick="beginPHQ('pre')">Mulai Tes Depresi →</button></div>
     </div>
 
-    <!-- 3. Tes PHQ (pre) -->
-    <div id="sc-test" class="card" style="display:none">
-      <h2 id="test-h">Tes Depresi Awal</h2>
-      <p class="sub" id="test-sub">Pilih seberapa sering kamu merasakan hal berikut <strong>dalam 2 minggu terakhir</strong>.</p>
+    <!-- SC: TES PHQ PRE -->
+    <div id="sc-phq-pre" class="card" style="display:none">
+      <h2 id="phq-pre-h">Tes Depresi Awal</h2>
+      <p class="sub">Pilih seberapa sering kamu/Anda merasakan hal berikut <strong>dalam 2 minggu terakhir</strong>.</p>
       <div class="pbar-w"><div class="pbar" id="pb-pre" style="width:0%"></div></div>
       <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Pertanyaan <span id="pn-pre">1</span> dari <span id="pt-pre"></span></p>
-      <div id="test-body"></div>
+      <div id="phq-pre-body"></div>
     </div>
 
-    <!-- 4. Hasil Awal -->
-    <div id="sc-pre-res" class="card" style="display:none">
+    <!-- SC: HASIL PHQ PRE -->
+    <div id="sc-phq-pre-res" class="card" style="display:none">
       <h2>Hasil Tes Awal 📊</h2>
-      <p class="sub">Skor depresimu sebelum sesi terapi bercerita.</p>
+      <p class="sub">Skor depresimu sebelum menjalani sesi Life Review Therapy.</p>
       <div class="ring-wrap" id="ring-pre"></div>
       <div style="text-align:center">
         <div class="sev-badge" id="sev-pre-b"></div>
         <p style="color:var(--muted);font-size:.86rem;line-height:1.7;margin-top:.4rem;max-width:400px;margin-inline:auto" id="sev-pre-d"></p>
       </div>
-      <div class="brow" style="justify-content:center"><button class="btn-sm bp" onclick="beginTherapy()">Lanjut ke Sesi Terapi 🎙️</button></div>
+      <div class="brow" style="justify-content:center">
+        <button class="btn-sm bp" onclick="startLifeReview()">Mulai Life Review Therapy 🌿</button>
+      </div>
     </div>
 
-    <!-- 5. Terapi NLP -->
-    <div id="sc-therapy" class="card" style="display:none">
-      <h2>Sesi Terapi 🎙️</h2>
-      <p class="sub" id="th-prog"></p>
-      <div class="pbar-w"><div class="pbar" id="pb-th" style="width:0%"></div></div>
+    <!-- SC: SESI INTRO -->
+    <div id="sc-sesi-intro" class="card" style="display:none">
+      <div class="sesi-intro">
+        <span class="sesi-icon" id="si-icon">🌿</span>
+        <div class="sesi-num" id="si-num">Sesi 1</div>
+        <div class="sesi-title" id="si-title">Life Review Therapy</div>
+        <p class="sesi-desc" id="si-desc">Deskripsi sesi.</p>
+        <div class="sess-prog" id="sess-prog-intro" style="justify-content:center"></div>
+        <button class="btn-sm bp" onclick="beginSesiQuestions()">Mulai Sesi Ini →</button>
+      </div>
+    </div>
+
+    <!-- SC: RINGKASAN SESI -->
+    <div id="sc-ringkasan" class="card" style="display:none">
+      <h2 id="rk-title">Ringkasan Sesi</h2>
+      <p class="sub" id="rk-sub">Berikut adalah apa yang sudah Anda ceritakan di sesi sebelumnya.</p>
+      <div id="rk-body"></div>
+      <div class="brow">
+        <button class="btn-sm bp" onclick="goToNextSesiIntro()">Lanjut ke Sesi Berikutnya →</button>
+      </div>
+    </div>
+
+    <!-- SC: PERTANYAAN SESI LIFE REVIEW -->
+    <div id="sc-sesi-q" class="card" style="display:none">
+      <h2 id="sq-title">Sesi 1</h2>
+      <p class="sub" id="sq-prog"></p>
+      <div class="pbar-w"><div class="pbar" id="pb-sesi" style="width:0%"></div></div>
       <div class="tbubble">
         <div class="tq-label">AI Terapis</div>
-        <div id="bubble-txt"></div>
+        <div id="sq-bubble"></div>
       </div>
-      <div class="chat-hist" id="chat-hist"></div>
-      <div id="th-input">
-        <button class="mic-btn" id="mic-btn" onclick="toggleMic()">🎤</button>
-        <div class="mic-hint" id="mic-hint">Tekan 🎤 untuk merekam suara, atau ketik langsung di bawah</div>
+      <div id="sq-ai-response" class="ai-response" style="display:none"></div>
+      <div class="chat-hist" id="sq-hist"></div>
+      <div id="sq-input">
+        <button class="mic-btn" id="sq-mic-btn" onclick="toggleMicSesi()">🎤</button>
+        <div class="mic-hint" id="sq-mic-hint">Tekan 🎤 untuk merekam suara, atau ketik langsung di bawah</div>
         <div class="chat-iw">
-          <textarea class="chat-ta" id="curhat-ta" placeholder="Ceritakan perasaanmu di sini…" rows="3"></textarea>
-          <button class="send-btn" onclick="sendCurhat()">➤</button>
+          <textarea class="chat-ta" id="sq-ta" placeholder="Ceritakan di sini…" rows="3"></textarea>
+          <button class="send-btn" onclick="sendSesiAnswer()">➤</button>
         </div>
       </div>
-      <div id="th-done" style="display:none">
-        <div class="brow"><button class="btn-sm bp" onclick="showAp()">Lanjutkan →</button></div>
+      <div id="sq-done" style="display:none">
+        <div class="brow"><button class="btn-sm bp" id="sq-done-btn" onclick="finishSesi()">Lanjutkan →</button></div>
       </div>
     </div>
 
-    <!-- 6. Apresiasi -->
+    <!-- SC: APRESIASI -->
     <div id="sc-ap" class="card" style="display:none">
       <div class="ap-card">
         <span class="ap-emo" id="ap-em">🌟</span>
         <div class="ap-title" id="ap-ti">Kamu Luar Biasa</div>
         <p class="ap-text" id="ap-tx"></p>
-        <button class="btn-sm bp" onclick="beginTest('post')">Lanjut → Tes Ulang Depresi</button>
+        <button class="btn-sm bp" onclick="beginPHQ('post')">Lanjut → Tes Ulang Depresi</button>
       </div>
     </div>
 
-    <!-- 7. Tes Post -->
-    <div id="sc-test-post" class="card" style="display:none">
+    <!-- SC: TES PHQ POST -->
+    <div id="sc-phq-post" class="card" style="display:none">
       <h2>Tes Depresi Ulang 🔄</h2>
-      <p class="sub">Setelah bercerita, bagaimana perasaanmu sekarang? Jawab sejujurnya.</p>
+      <p class="sub">Setelah menjalani Life Review Therapy, bagaimana perasaanmu sekarang?</p>
       <div class="pbar-w"><div class="pbar" id="pb-post" style="width:0%"></div></div>
       <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Pertanyaan <span id="pn-post">1</span> dari <span id="pt-post"></span></p>
-      <div id="test-post-body"></div>
+      <div id="phq-post-body"></div>
     </div>
 
-    <!-- 8. Hasil Final -->
+    <!-- SC: HASIL FINAL -->
     <div id="sc-final" class="card" style="display:none">
       <h2>Perbandingan Hasil 📈</h2>
-      <p class="sub">Begini perubahan kondisimu setelah sesi terapi bercerita.</p>
+      <p class="sub">Perubahan kondisimu setelah menjalani Life Review Therapy.</p>
       <div class="cmp-grid">
         <div class="cmp-box"><div class="cl">Sebelum Terapi</div><div class="cn" id="c-pre-n"></div><div class="sev-badge" id="c-pre-s" style="margin-top:.4rem"></div></div>
         <div class="cmp-box"><div class="cl">Sesudah Terapi</div><div class="cn" id="c-post-n"></div><div class="sev-badge" id="c-post-s" style="margin-top:.4rem"></div></div>
@@ -399,39 +453,21 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 <div id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════
-   KONFIGURASI SUPABASE
-   Ganti dengan URL dan ANON KEY project Supabase kamu!
-═══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   SUPABASE CONFIG
+══════════════════════════════════════════ */
 const SUPABASE_URL = 'https://xxcxygdssveddjonwxat.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4Y3h5Z2Rzc3ZlZGRqb253eGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MjcxMTYsImV4cCI6MjA5MjMwMzExNn0.u1QqZpj2n5v8lhCGaqxZCKmVbGtWxukXZ-yJmAASDbI'
-
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4Y3h5Z2Rzc3ZlZGRqb253eGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MjcxMTYsImV4cCI6MjA5MjMwMzExNn0.u1QqZpj2n5v8lhCGaqxZCKmVbGtWxukXZ-yJmAASDbI';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ════════ UTILS ════════ */
-function toast(m,d=2800){
-  const t=document.getElementById('toast');
-  t.textContent=m;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),d);
-}
-
-function showErr(id,msg){
-  const el=document.getElementById(id);
-  el.textContent=msg;el.style.display='block';
-  setTimeout(()=>el.style.display='none',4500);
-}
-
-function showOk(id,msg){
-  const el=document.getElementById(id);
-  el.textContent=msg;el.style.display='block';
-}
-
-function setBtnLoading(id,loading){
-  const btn=document.getElementById(id);
-  if(loading){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Memproses…';}
-  else{btn.disabled=false;btn.innerHTML=btn.dataset.orig||'Kirim';}
-}
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function toast(m,d=2800){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function showErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4500);}
+function showOk(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';}
+function setBtnLoading(id,loading,orig){const btn=document.getElementById(id);if(loading){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Memproses…';}else{btn.disabled=false;btn.innerHTML=orig||'Kirim';}}
 
 function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -443,106 +479,85 @@ function goPage(id){
   if(id==='riwayat') loadRiwayat();
 }
 
-/* ════════ AUTH STATE ════════ */
-let _currentUser = null;
-
-function setLoggedIn(user, fullName){
-  _currentUser = user;
-  const nm = fullName || user.email;
-  document.getElementById('uav-l').textContent = nm[0].toUpperCase();
-  document.getElementById('uav-n').textContent = nm;
-  document.getElementById('upill').style.display = 'flex';
-  document.getElementById('nav-pub').style.display = 'none';
+function showSc(id){
+  ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-sesi-q','sc-ap','sc-phq-post','sc-final'].forEach(s=>{
+    const e=document.getElementById(s);if(e)e.style.display='none';
+  });
+  document.getElementById(id).style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
+/* ══════════════════════════════════════════
+   AUTH STATE
+══════════════════════════════════════════ */
+let _cu = null; // current user
+let _cuName = '';
+
+function setLoggedIn(user, nm){
+  _cu=user; _cuName=nm;
+  document.getElementById('uav-l').textContent=nm[0].toUpperCase();
+  document.getElementById('uav-n').textContent=nm;
+  document.getElementById('upill').style.display='flex';
+  document.getElementById('nav-pub').style.display='none';
+}
 function setLoggedOut(){
-  _currentUser = null;
-  document.getElementById('upill').style.display = 'none';
-  document.getElementById('nav-pub').style.display = 'flex';
+  _cu=null; _cuName='';
+  document.getElementById('upill').style.display='none';
+  document.getElementById('nav-pub').style.display='flex';
 }
 
-/* ════════ REGISTER ════════ */
+/* ══════════════════════════════════════════
+   REGISTER
+══════════════════════════════════════════ */
 async function doRegister(){
-  const n = document.getElementById('rg-n').value.trim();
-  const u = document.getElementById('rg-u').value.trim().toLowerCase().replace(/\s+/g,'');
-  const e = document.getElementById('rg-e').value.trim();
-  const p = document.getElementById('rg-p').value;
-
+  const n=document.getElementById('rg-n').value.trim();
+  const u=document.getElementById('rg-u').value.trim().toLowerCase().replace(/\s+/g,'');
+  const e=document.getElementById('rg-e').value.trim();
+  const p=document.getElementById('rg-p').value;
   if(!n||!u||!e||!p){showErr('rg-err','⚠️ Semua kolom wajib diisi');return;}
   if(p.length<6){showErr('rg-err','⚠️ Password minimal 6 karakter');return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){showErr('rg-err','⚠️ Format email tidak valid');return;}
-  if(!/^[a-z0-9_]+$/.test(u)){showErr('rg-err','⚠️ Username hanya boleh huruf kecil, angka, dan underscore');return;}
-
-  document.getElementById('rg-btn').dataset.orig = 'Daftar Sekarang';
+  if(!/^[a-z0-9_]+$/.test(u)){showErr('rg-err','⚠️ Username hanya boleh huruf kecil, angka, underscore');return;}
   setBtnLoading('rg-btn',true);
-
-  try {
-    // Cek username sudah dipakai
-    const {data: existU} = await sb.from('profiles').select('id').eq('username',u).single();
-    if(existU){showErr('rg-err','⚠️ Username sudah dipakai, coba yang lain');setBtnLoading('rg-btn',false);document.getElementById('rg-btn').innerHTML='Daftar Sekarang';return;}
-
-    // Register via Supabase Auth
-    const {data, error} = await sb.auth.signUp({
-      email: e,
-      password: p,
-      options: { data: { full_name: n, username: u } }
-    });
-
+  try{
+    const {data:existU}=await sb.from('profiles').select('id').eq('username',u).maybeSingle();
+    if(existU){showErr('rg-err','⚠️ Username sudah dipakai');setBtnLoading('rg-btn',false,'Daftar Sekarang');return;}
+    const {data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{full_name:n,username:u}}});
     if(error) throw error;
-
-    // Simpan profil tambahan ke tabel profiles
     if(data.user){
-      await sb.from('profiles').upsert({
-        id: data.user.id,
-        username: u,
-        full_name: n,
-        email: e,
-        created_at: new Date().toISOString()
-      });
+      await sb.from('profiles').upsert({id:data.user.id,username:u,full_name:n,email:e,role:'user',created_at:new Date().toISOString()});
     }
-
     showOk('rg-ok','✅ Akun berhasil dibuat! Silakan cek email untuk verifikasi, lalu masuk.');
-    document.getElementById('rg-btn').innerHTML = 'Daftar Sekarang';
-    document.getElementById('rg-btn').disabled = false;
+    setBtnLoading('rg-btn',false,'Daftar Sekarang');
     setTimeout(()=>goPage('login'),2500);
-
-  } catch(err){
-    setBtnLoading('rg-btn',false);
-    document.getElementById('rg-btn').innerHTML = 'Daftar Sekarang';
-    const msg = err.message.includes('already registered') ? '⚠️ Email sudah terdaftar.' : '❌ '+err.message;
-    showErr('rg-err',msg);
+  }catch(err){
+    setBtnLoading('rg-btn',false,'Daftar Sekarang');
+    showErr('rg-err','❌ '+(err.message.includes('already registered')?'Email sudah terdaftar.':err.message));
   }
 }
 
-/* ════════ LOGIN ════════ */
+/* ══════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════ */
 async function doLogin(){
-  const e = document.getElementById('lg-e').value.trim();
-  const p = document.getElementById('lg-p').value;
+  const e=document.getElementById('lg-e').value.trim();
+  const p=document.getElementById('lg-p').value;
   if(!e||!p){showErr('lg-err','⚠️ Isi email & password');return;}
-
-  document.getElementById('lg-btn').dataset.orig = 'Masuk';
   setBtnLoading('lg-btn',true);
-
-  try {
-    const {data, error} = await sb.auth.signInWithPassword({email:e, password:p});
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email:e,password:p});
     if(error) throw error;
-
-    // Ambil profil dari tabel profiles
-    const {data: prof} = await sb.from('profiles').select('*').eq('id',data.user.id).single();
-    const nm = prof?.full_name || data.user.user_metadata?.full_name || e;
-
-    setLoggedIn(data.user, nm);
+    const {data:prof}=await sb.from('profiles').select('*').eq('id',data.user.id).single();
+    const nm=prof?.full_name||data.user.user_metadata?.full_name||e;
+    setLoggedIn(data.user,nm);
     toast('👋 Halo, '+nm+'!');
-    launchApp();
-
-  } catch(err){
-    setBtnLoading('lg-btn',false);
-    document.getElementById('lg-btn').innerHTML = 'Masuk';
+    checkAndResumeSession();
+  }catch(err){
+    setBtnLoading('lg-btn',false,'Masuk');
     showErr('lg-err','❌ Email atau password salah');
   }
 }
 
-/* ════════ LOGOUT ════════ */
 async function doLogout(){
   await sb.auth.signOut();
   setLoggedOut();
@@ -550,105 +565,457 @@ async function doLogout(){
   goPage('beranda');
 }
 
-/* ════════ STATE ════════ */
-const S={nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',tahap:'',avail:[],preScore:0,postScore:0,thIdx:0,hist:[],phase:''};
+/* ══════════════════════════════════════════
+   NLP SEDERHANA (Rule-Based)
+══════════════════════════════════════════ */
+const NLP = {
+  positif: ['bahagia','senang','gembira','baik','bagus','indah','syukur','bersyukur','cinta','sayang','semangat','harapan','bangga','berhasil','sukses','damai','tenang','nyaman','aman','sehat','segar','bersemangat','luar biasa','menyenangkan','hebat','kuat','tabah','sabar','ikhlas','percaya','optimis','bermanfaat','berarti','bermakna','berharga','ringan','lega','puas','beruntung','tercukupi','dicintai','dihargai','didukung','terhubung','dekat','akrab','hangat','erat'],
+  negatif: ['sedih','menangis','susah','sulit','berat','lelah','capek','stress','stres','cemas','khawatir','takut','marah','kesal','frustrasi','kecewa','sakit','nyeri','menderita','kesepian','sendiri','terisolasi','terbuang','tidak dihargai','tidak berharga','putus asa','pesimis','hancur','hilang','kehilangan','ditinggal','mati','bunuh','menyakiti','tidak bisa','gagal','hancur','beban','tertekan','terpuruk','malu','bersalah','menyesal','trauma','luka','perih','pahit','hampa','kosong','sia-sia','tidak berguna','tidak mampu','tidak sanggup','terpenjara','terjebak'],
+  emosi: {
+    'sedih':['sedih','menangis','duka','pilu','nestapa','merana','kepedihan','air mata'],
+    'marah':['marah','kesal','frustrasi','jengkel','dongkol','murka','benci','dendam','emosi'],
+    'takut':['takut','cemas','khawatir','gelisah','was-was','panik','gugup','ngeri','trauma'],
+    'senang':['senang','bahagia','gembira','riang','ceria','bersuka','ria','puas','lega'],
+    'malu':['malu','rendah diri','minder','tidak percaya diri','canggung','sungkan'],
+    'rindu':['rindu','kangen','merindukan','savahan','ingin bertemu','mengenang'],
+    'bangga':['bangga','puas','berhasil','sukses','pencapaian','prestasi','hebat']
+  },
+  topik: {
+    'keluarga':['keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan','rumah tangga'],
+    'pekerjaan':['kerja','pekerjaan','kantor','karir','atasan','bos','rekan','karyawan','usaha','bisnis','penghasilan','gaji','PHK','dipecat'],
+    'kesehatan':['sakit','sehat','dokter','rumah sakit','obat','penyakit','fisik','tubuh','kesehatan','medis'],
+    'sosial':['teman','sahabat','tetangga','masyarakat','komunitas','bergaul','pertemanan','persahabatan','lingkungan'],
+    'masa lalu':['dulu','dahulu','masa kecil','masa lalu','kenangan','ingatan','waktu kecil','sewaktu kecil','zaman'],
+    'masa depan':['masa depan','nanti','harapan','cita-cita','rencana','impian','khawatir','takut masa depan'],
+    'spiritualitas':['ibadah','shalat','doa','agama','tuhan','iman','bersyukur','pasrah','ikhlas','masjid','gereja','tempat ibadah']
+  }
+};
 
-/* ════════ DATA PHQ ════════ */
-const PHQ={
+function analyzeNLP(text){
+  const t = text.toLowerCase();
+  let posCount=0, negCount=0;
+  NLP.positif.forEach(w=>{if(t.includes(w)) posCount++;});
+  NLP.negatif.forEach(w=>{if(t.includes(w)) negCount++;});
+  const sentiment = posCount>negCount ? 'positif' : negCount>posCount ? 'negatif' : 'netral';
+
+  let detectedEmo = 'netral';
+  let maxEmo = 0;
+  for(const[emo,words] of Object.entries(NLP.emosi)){
+    let c=0; words.forEach(w=>{if(t.includes(w))c++;});
+    if(c>maxEmo){maxEmo=c;detectedEmo=emo;}
+  }
+
+  const topics=[];
+  for(const[top,words] of Object.entries(NLP.topik)){
+    let c=0; words.forEach(w=>{if(t.includes(w))c++;});
+    if(c>0) topics.push(top);
+  }
+
+  return {sentiment, emotion:detectedEmo, topics};
+}
+
+function getAIResponse(nlp, sesiNum, qIdx){
+  const {sentiment, emotion, topics} = nlp;
+  const sapaan = S.usia <= 17 ? 'kamu' : 'Anda';
+
+  // Template respons berdasarkan kombinasi sentimen dan emosi
+  const templates = {
+    positif: [
+      `Terima kasih sudah berbagi, ${sapaan} tampak memiliki kenangan yang sangat berharga dari pengalaman itu.`,
+      `Sungguh indah mendengar cerita ${sapaan}, ada hal-hal bermakna yang telah ${sapaan} lalui.`,
+      `${sapaan.charAt(0).toUpperCase()+sapaan.slice(1)} telah melalui momen yang penuh arti, dan itu adalah kekuatan nyata dalam hidup ${sapaan}.`,
+      `Cerita ${sapaan} mengingatkan kita bahwa ada banyak hal berharga yang telah dijalani dengan baik.`
+    ],
+    negatif: {
+      sedih: [`Terima kasih sudah mau bercerita tentang hal yang berat ini, ${sapaan} sangat berani untuk berbagi.`,`Wajar sekali jika ${sapaan} merasakan itu, dan penting bahwa ${sapaan} tidak menyimpannya sendirian.`],
+      marah: [`Perasaan ${sapaan} sepenuhnya valid, dan mengakui emosi itu adalah langkah yang penting.`,`Terima kasih sudah jujur tentang perasaan ${sapaan}, itu membutuhkan keberanian.`],
+      takut: [`Kekhawatiran ${sapaan} sangat bisa dipahami, dan berbagi rasa takut itu sudah merupakan langkah yang kuat.`,`Wajar untuk merasa seperti itu, dan ${sapaan} tidak harus menghadapinya sendirian.`],
+      malu: [`Cerita ${sapaan} membutuhkan keberanian besar untuk diungkapkan, dan itu sangat dihargai.`,`Tidak ada yang perlu disembunyikan di sini, ${sapaan} aman untuk bercerita.`],
+      default: [`Terima kasih sudah mempercayakan cerita ini, ${sapaan} sudah melakukan hal yang luar biasa dengan berbicara.`,`${sapaan.charAt(0).toUpperCase()+sapaan.slice(1)} tidak harus menanggung ini sendirian, dan cerita ${sapaan} sangat berarti.`]
+    },
+    netral: [
+      `Terima kasih sudah bercerita, ${sapaan}. Mari kita lanjutkan perjalanan ini bersama.`,
+      `Cerita ${sapaan} memberikan gambaran yang lebih jelas tentang perjalanan hidup yang telah dijalani.`,
+      `Setiap pengalaman yang ${sapaan} bagikan memiliki nilai tersendiri dalam perjalanan ini.`
+    ],
+    topik: {
+      keluarga: `Keluarga tampaknya memiliki peran yang sangat penting dalam perjalanan hidup ${sapaan}.`,
+      pekerjaan: `Pengalaman ${sapaan} di dunia kerja tentu membentuk banyak hal dalam kehidupan ${sapaan}.`,
+      kesehatan: `Kondisi kesehatan memang sangat mempengaruhi kualitas hidup, terima kasih sudah terbuka tentang itu.`,
+      sosial: `Hubungan dengan orang-orang di sekitar ${sapaan} tampaknya sangat bermakna dalam hidup ${sapaan}.`,
+      spiritualitas: `Dimensi spiritual dalam hidup ${sapaan} tampak menjadi sumber kekuatan yang penting.`
+    }
+  };
+
+  // Prioritas: jika ada topik spesifik yang terdeteksi
+  if(topics.length > 0 && Math.random() > 0.5){
+    const t = topics[0];
+    if(templates.topik[t]) return templates.topik[t];
+  }
+
+  if(sentiment === 'positif'){
+    return templates.positif[Math.floor(Math.random()*templates.positif.length)];
+  } else if(sentiment === 'negatif'){
+    const emoTemplates = templates.negatif[emotion] || templates.negatif.default;
+    return emoTemplates[Math.floor(Math.random()*emoTemplates.length)];
+  } else {
+    return templates.netral[Math.floor(Math.random()*templates.netral.length)];
+  }
+}
+
+/* ══════════════════════════════════════════
+   DATA PHQ
+══════════════════════════════════════════ */
+const PHQ = {
   anak:{label:'Anak & Remaja',range:'≤ 17 tahun',emoji:'🌱',
     qs:['Apakah kamu sering merasa sedih, murung, atau ingin menangis?','Apakah kamu tidak tertarik bermain atau melakukan hal yang biasanya kamu suka?','Apakah kamu mudah lelah atau tidak punya tenaga?','Apakah kamu sulit tidur atau tidur terlalu banyak?','Apakah kamu merasa tidak berharga atau selalu disalahkan?','Apakah kamu susah berkonsentrasi di sekolah atau saat belajar?','Apakah kamu pernah berpikir untuk menyakiti dirimu sendiri?']},
-  dewasa:{label:'Dewasa',range:'18 – 59 tahun',emoji:'🌿',
-    qs:['Apakah kamu merasa kehilangan minat atau kesenangan dalam hal-hal yang biasa kamu sukai?','Apakah kamu merasa sedih, tertekan, atau putus asa?','Apakah kamu mengalami masalah tidur — sulit tidur, sering terbangun, atau tidur berlebihan?','Apakah kamu merasa lelah atau tidak berenergi?','Apakah nafsu makanmu berubah drastis (sangat sedikit atau berlebihan)?','Apakah kamu merasa buruk tentang dirimu sendiri atau merasa gagal?','Apakah kamu sulit berkonsentrasi saat bekerja, membaca, atau beraktivitas?','Apakah kamu bergerak/berbicara lebih lambat, atau justru sangat gelisah dan tidak bisa diam?','Apakah kamu punya pikiran untuk menyakiti atau mengakhiri hidupmu?']},
+  dewasa:{label:'Dewasa',range:'18–59 tahun',emoji:'🌿',
+    qs:['Apakah Anda merasa kehilangan minat atau kesenangan dalam hal-hal yang biasa Anda sukai?','Apakah Anda merasa sedih, tertekan, atau putus asa?','Apakah Anda mengalami masalah tidur — sulit tidur, sering terbangun, atau tidur berlebihan?','Apakah Anda merasa lelah atau tidak berenergi?','Apakah nafsu makan Anda berubah drastis?','Apakah Anda merasa buruk tentang diri sendiri atau merasa gagal?','Apakah Anda sulit berkonsentrasi saat bekerja atau beraktivitas?','Apakah Anda bergerak/berbicara lebih lambat, atau justru sangat gelisah?','Apakah Anda punya pikiran untuk menyakiti atau mengakhiri hidup Anda?']},
   lansia:{label:'Lansia',range:'≥ 60 tahun',emoji:'🍂',
-    qs:['Apakah kamu sering merasa sedih, kosong, atau tidak ada harapan?','Apakah kamu sudah tidak menikmati hal-hal yang dulu kamu sukai?','Apakah kamu mudah marah atau mudah terganggu belakangan ini?','Apakah kamu mengalami gangguan tidur?','Apakah kamu merasa sangat lelah sepanjang hari?','Apakah nafsu makanmu berkurang atau berat badan turun tanpa alasan jelas?','Apakah kamu sulit mengingat hal-hal atau berkonsentrasi?','Apakah kamu merasa tidak berguna atau menjadi beban bagi keluarga?','Apakah kamu pernah berpikir bahwa lebih baik tidak hidup?']}
+    qs:['Apakah Anda sering merasa sedih, kosong, atau tidak ada harapan?','Apakah Anda sudah tidak menikmati hal-hal yang dulu Anda sukai?','Apakah Anda mudah marah atau mudah terganggu belakangan ini?','Apakah Anda mengalami gangguan tidur?','Apakah Anda merasa sangat lelah sepanjang hari?','Apakah nafsu makan Anda berkurang atau berat badan turun tanpa alasan?','Apakah Anda sulit mengingat hal-hal atau berkonsentrasi?','Apakah Anda merasa tidak berguna atau menjadi beban bagi keluarga?','Apakah Anda pernah berpikir bahwa lebih baik tidak hidup?']}
 };
 
-const OPTS=[{l:'😊 Tidak pernah',v:0},{l:'😐 Beberapa hari',v:1},{l:'😟 Lebih dari separuh hari',v:2},{l:'😰 Hampir setiap hari',v:3}];
-
-const THERAPY_Q={
-  anak:['Hai, terima kasih sudah mau ada di sini. Cerita dong — belakangan ini apa yang paling membuat kamu sedih atau tidak nyaman?','Waktu kamu merasa sedih, biasanya ada nggak orang yang kamu cerita? Atau kamu lebih suka simpan sendiri?','Pernah nggak ada satu momen di sekolah atau di rumah yang rasanya berat banget buat kamu? Ceritain pelan-pelan.','Apa yang biasanya kamu lakukan waktu kamu merasa tidak baik-baik saja?'],
-  dewasa:['Terima kasih sudah meluangkan waktu untuk dirimu sendiri. Ceritakan — apa perasaan atau kejadian yang paling berat kamu rasakan belakangan ini?','Dari semua yang sudah kamu lalui, adakah satu momen yang paling membekas dan membuatmu merasa paling lelah?','Bagaimana kondisi tidur dan istirahatmu akhir-akhir ini? Apakah ada hal yang terus-menerus mengganggu pikiranmu saat malam?','Apakah ada orang di sekitarmu yang tahu tentang apa yang sedang kamu rasakan? Bagaimana rasanya menanggung semua ini?','Kalau kamu boleh melepaskan satu beban terberat hari ini, beban apa itu?'],
-  lansia:['Halo, senang sekali kamu ada di sini. Ceritakan — apa yang paling sering membuat hatimu terasa berat belakangan ini?','Dalam perjalanan hidupmu yang panjang, adakah pengalaman yang masih terasa menyakitkan hingga sekarang dan jarang kamu ceritakan?','Bagaimana hubunganmu dengan orang-orang terdekat saat ini? Apakah kamu merasa didengar dan ditemani?','Apa yang paling kamu rindukan dari masa-masa yang lebih mudah? Boleh diceritakan lebih dalam.']
-};
-
-const APS=[
-  {e:'🌟',t:'Kamu Sungguh Luar Biasa',x:'Ternyata berat sekali yang sudah kamu lalui. Tapi kamu masih ada di sini — masih mau bercerita. Itu bukan hal kecil. Itu keberanian yang nyata.'},
-  {e:'💙',t:'Kamu Tidak Sendiri',x:'Semua yang kamu rasakan itu valid dan nyata. Wajar sekali jika kamu merasa lelah. Yang terpenting, kamu tidak harus menanggung semuanya sendirian.'},
-  {e:'🌿',t:'Langkah Kecil yang Hebat',x:'Dengan memilih berbicara hari ini, kamu sudah mengambil langkah pertama yang paling penting. Pemulihan bukan soal seberapa cepat, tapi soal terus melangkah satu-satu.'},
-  {e:'✨',t:'Hatimu Kuat',x:'Di balik semua cerita yang kamu bagikan, ada jiwa yang kuat dan berharga. Kamu layak mendapatkan kedamaian dan kebahagiaan.'}
-];
+const PHQ_OPTS = [{l:'😊 Tidak pernah',v:0},{l:'😐 Beberapa hari',v:1},{l:'😟 Lebih dari separuh hari',v:2},{l:'😰 Hampir setiap hari',v:3}];
 
 function getSev(score, tahap){
-  const mx=PHQ[tahap].qs.length*3;
-  const p=score/mx;
+  const mx=PHQ[tahap].qs.length*3, p=score/mx;
   if(p<=0.22) return{l:'Minimal / Tidak Ada Gejala',cls:'sev-none',col:'var(--green)',adv:'Kondisimu saat ini terlihat baik. Pertahankan gaya hidup sehat dan koneksi sosialmu!'};
   if(p<=0.44) return{l:'Gejala Ringan',cls:'sev-mild',col:'var(--amber)',adv:'Ada beberapa tanda yang perlu diperhatikan. Berbagi dengan orang terpercaya bisa sangat membantu.'};
   if(p<=0.67) return{l:'Gejala Sedang',cls:'sev-mod',col:'var(--orange)',adv:'Kamu butuh dukungan lebih. Pertimbangkan untuk berbicara dengan konselor atau psikolog.'};
   return{l:'Gejala Berat',cls:'sev-sev',col:'var(--red)',adv:'Sangat disarankan untuk segera berkonsultasi dengan profesional kesehatan mental.'};
 }
 
-/* ════════ STEP INDICATOR ════════ */
-const STEPS=['Data Diri','Pilih Tahap','Tes Awal','Terapi','Apresiasi','Tes Ulang','Hasil'];
-function renderSteps(ai){
-  const el=document.getElementById('step-row');
-  let h='';
-  STEPS.forEach((s,i)=>{
-    const done=i<ai,act=i===ai;
-    h+=`<div class="swrap"><div class="sdot ${done?'done':act?'active':''}">${done?'✓':i+1}</div><div class="slbl" style="color:${act?'var(--accent)':done?'var(--primary)':'var(--muted)'}">${s}</div></div>`;
-    if(i<STEPS.length-1) h+=`<div class="sline ${done?'done':''}"></div>`;
-  });
-  el.innerHTML=h;
+/* ══════════════════════════════════════════
+   DATA SESI LIFE REVIEW
+══════════════════════════════════════════ */
+const SESI_META = {
+  1: {
+    icon:'🌿', title:'Life Review — Kondisi Saat Ini',
+    desc:'Sesi pembuka ini mengajak kita untuk mengenali kondisi psikologis, lingkungan, dan kehidupan sehari-hari yang sedang dijalani saat ini.',
+    qs_anak:[
+      'Ceritakanlah bagaimana perasaan dan kondisi psikologi kamu saat ini.',
+      'Ceritakanlah seperti apa lingkungan kamu saat ini — di rumah, di sekolah, dan di sekitar tempat tinggal kamu.',
+      'Ceritakanlah seperti apa kehidupan kamu saat ini — kegiatan sehari-hari, kebiasaan, dan hal-hal yang biasa kamu lakukan.'
+    ],
+    qs_dewasa:[
+      'Ceritakanlah bagaimana keadaan psikologi Anda saat ini — apa yang sedang Anda rasakan dan pikirkan.',
+      'Ceritakanlah seperti apa lingkungan Anda saat ini — di rumah, di tempat kerja, dan di komunitas sekitar Anda.',
+      'Ceritakanlah seperti apa kehidupan Anda saat ini — pola dan kebiasaan harian, kemampuan fungsional, medikasi yang dijalani, komunikasi, kondisi pendengaran dan penglihatan, serta penyakit kronis yang mungkin Anda hadapi.'
+    ]
+  },
+  2: {
+    icon:'🧒', title:'Pengalaman Masa Anak-Anak',
+    desc:'Sesi ini mengajak kita untuk kembali menelusuri kenangan masa kecil — tempat lahir, keluarga, teman dekat, dan pengalaman yang membentuk diri kita.',
+    qs_anak:[
+      'Ceritakanlah kapan dan di mana kamu lahir, lalu di mana kamu dulu tumbuh besar.',
+      'Ceritakanlah seperti apa lingkungan masyarakat tempat kamu dahulu tumbuh besar.',
+      'Ceritakanlah tentang saudara-saudara yang kamu miliki baik kandung maupun tiri.',
+      'Ceritakanlah tentang orang tua kamu, baik kandung, tiri, ataupun wali.',
+      'Ceritakanlah gambaran masa anak-anak kamu dahulu — bagaimana rasanya?',
+      'Ceritakanlah adakah seseorang yang sangat dekat dengan kamu saat masa anak-anak dahulu?',
+      'Ceritakanlah apakah pernah ada pengalaman yang dirasa sangat menyedihkan atau menderita saat anak-anak?',
+      'Ceritakanlah apakah ada pengalaman sesuatu yang sangat penting bagi dirimu yang hilang atau rusak?',
+      'Bagaimana kamu melewati masa sulit itu dan apa hikmah yang kamu rasakan?',
+      'Ceritakanlah pengalaman pertama kali yang paling kamu ingat dari masa kecil dahulu.'
+    ],
+    qs_dewasa:[
+      'Ceritakanlah kapan dan di mana Anda lahir, lalu di mana Anda dahulu tumbuh besar.',
+      'Ceritakanlah seperti apa lingkungan masyarakat tempat Anda dahulu tumbuh besar.',
+      'Ceritakanlah tentang saudara yang Anda miliki baik kandung maupun tiri.',
+      'Ceritakanlah tentang orang tua Anda baik kandung, tiri, ataupun wali.',
+      'Ceritakanlah gambaran masa anak-anak Anda dahulu — bagaimana rasanya?',
+      'Ceritakanlah adakah seseorang yang sangat dekat dengan Anda saat masa anak-anak dahulu?',
+      'Ceritakanlah apakah pernah ada pengalaman yang dirasa sangat menyedihkan atau menderita saat anak-anak?',
+      'Ceritakanlah apakah ada pengalaman sesuatu yang sangat penting pada diri Anda yang hilang atau rusak?',
+      'Bagaimana Anda melewati masa sulit itu dan apa hikmah yang Anda rasakan?',
+      'Ceritakanlah pengalaman pertama kali yang paling Anda ingat dari masa kecil dahulu.'
+    ]
+  },
+  3: {
+    icon:'🧑', title:'Masa Remaja',
+    desc:'Sesi ini menelusuri perjalanan masa remaja — sekolah, persahabatan, pengalaman penting, dan tantangan yang membentuk karakter kita.',
+    qs_anak:[
+      'Ceritakanlah apa yang pertama kali serta hal apa saja yang teringat tentang kehidupan masa remajamu.',
+      'Ceritakanlah tentang siapa saja orang yang penting bagi kamu saat masa remaja.',
+      'Ceritakanlah pengalaman tentang apakah kamu beribadah di tempat ibadah dan mengikuti perkumpulan anak muda.',
+      'Ceritakanlah pengalaman kamu bersekolah pada masa remaja.',
+      'Ceritakanlah apakah kamu juga ikut bekerja saat masa remaja.',
+      'Ceritakanlah pengalaman sulit atau berat di kala remaja — dan bagaimana kamu melewatinya serta hikmahnya.',
+      'Ceritakanlah pengalaman yang menyenangkan saat remaja dahulu.',
+      'Menurut kamu, masa remajamu apakah secara keseluruhan menyenangkan atau tidak?',
+      'Ceritakanlah tentang pengalaman keberhasilan mengatasi konflik masa remaja dan maknanya.',
+      'Bagaimana cara mudah kamu mengingat kemampuan positif dari keberhasilan yang dapat diterapkan hari ini?'
+    ],
+    qs_dewasa:[
+      'Ceritakanlah apa yang pertama kali serta hal apa saja yang teringat tentang kehidupan masa remaja Anda.',
+      'Ceritakanlah tentang siapa saja orang yang penting bagi Anda saat masa remaja.',
+      'Ceritakanlah pengalaman tentang apakah Anda beribadah di tempat ibadah dan mengikuti perkumpulan anak muda.',
+      'Ceritakanlah pengalaman Anda bersekolah pada masa remaja.',
+      'Ceritakanlah apakah Anda juga ikut bekerja saat masa remaja.',
+      'Ceritakanlah pengalaman sulit atau berat di kala remaja — dan bagaimana Anda melewatinya serta hikmahnya.',
+      'Ceritakanlah pengalaman yang menyenangkan saat remaja dahulu.',
+      'Menurut Anda, masa remaja Anda apakah secara keseluruhan menyenangkan atau tidak?',
+      'Ceritakanlah tentang pengalaman keberhasilan mengatasi konflik masa remaja dan maknanya.',
+      'Bagaimana cara mudah Anda mengingat kemampuan positif dari keberhasilan yang dapat diterapkan hari ini?'
+    ]
+  },
+  4: {
+    icon:'👨', title:'Masa Dewasa',
+    desc:'Sesi ini menelusuri perjalanan masa dewasa — pernikahan, pekerjaan, keluarga, persahabatan, dan pencapaian hidup yang paling berarti.',
+    qs_anak: null, // tidak ada untuk remaja
+    qs_dewasa:[
+      'Ceritakanlah pengalaman yang memorable bagi Anda saat mulai menjadi dewasa usia 20-an lalu 30-an.',
+      'Apakah Anda menikah di usia tersebut? Tepatnya di usia berapa? Jika tidak, mengapa?',
+      'Ceritakanlah tentang kehidupan pernikahan Anda, tentang pertama kali bekerja, dan tentang meninggalkan rumah orang tua.',
+      'Apakah Anda bahagia dan sejahtera di kehidupan pernikahan dan pekerjaan? Jika tidak, mengapa?',
+      'Siapa orang yang sangat berharga atau penting bagi hidup Anda di usia dewasa? Mengapa?',
+      'Apakah Anda memiliki anak? Seberapa dekat dengan mereka? Ceritakanlah.',
+      'Bagaimana hubungan Anda dengan anggota keluarga dan teman-teman lama di usia dewasa?',
+      'Bagaimana pertemanan dan relasi telah mengubah sudut pandang dan keseharian Anda bertahun-tahun?',
+      'Apakah Anda memiliki hobi di usia dewasa dahulu? Bagaimana hobi tersebut mempengaruhi kehidupan Anda?',
+      'Ceritakanlah pengalaman sulit dalam masa dewasa — kesepian, kehilangan, dan bagaimana Anda melewatinya.',
+      'Ceritakanlah pengalaman keberhasilan mengatasi konflik masa dewasa dan maknanya.',
+      'Bagaimana cara mudah Anda mengingat kemampuan positif dari keberhasilan yang dapat diterapkan hari ini?'
+    ]
+  },
+  5: {
+    icon:'👴', title:'Pengalaman Masa Tua',
+    desc:'Sesi ini mengajak kita merenungkan keseluruhan perjalanan hidup — pencapaian, kehilangan, kebijaksanaan, dan makna yang ditemukan sepanjang jalan.',
+    qs_anak: null,
+    qs_dewasa:[
+      'Secara keseluruhan, kehidupan seperti apa yang telah Anda lewati selama ini?',
+      'Siapakah orang yang sangat berpengaruh di sepanjang tahapan kehidupan Anda? Mengapa? Apa yang telah dilakukan saat itu?',
+      'Jika harus memilih satu orang, siapakah yang paling memberikan dampak dalam kehidupan Anda? Mengapa?',
+      'Apakah Anda telah pensiun? Apa yang dirasakan dengan keadaan tersebut?',
+      'Siapa orang terdekat dengan Anda sekarang? Seberapa sering Anda bertemu dengan mereka?',
+      'Kepada siapa Anda meminta pertolongan untuk keperluan keuangan, pekerjaan rumah, dan dukungan emosional?',
+      'Apa kesuksesan penting dalam hidup yang Anda rasakan? Apa kekecewaan terbesar?',
+      'Jika diberikan kesempatan memperbaiki kehidupan, apa yang berbeda yang akan Anda lakukan?',
+      'Apa hal yang paling berat dilalui dalam hidup Anda selama ini?',
+      'Saat kapan Anda merasa paling bahagia dan apa kejadiannya?',
+      'Ceritakanlah hal yang membuat Anda sangat bangga sepanjang hidup.',
+      'Apakah Anda punya filosofi hidup? Apa hal terpenting dalam menjalani kehidupan yang baik?',
+      'Bagaimana perasaan Anda ketika menjadi lansia/tua? Apa yang terberat dan terbaik?',
+      'Apa yang masih ingin Anda capai dalam hidup? Apa kekhawatiran di masa depan?',
+      'Ceritakanlah tentang pengalaman keberhasilan mengatasi konflik masa lansia dan maknanya.'
+    ]
+  },
+  6: {
+    icon:'✨', title:'Sesi Penutup — Refleksi Kehidupan',
+    desc:'Sesi terakhir ini adalah ruang untuk merenungkan keseluruhan perjalanan hidup, menemukan kepuasan, dan menutup proses Life Review Therapy dengan penuh makna.',
+    qs_anak:[
+      'Secara keseluruhan, kehidupan seperti apa yang kamu miliki?',
+      'Jika semuanya sama, apakah kamu ingin hidup kembali?',
+      'Jika kamu hidup sekali lagi, apa yang kamu ubah?',
+      'Bagian mana dari hidupmu yang paling membuat kamu puas dan bahagia? Mengapa?',
+      'Bagian kisah mana yang paling mengecewakan yang kamu lalui?',
+      'Ceritakanlah bagian yang tersulit dalam kehidupan yang telah kamu jalani.',
+      'Pencapaian apa yang paling berkesan kamu raih dalam hidupmu?',
+      'Apa hal terbaik yang kamu miliki di usiamu saat ini?',
+      'Apakah kamu puas telah melakukan "life review" ini?'
+    ],
+    qs_dewasa:[
+      'Secara keseluruhan, kehidupan seperti apa yang Anda miliki?',
+      'Jika semuanya sama, apakah Anda ingin hidup kembali?',
+      'Jika Anda hidup sekali lagi, apa yang Anda ubah?',
+      'Bagian mana dari hidup Anda yang paling membuat Anda puas dan bahagia? Mengapa?',
+      'Bagian kisah mana yang paling mengecewakan yang Anda lewati?',
+      'Ceritakanlah bagian yang tersulit dalam kehidupan yang telah Anda jalani.',
+      'Pencapaian apa yang paling berkesan Anda raih dalam kehidupan Anda?',
+      'Apa hal terbaik yang Anda miliki di usia Anda saat ini?',
+      'Apakah Anda puas telah melakukan "life review" ini?'
+    ]
+  }
+};
+
+function getSesiQuestions(sesiNum){
+  const meta = SESI_META[sesiNum];
+  if(!meta) return [];
+  return S.usia <= 17 ? (meta.qs_anak || []) : (meta.qs_dewasa || []);
 }
 
-/* ════════ APP LAUNCH ════════ */
+function getSesiList(){
+  // Tentukan sesi yang harus dijalani berdasarkan usia
+  if(S.usia <= 17) return [1,2,3,6];
+  if(S.usia <= 59) return [1,2,3,4,6];
+  return [1,2,3,4,5,6];
+}
+
+/* ══════════════════════════════════════════
+   APP STATE
+══════════════════════════════════════════ */
+const S = {
+  nama:'', usia:0, jk:'', penyakit:'', pasangan:'', jumlahAnak:'',
+  tahap:'', avail:[],
+  preScore:0, postScore:0,
+  sessionId: null,        // ID di tabel therapy_sessions
+  sesiList: [],           // [1,2,3,6] atau [1,2,3,4,6] dst
+  currentSesiIdx: 0,      // index di sesiList
+  currentSesiNum: 1,      // nomor sesi aktual (1-6)
+  currentQIdx: 0,         // index pertanyaan dalam sesi
+  phqPhase: '',
+  phqQIdx: 0, phqScores: []
+};
+
+/* ══════════════════════════════════════════
+   STEP INDICATOR
+══════════════════════════════════════════ */
+function renderSteps(activeIdx){
+  // Step: Data Diri, PHQ Pre, Sesi-sesi, Apresiasi, PHQ Post, Hasil
+  const steps = ['Data Diri','PHQ Awal',...S.sesiList.map(n=>'Sesi '+n),'Apresiasi','PHQ Ulang','Hasil'];
+  const el = document.getElementById('step-row');
+  let h = '';
+  steps.forEach((s,i)=>{
+    const done=i<activeIdx, act=i===activeIdx;
+    h+=`<div class="swrap"><div class="sdot ${done?'done':act?'active':''}">${done?'✓':i+1}</div><div class="slbl" style="color:${act?'var(--accent)':done?'var(--primary)':'var(--muted)'}">${s}</div></div>`;
+    if(i<steps.length-1) h+=`<div class="sline ${done?'done':''}"></div>`;
+  });
+  el.innerHTML = h;
+}
+
+function getStepIdxForSesi(sesiNum){
+  return 2 + S.sesiList.indexOf(sesiNum);
+}
+
+/* ══════════════════════════════════════════
+   LAUNCH APP — CEK RESUME
+══════════════════════════════════════════ */
+async function checkAndResumeSession(){
+  if(!_cu){goPage('login');return;}
+  // Cek apakah ada sesi ongoing
+  const {data:ongoingSess} = await sb.from('therapy_sessions')
+    .select('*').eq('user_id',_cu.id).eq('status','ongoing')
+    .order('created_at',{ascending:false}).limit(1).maybeSingle();
+
+  if(ongoingSess){
+    // Ada sesi yang belum selesai
+    S.sessionId = ongoingSess.id;
+    S.nama = ongoingSess.nickname;
+    S.usia = ongoingSess.age;
+    S.jk = ongoingSess.gender;
+    S.penyakit = ongoingSess.chronic_disease||'';
+    S.pasangan = ongoingSess.has_partner||'';
+    S.jumlahAnak = ongoingSess.children_count||'';
+    S.tahap = ongoingSess.stage;
+    S.sesiList = getSesiListByStage(ongoingSess.stage, ongoingSess.age);
+    S.preScore = ongoingSess.pre_score||0;
+
+    // Cari progress terakhir
+    const {data:progress} = await sb.from('life_review_progress')
+      .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id)
+      .order('session_number',{ascending:true}).order('question_index',{ascending:true});
+
+    // Cek PHQ pre sudah selesai?
+    const {data:phqPre} = await sb.from('phq_assessments')
+      .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id).eq('phase','pre').maybeSingle();
+
+    goPage('app');
+    renderSteps(0);
+
+    if(!phqPre){
+      // Belum PHQ pre, mulai dari tahap
+      buildTahapFromResume();
+      return;
+    }
+
+    S.preScore = phqPre.score;
+
+    if(!progress || progress.length === 0){
+      // PHQ pre selesai tapi belum mulai sesi sama sekali
+      startLifeReview();
+      return;
+    }
+
+    // Hitung sesi dan pertanyaan terakhir yang sudah dijawab
+    const lastEntry = progress[progress.length-1];
+    const lastSesiNum = lastEntry.session_number;
+    const lastQIdx = lastEntry.question_index;
+    const totalQInLastSesi = getSesiQuestions(lastSesiNum).length;
+
+    // Cek apakah sesi terakhir sudah selesai semua pertanyaannya
+    const answeredInLastSesi = progress.filter(p=>p.session_number===lastSesiNum).length;
+
+    if(answeredInLastSesi >= totalQInLastSesi){
+      // Sesi terakhir sudah selesai penuh → tampilkan ringkasan
+      const nextSesiIdx = S.sesiList.indexOf(lastSesiNum) + 1;
+      if(nextSesiIdx < S.sesiList.length){
+        S.currentSesiIdx = nextSesiIdx;
+        S.currentSesiNum = S.sesiList[nextSesiIdx];
+        S.currentQIdx = 0;
+        showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
+      } else {
+        // Semua sesi selesai, lanjut apresiasi
+        showApresiasi();
+      }
+    } else {
+      // Sesi belum selesai → lanjut dari pertanyaan berikutnya
+      S.currentSesiIdx = S.sesiList.indexOf(lastSesiNum);
+      S.currentSesiNum = lastSesiNum;
+      S.currentQIdx = answeredInLastSesi; // lanjut dari jawaban berikutnya
+      renderSteps(getStepIdxForSesi(S.currentSesiNum));
+      showSc('sc-sesi-q');
+      loadSesiQuestion();
+    }
+  } else {
+    // Tidak ada sesi ongoing → mulai baru
+    launchApp();
+  }
+}
+
+function getSesiListByStage(stage, age){
+  if(age <= 17) return [1,2,3,6];
+  if(age <= 59) return [1,2,3,4,6];
+  return [1,2,3,4,5,6];
+}
+
+function buildTahapFromResume(){
+  S.avail = S.sesiList.length > 0 ? [S.tahap] : [];
+  showSc('sc-tahap');
+  buildTahap();
+}
+
 function launchApp(){
-  if(!_currentUser){toast('⚠️ Silakan login terlebih dahulu');goPage('login');return;}
-  Object.assign(S,{nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',tahap:'',avail:[],preScore:0,postScore:0,thIdx:0,hist:[],phase:''});
+  if(!_cu){toast('⚠️ Silakan login terlebih dahulu');goPage('login');return;}
+  Object.assign(S,{nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',tahap:'',avail:[],preScore:0,postScore:0,sessionId:null,sesiList:[],currentSesiIdx:0,currentSesiNum:1,currentQIdx:0,phqPhase:'',phqQIdx:0,phqScores:[]});
   goPage('app');
   renderSteps(0);
   showSc('sc-data');
 }
 
-function showSc(id){
-  ['sc-data','sc-tahap','sc-test','sc-pre-res','sc-therapy','sc-ap','sc-test-post','sc-final'].forEach(s=>{
-    const e=document.getElementById(s);if(e)e.style.display='none';
-  });
-  document.getElementById(id).style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-/* ════════ STEP 1: DATA DIRI ════════ */
+/* ══════════════════════════════════════════
+   STEP 1: DATA DIRI
+══════════════════════════════════════════ */
 function submitData(){
   const nm=document.getElementById('d-nm').value.trim();
   const us=parseInt(document.getElementById('d-us').value);
   const jk=document.getElementById('d-jk').value;
   if(!nm||!us||!jk){toast('⚠️ Lengkapi semua data');return;}
   if(us<5||us>120){toast('⚠️ Usia tidak valid');return;}
-  S.nama=nm;
-  S.usia=us;
-  S.jk=jk;
+  S.nama=nm; S.usia=us; S.jk=jk;
   S.penyakit=document.getElementById('d-pk').value.trim()||'-';
   S.pasangan=document.getElementById('d-ps').value.trim()||'-';
   S.jumlahAnak=document.getElementById('d-as').value.trim()||'-';
-  renderSteps(1);
   buildTahap();
 }
 
-/* ════════ STEP 2: TAHAP ════════ */
+/* ══════════════════════════════════════════
+   STEP 2: TAHAP
+══════════════════════════════════════════ */
 function buildTahap(){
   const u=S.usia;
   let av=[];
   if(u<=17) av.push('anak');
   if(u>=18&&u<=59) av.push('dewasa');
   if(u>=60) av.push('lansia');
-  if(u===17||u===18){if(!av.includes('anak'))av.push('anak');if(!av.includes('dewasa'))av.push('dewasa');}
-  if(u===59||u===60){if(!av.includes('dewasa'))av.push('dewasa');if(!av.includes('lansia'))av.push('lansia');}
+  if((u===17||u===18)){if(!av.includes('anak'))av.push('anak');if(!av.includes('dewasa'))av.push('dewasa');}
+  if((u===59||u===60)){if(!av.includes('dewasa'))av.push('dewasa');if(!av.includes('lansia'))av.push('lansia');}
   S.avail=[...new Set(av)];
   S.tahap=S.avail[0];
+  S.sesiList=getSesiListByStage(S.tahap, S.usia);
 
-  document.getElementById('tahap-sub').textContent=`Halo ${S.nama}! Berdasarkan usiamu (${u} tahun), berikut tahap yang tersedia:`;
+  document.getElementById('tahap-sub').textContent=`Halo ${S.nama}! Berdasarkan usia ${u} tahun, berikut tahap yang tersedia:`;
   document.getElementById('tahap-ibox').innerHTML=S.avail.length>1
-    ?`<strong>Usiamu berada di batas dua tahap.</strong> Pilih salah satu yang paling menggambarkan kondisimu saat ini.`
+    ?`<strong>Usia berada di batas dua tahap.</strong> Pilih yang paling menggambarkan kondisi saat ini.`
     :`Tahap ini sesuai untuk usia <strong>${PHQ[S.tahap].range}</strong>.`;
 
   const tabs=document.getElementById('stabs');
@@ -659,192 +1026,308 @@ function buildTahap(){
     btn.className='stab'+(S.tahap===t?' active':'')+(ok?'':' disabled');
     btn.textContent=PHQ[t].emoji+' '+PHQ[t].label;
     btn.title=PHQ[t].range;
-    if(ok) btn.onclick=()=>{S.tahap=t;tabs.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+    if(ok) btn.onclick=()=>{
+      S.tahap=t;
+      S.sesiList=getSesiListByStage(t,S.usia);
+      tabs.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    };
     tabs.appendChild(btn);
   });
+  renderSteps(1);
   showSc('sc-tahap');
 }
 
-/* ════════ STEP 3 & 7: TES PHQ ════════ */
-let _qi=0,_qs=[],_qscores=[];
-
-function beginTest(phase){
-  S.phase=phase;
-  _qi=0;_qscores=[];
-  _qs=PHQ[S.tahap].qs;
+/* ══════════════════════════════════════════
+   PHQ TEST
+══════════════════════════════════════════ */
+function beginPHQ(phase){
+  S.phqPhase=phase; S.phqQIdx=0; S.phqScores=[];
+  const qs=PHQ[S.tahap].qs;
   if(phase==='pre'){
-    renderSteps(2);
-    document.getElementById('test-h').textContent='Tes Depresi Awal — '+PHQ[S.tahap].label;
-    document.getElementById('pt-pre').textContent=_qs.length;
-    showSc('sc-test');
-    renderQ();
+    renderSteps(1);
+    document.getElementById('phq-pre-h').textContent='Tes Depresi Awal — '+PHQ[S.tahap].label;
+    document.getElementById('pt-pre').textContent=qs.length;
+    showSc('sc-phq-pre');
+    renderPHQQuestion();
   } else {
-    renderSteps(5);
-    document.getElementById('pt-post').textContent=_qs.length;
-    showSc('sc-test-post');
-    renderQPost();
+    const apIdx = 2 + S.sesiList.length;
+    renderSteps(apIdx+1);
+    document.getElementById('pt-post').textContent=qs.length;
+    showSc('sc-phq-post');
+    renderPHQQuestionPost();
   }
 }
 
-function renderQ(){
-  if(_qi>=_qs.length){finishTest('pre');return;}
-  document.getElementById('pb-pre').style.width=((_qi/_qs.length)*100)+'%';
-  document.getElementById('pn-pre').textContent=_qi+1;
-  document.getElementById('test-body').innerHTML=makeQHTML(_qi,'pickPre');
+function renderPHQQuestion(){
+  const qs=PHQ[S.tahap].qs;
+  if(S.phqQIdx>=qs.length){finishPHQ();return;}
+  document.getElementById('pb-pre').style.width=((S.phqQIdx/qs.length)*100)+'%';
+  document.getElementById('pn-pre').textContent=S.phqQIdx+1;
+  document.getElementById('phq-pre-body').innerHTML=makePHQHTML(qs[S.phqQIdx],'pickPHQPre');
 }
 
-function renderQPost(){
-  if(_qi>=_qs.length){finishTest('post');return;}
-  document.getElementById('pb-post').style.width=((_qi/_qs.length)*100)+'%';
-  document.getElementById('pn-post').textContent=_qi+1;
-  document.getElementById('test-post-body').innerHTML=makeQHTML(_qi,'pickPost');
+function renderPHQQuestionPost(){
+  const qs=PHQ[S.tahap].qs;
+  if(S.phqQIdx>=qs.length){finishPHQ();return;}
+  document.getElementById('pb-post').style.width=((S.phqQIdx/qs.length)*100)+'%';
+  document.getElementById('pn-post').textContent=S.phqQIdx+1;
+  document.getElementById('phq-post-body').innerHTML=makePHQHTML(qs[S.phqQIdx],'pickPHQPost');
 }
 
-function makeQHTML(i,fn){
-  return`<div class="phq-q"><div class="qt">❓ ${_qs[i]}</div><div class="phq-opts">${OPTS.map(o=>`<button class="popt" onclick="${fn}(${o.v})">${o.l}</button>`).join('')}</div></div>`;
+function makePHQHTML(q,fn){
+  return`<div class="phq-q"><div class="qt">❓ ${q}</div><div class="phq-opts">${PHQ_OPTS.map(o=>`<button class="popt" onclick="${fn}(${o.v})">${o.l}</button>`).join('')}</div></div>`;
 }
 
-function pickPre(v){_qscores.push(v);_qi++;renderQ();}
-function pickPost(v){_qscores.push(v);_qi++;renderQPost();}
+function pickPHQPre(v){S.phqScores.push(v);S.phqQIdx++;renderPHQQuestion();}
+function pickPHQPost(v){S.phqScores.push(v);S.phqQIdx++;renderPHQQuestionPost();}
 
-function finishTest(phase){
-  const total=_qscores.reduce((a,b)=>a+b,0);
-  if(phase==='pre'){S.preScore=total;showPreRes();}
-  else{S.postScore=total;showFinal();}
+async function finishPHQ(){
+  const total=S.phqScores.reduce((a,b)=>a+b,0);
+  const sev=getSev(total,S.tahap);
+
+  if(S.phqPhase==='pre'){
+    S.preScore=total;
+    // Buat session baru di Supabase
+    const {data:sess,error:sessErr}=await sb.from('therapy_sessions').insert({
+      user_id:_cu.id, stage:S.tahap, nickname:S.nama, age:S.usia, gender:S.jk,
+      chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
+      pre_score:total, post_score:0, score_delta:0,
+      severity_pre:sev.l, status:'ongoing', created_at:new Date().toISOString()
+    }).select().single();
+    if(!sessErr && sess) S.sessionId=sess.id;
+
+    // Simpan PHQ pre ke phq_assessments
+    await sb.from('phq_assessments').insert({
+      user_id:_cu.id, session_id:S.sessionId, phase:'pre',
+      stage:S.tahap, score:total, severity:sev.l,
+      answers:PHQ[S.tahap].qs.map((q,i)=>({q,v:S.phqScores[i]||0})),
+      created_at:new Date().toISOString()
+    });
+
+    // Juga simpan profil pasien
+    await sb.from('patient_profiles').upsert({
+      user_id:_cu.id, nickname:S.nama, age:S.usia, gender:S.jk,
+      chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id'});
+
+    // Tampilkan hasil
+    showPHQPreResult(total, sev);
+  } else {
+    S.postScore=total;
+    await sb.from('phq_assessments').insert({
+      user_id:_cu.id, session_id:S.sessionId, phase:'post',
+      stage:S.tahap, score:total, severity:sev.l,
+      answers:PHQ[S.tahap].qs.map((q,i)=>({q,v:S.phqScores[i]||0})),
+      created_at:new Date().toISOString()
+    });
+    showFinal();
+  }
 }
 
-/* ════════ STEP 4: HASIL AWAL ════════ */
-function showPreRes(){
-  renderSteps(2);
-  const sev=getSev(S.preScore,S.tahap);
+function showPHQPreResult(score, sev){
+  renderSteps(1);
   const mx=PHQ[S.tahap].qs.length*3;
-  const arc=Math.round((S.preScore/mx)*283);
-  document.getElementById('ring-pre').innerHTML=`<svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="45" fill="none" stroke="var(--border)" stroke-width="10"/><circle cx="60" cy="60" r="45" fill="none" stroke="${sev.col}" stroke-width="10" stroke-dasharray="${arc} 283" stroke-linecap="round"/></svg><div class="ring-num" style="color:${sev.col}">${S.preScore}</div>`;
+  const arc=Math.round((score/mx)*283);
+  document.getElementById('ring-pre').innerHTML=`<svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="45" fill="none" stroke="var(--border)" stroke-width="10"/><circle cx="60" cy="60" r="45" fill="none" stroke="${sev.col}" stroke-width="10" stroke-dasharray="${arc} 283" stroke-linecap="round"/></svg><div class="ring-num" style="color:${sev.col}">${score}</div>`;
   document.getElementById('sev-pre-b').className='sev-badge '+sev.cls;
   document.getElementById('sev-pre-b').textContent=sev.l;
   document.getElementById('sev-pre-d').textContent=sev.adv;
-  showSc('sc-pre-res');
+  showSc('sc-phq-pre-res');
 }
 
-/* ════════ STEP 5: TERAPI NLP ════════ */
-let _rec=null,_isRec=false;
-
-function beginTherapy(){
-  renderSteps(3);
-  S.thIdx=0;S.hist=[];
-  document.getElementById('chat-hist').innerHTML='';
-  document.getElementById('th-done').style.display='none';
-  document.getElementById('th-input').style.display='block';
-  showSc('sc-therapy');
-  loadQ();
+/* ══════════════════════════════════════════
+   LIFE REVIEW THERAPY
+══════════════════════════════════════════ */
+function startLifeReview(){
+  S.currentSesiIdx=0;
+  S.currentSesiNum=S.sesiList[0];
+  S.currentQIdx=0;
+  showSesiIntro(S.currentSesiNum);
 }
 
-function loadQ(){
-  const qs=THERAPY_Q[S.tahap];
-  const n=S.thIdx,tot=qs.length;
-  document.getElementById('pb-th').style.width=((n/tot)*100)+'%';
-  document.getElementById('th-prog').textContent=`Pertanyaan ${n+1} dari ${tot}`;
-  const bt=document.getElementById('bubble-txt');
-  bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
-  setTimeout(()=>{bt.textContent=qs[n];document.getElementById('curhat-ta').value='';document.getElementById('curhat-ta').focus();},950);
+function showSesiIntro(sesiNum){
+  const meta=SESI_META[sesiNum];
+  const stepIdx=getStepIdxForSesi(sesiNum);
+  renderSteps(stepIdx);
+
+  document.getElementById('si-icon').textContent=meta.icon;
+  document.getElementById('si-num').textContent='Sesi '+sesiNum;
+  document.getElementById('si-title').textContent=meta.title;
+  document.getElementById('si-desc').textContent=meta.desc;
+
+  // Session progress dots
+  const prog=document.getElementById('sess-prog-intro');
+  prog.innerHTML=S.sesiList.map(n=>{
+    const isDone=S.sesiList.indexOf(n)<S.currentSesiIdx;
+    const isAct=n===sesiNum;
+    return`<div class="sess-dot ${isDone?'done':isAct?'active':'locked'}" title="Sesi ${n}">${n}</div>`;
+  }).join('');
+
+  showSc('sc-sesi-intro');
 }
 
-function sendCurhat(){
-  const txt=document.getElementById('curhat-ta').value.trim();
-  if(!txt){toast('⚠️ Ceritakan sesuatu dulu ya');return;}
-
-  // ── Kill mic sepenuhnya sebelum lanjut ──
-  _killMic();
-
-  const hist=document.getElementById('chat-hist');
-  const d=document.createElement('div');d.className='ch-u';d.textContent=txt;hist.appendChild(d);hist.scrollTop=hist.scrollHeight;
-  S.hist.push({q:THERAPY_Q[S.tahap][S.thIdx],a:txt});
-  S.thIdx++;
-  document.getElementById('curhat-ta').value='';
-  document.getElementById('mic-hint').textContent='Tekan 🎤 untuk merekam suara, atau ketik langsung di bawah';
-  const qs=THERAPY_Q[S.tahap];
-  if(S.thIdx<qs.length){setTimeout(loadQ,650);}
-  else{
-    document.getElementById('pb-th').style.width='100%';
-    document.getElementById('th-prog').textContent='Sesi selesai ✓';
-    document.getElementById('bubble-txt').textContent='Terima kasih sudah mau berbagi. Aku sudah mendengar semua ceritamu. ❤️';
-    document.getElementById('th-input').style.display='none';
-    document.getElementById('th-done').style.display='block';
-  }
+function beginSesiQuestions(){
+  S.currentQIdx=0;
+  showSc('sc-sesi-q');
+  loadSesiQuestion();
 }
 
-// ── Helper: matikan mic sepenuhnya ──
-function _killMic(){
-  if(_rec){
-    try{ _rec.onresult=null; _rec.onerror=null; _rec.onend=null; _rec.stop(); }catch(e){}
-    _rec=null;
-  }
-  _isRec=false;
-  const btn=document.getElementById('mic-btn');
-  if(btn) btn.classList.remove('rec');
-}
+let _recSesi=null, _isRecSesi=false;
 
-function toggleMic(){
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
-    toast('Browser tidak mendukung fitur suara. Silakan ketik.');return;
-  }
+function loadSesiQuestion(){
+  const qs=getSesiQuestions(S.currentSesiNum);
+  const tot=qs.length;
+  const n=S.currentQIdx;
 
-  // Jika sedang rekam → stop
-  if(_isRec){
-    _killMic();
-    document.getElementById('mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';
+  if(n>=tot){
+    completeSesi();
     return;
   }
 
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const recInst=new SR();
-  recInst.lang='id-ID';
-  recInst.continuous=false;    // NON-continuous: lebih stabil di mobile, tidak restart-restart
-  recInst.interimResults=true; // tetap tampilkan progress sementara
+  const stepIdx=getStepIdxForSesi(S.currentSesiNum);
+  renderSteps(stepIdx);
 
-  let _collected=''; // akumulasi teks final per sesi ini
+  document.getElementById('sq-title').textContent=`Sesi ${S.currentSesiNum} — ${SESI_META[S.currentSesiNum].title}`;
+  document.getElementById('sq-prog').textContent=`Pertanyaan ${n+1} dari ${tot}`;
+  document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
-  recInst.onresult=e=>{
-    // Dengan continuous=false, e.results hanya berisi 1 result group
-    // Tidak ada masalah index reset seperti di continuous=true
-    let interim='';
-    for(let i=0;i<e.results.length;i++){
-      if(e.results[i].isFinal){
-        _collected+=e.results[i][0].transcript+' ';
-      } else {
-        interim+=e.results[i][0].transcript;
-      }
-    }
-    document.getElementById('curhat-ta').value=(_collected+interim).trim();
-  };
+  // Tampilkan AI response dari jawaban sebelumnya jika ada
+  document.getElementById('sq-ai-response').style.display='none';
+  document.getElementById('sq-hist').innerHTML='';
+  document.getElementById('sq-done').style.display='none';
+  document.getElementById('sq-input').style.display='block';
+  document.getElementById('sq-ta').value='';
 
-  recInst.onerror=err=>{
-    if(err.error==='no-speech'||err.error==='aborted') return;
-    toast('⚠️ Mikrofon error: '+err.error);
-    _killMic();
-    document.getElementById('mic-hint').textContent='Tekan 🎤 untuk merekam suara, atau ketik langsung di bawah';
-  };
-
-  recInst.onend=()=>{
-    // Set teks final bersih ke textarea
-    const clean=_collected.trim();
-    if(clean) document.getElementById('curhat-ta').value=clean;
-    _isRec=false;
-    _rec=null;
-    document.getElementById('mic-btn').classList.remove('rec');
-    document.getElementById('mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';
-  };
-
-  _rec=recInst;
-  _isRec=true;
-  recInst.start();
-  document.getElementById('mic-btn').classList.add('rec');
-  document.getElementById('mic-hint').textContent='🔴 Sedang merekam… ceritakan perasaanmu';
+  const bt=document.getElementById('sq-bubble');
+  bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
+  setTimeout(()=>{
+    bt.textContent=qs[n];
+    document.getElementById('sq-ta').focus();
+  },800);
 }
 
-/* ════════ STEP 6: APRESIASI ════════ */
-function showAp(){
-  renderSteps(4);
+async function sendSesiAnswer(){
+  const txt=document.getElementById('sq-ta').value.trim();
+  if(!txt){toast('⚠️ Ceritakan sesuatu dulu');return;}
+
+  _killMicSesi();
+
+  // NLP Analysis
+  const nlp=analyzeNLP(txt);
+  const aiResp=getAIResponse(nlp, S.currentSesiNum, S.currentQIdx);
+
+  // Tampilkan jawaban user di histori
+  const hist=document.getElementById('sq-hist');
+  const d=document.createElement('div');d.className='ch-u';d.textContent=txt;hist.appendChild(d);
+
+  // Tampilkan respons AI
+  const respEl=document.getElementById('sq-ai-response');
+  respEl.textContent=aiResp;
+  respEl.style.display='block';
+
+  // Simpan ke Supabase
+  if(S.sessionId){
+    await sb.from('life_review_progress').upsert({
+      user_id:_cu.id, session_id:S.sessionId,
+      session_number:S.currentSesiNum, question_index:S.currentQIdx,
+      question_text:getSesiQuestions(S.currentSesiNum)[S.currentQIdx],
+      answer_text:txt, nlp_sentiment:nlp.sentiment,
+      nlp_emotion:nlp.emotion, nlp_topics:nlp.topics,
+      ai_response:aiResp, answered_at:new Date().toISOString()
+    },{onConflict:'user_id,session_id,session_number,question_index'});
+  }
+
+  S.currentQIdx++;
+  const qs=getSesiQuestions(S.currentSesiNum);
+
+  if(S.currentQIdx<qs.length){
+    // Ada pertanyaan berikutnya
+    document.getElementById('sq-input').style.display='none';
+    setTimeout(()=>{
+      document.getElementById('sq-ai-response').style.display='none';
+      document.getElementById('sq-hist').innerHTML='';
+      document.getElementById('sq-input').style.display='block';
+      document.getElementById('sq-ta').value='';
+      loadSesiQuestion();
+    },1800);
+  } else {
+    // Sesi selesai
+    document.getElementById('sq-input').style.display='none';
+    document.getElementById('pb-sesi').style.width='100%';
+    const doneBtn=document.getElementById('sq-done-btn');
+    doneBtn.textContent='Sesi Selesai — Lanjutkan →';
+    document.getElementById('sq-done').style.display='block';
+  }
+}
+
+function completeSesi(){
+  document.getElementById('sq-input').style.display='none';
+  document.getElementById('sq-done').style.display='block';
+}
+
+async function finishSesi(){
+  // Cek apakah ada sesi berikutnya
+  const nextSesiIdx=S.currentSesiIdx+1;
+  if(nextSesiIdx<S.sesiList.length){
+    // Ada sesi berikutnya — ambil jawaban sesi ini untuk ringkasan
+    const {data:progress}=await sb.from('life_review_progress')
+      .select('*').eq('user_id',_cu.id).eq('session_id',S.sessionId)
+      .eq('session_number',S.currentSesiNum)
+      .order('question_index',{ascending:true});
+
+    S.currentSesiIdx=nextSesiIdx;
+    S.currentSesiNum=S.sesiList[nextSesiIdx];
+    S.currentQIdx=0;
+
+    showRingkasanSesi(S.sesiList[S.currentSesiIdx-1], progress||[]);
+  } else {
+    // Semua sesi selesai
+    showApresiasi();
+  }
+}
+
+function showRingkasanSesi(sesiNum, progressData){
+  const meta=SESI_META[sesiNum];
+  document.getElementById('rk-title').textContent=`Ringkasan Sesi ${sesiNum} — ${meta.title}`;
+  document.getElementById('rk-sub').textContent=`Berikut adalah apa yang sudah ${S.usia<=17?'kamu':'Anda'} ceritakan di Sesi ${sesiNum}.`;
+
+  const body=document.getElementById('rk-body');
+  if(!progressData || progressData.length===0){
+    body.innerHTML='<p style="color:var(--muted);font-size:.85rem">Tidak ada data yang tersimpan untuk sesi ini.</p>';
+  } else {
+    body.innerHTML=progressData.map(p=>`
+      <div class="ringkasan-item">
+        <div class="ringkasan-q">❓ ${p.question_text}</div>
+        <div class="ringkasan-a">${p.answer_text||'-'}</div>
+        ${p.nlp_sentiment?`<div class="nlp-row">
+          <span class="nlp-tag nlp-${p.nlp_sentiment==='positif'?'pos':p.nlp_sentiment==='negatif'?'neg':'neu'}">${p.nlp_sentiment}</span>
+          ${p.nlp_emotion && p.nlp_emotion!=='netral'?`<span class="nlp-tag nlp-emo">${p.nlp_emotion}</span>`:''}
+          ${(p.nlp_topics||[]).map(t=>`<span class="nlp-tag nlp-top">${t}</span>`).join('')}
+        </div>`:''}
+      </div>`).join('');
+  }
+  showSc('sc-ringkasan');
+}
+
+function goToNextSesiIntro(){
+  showSesiIntro(S.currentSesiNum);
+}
+
+/* ══════════════════════════════════════════
+   APRESIASI
+══════════════════════════════════════════ */
+const APS=[
+  {e:'🌟',t:'Luar Biasa!',x:'Perjalanan panjang yang telah diceritakan adalah bukti nyata kekuatan dan keberanian. Setiap cerita yang dibagikan memiliki nilai yang sangat berharga.'},
+  {e:'💙',t:'Tidak Sendirian',x:'Semua yang dirasakan itu valid dan nyata. Dengan menjalani proses ini, sudah diambil langkah yang sangat berani untuk diri sendiri.'},
+  {e:'🌿',t:'Langkah Bermakna',x:'Life Review Therapy adalah perjalanan menemukan kembali makna dari setiap pengalaman hidup. Sudah dijalani dengan penuh keberanian.'},
+  {e:'✨',t:'Jiwa yang Kuat',x:'Di balik semua cerita yang dibagikan, ada jiwa yang kuat dan berharga. Layak mendapatkan kedamaian dan kebahagiaan.'}
+];
+
+function showApresiasi(){
+  const apIdx=2+S.sesiList.length;
+  renderSteps(apIdx);
   const ap=APS[Math.floor(Math.random()*APS.length)];
   document.getElementById('ap-em').textContent=ap.e;
   document.getElementById('ap-ti').textContent=ap.t;
@@ -852,11 +1335,14 @@ function showAp(){
   showSc('sc-ap');
 }
 
-/* ════════ STEP 7: FINAL + SIMPAN KE DATABASE ════════ */
+/* ══════════════════════════════════════════
+   HASIL FINAL
+══════════════════════════════════════════ */
 async function showFinal(){
-  renderSteps(6);
-  const ps=S.preScore,ss=S.postScore;
-  const psev=getSev(ps,S.tahap),ssev=getSev(ss,S.tahap);
+  const totalSteps = 2 + S.sesiList.length + 2;
+  renderSteps(totalSteps);
+  const ps=S.preScore, ss=S.postScore;
+  const psev=getSev(ps,S.tahap), ssev=getSev(ss,S.tahap);
   const d=ps-ss;
 
   document.getElementById('c-pre-n').style.color=psev.col;
@@ -868,127 +1354,105 @@ async function showFinal(){
   document.getElementById('c-post-s').className='sev-badge '+ssev.cls;
   document.getElementById('c-post-s').textContent=ssev.l;
 
-  const de=document.getElementById('c-delta'),me=document.getElementById('c-msg');
-  if(d>0){de.innerHTML=`<span style="color:var(--green)">↓ ${d} poin lebih rendah</span>`;me.textContent='Luar biasa! Sesi terapi berhasil menurunkan skor depresimu.';}
-  else if(d===0){de.innerHTML=`<span style="color:var(--amber)">= Tidak ada perubahan</span>`;me.textContent='Skor belum berubah, tapi prosesmu sudah sangat berharga. Terus coba!';}
+  const de=document.getElementById('c-delta'), me=document.getElementById('c-msg');
+  if(d>0){de.innerHTML=`<span style="color:var(--green)">↓ ${d} poin lebih rendah</span>`;me.textContent='Luar biasa! Sesi terapi berhasil menurunkan skor depresi.';}
+  else if(d===0){de.innerHTML=`<span style="color:var(--amber)">= Tidak ada perubahan</span>`;me.textContent='Skor belum berubah, tapi prosesnya sudah sangat berharga. Terus coba!';}
   else{de.innerHTML=`<span style="color:var(--orange)">↑ ${Math.abs(d)} poin lebih tinggi</span>`;me.textContent='Kadang berbicara membuka lebih banyak perasaan — itu pun proses yang sehat.';}
 
-  document.getElementById('final-adv').innerHTML=`<strong>Saran:</strong> ${ssev.adv} PsyWellMate tidak menggantikan dukungan profesional. Jika kamu membutuhkan bantuan segera, hubungi psikolog atau layanan kesehatan jiwa terdekat.`;
+  document.getElementById('final-adv').innerHTML=`<strong>Saran:</strong> ${ssev.adv} PsyWellMate tidak menggantikan dukungan profesional. Jika membutuhkan bantuan segera, hubungi psikolog atau layanan kesehatan jiwa terdekat.`;
   showSc('sc-final');
 
-  // ── Simpan sesi ke Supabase ──
-  if(_currentUser){
+  // Update therapy_sessions jadi completed
+  if(S.sessionId){
     document.getElementById('save-status').style.display='flex';
-    try {
-      // 1. Simpan/update profil pasien
-      await sb.from('patient_profiles').upsert({
-        user_id: _currentUser.id,
-        nickname: S.nama,
-        age: S.usia,
-        gender: S.jk,
-        chronic_disease: S.penyakit,
-        has_partner: S.pasangan,
-        children_count: S.jumlahAnak,
-        updated_at: new Date().toISOString()
-      }, {onConflict:'user_id'});
-
-      // 2. Simpan sesi terapi
-      const {error} = await sb.from('therapy_sessions').insert({
-        user_id: _currentUser.id,
-        stage: S.tahap,
-        nickname: S.nama,
-        age: S.usia,
-        gender: S.jk,
-        chronic_disease: S.penyakit,
-        has_partner: S.pasangan,
-        children_count: S.jumlahAnak,
-        pre_score: ps,
-        post_score: ss,
-        score_delta: d,
-        severity_pre: psev.l,
-        severity_post: ssev.l,
-        therapy_history: S.hist,
-        created_at: new Date().toISOString()
-      });
-      if(error) throw error;
-
+    try{
+      await sb.from('therapy_sessions').update({
+        post_score:ss, score_delta:d, severity_post:ssev.l,
+        status:'completed', completed_at:new Date().toISOString()
+      }).eq('id',S.sessionId);
       document.getElementById('save-status').innerHTML='<span style="color:var(--green)">✓ Tersimpan ke database</span>';
       setTimeout(()=>document.getElementById('save-status').style.display='none',3000);
-    } catch(err){
+    }catch(err){
       document.getElementById('save-status').innerHTML='<span style="color:var(--amber)">⚠️ Gagal menyimpan: '+err.message+'</span>';
     }
   }
 }
 
-/* ════════ RIWAYAT ════════ */
+/* ══════════════════════════════════════════
+   MIC
+══════════════════════════════════════════ */
+function _killMicSesi(){
+  if(_recSesi){try{_recSesi.onresult=null;_recSesi.onerror=null;_recSesi.onend=null;_recSesi.stop();}catch(e){}_recSesi=null;}
+  _isRecSesi=false;
+  const btn=document.getElementById('sq-mic-btn');
+  if(btn) btn.classList.remove('rec');
+}
+
+function toggleMicSesi(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){toast('Browser tidak mendukung fitur suara.');return;}
+  if(_isRecSesi){_killMicSesi();document.getElementById('sq-mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR(); r.lang='id-ID'; r.continuous=false; r.interimResults=true;
+  let collected='';
+  r.onresult=e=>{let interim='';for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)collected+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}document.getElementById('sq-ta').value=(collected+interim).trim();};
+  r.onerror=err=>{if(err.error==='no-speech'||err.error==='aborted')return;toast('⚠️ Mikrofon error: '+err.error);_killMicSesi();};
+  r.onend=()=>{const c=collected.trim();if(c)document.getElementById('sq-ta').value=c;_isRecSesi=false;_recSesi=null;document.getElementById('sq-mic-btn').classList.remove('rec');document.getElementById('sq-mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';};
+  _recSesi=r; _isRecSesi=true;
+  r.start();
+  document.getElementById('sq-mic-btn').classList.add('rec');
+  document.getElementById('sq-mic-hint').textContent='🔴 Sedang merekam… ceritakan';
+}
+
+/* ══════════════════════════════════════════
+   RIWAYAT
+══════════════════════════════════════════ */
 async function loadRiwayat(){
-  if(!_currentUser){return;}
+  if(!_cu) return;
   const el=document.getElementById('riwayat-list');
   el.innerHTML='<div class="empty-state"><div class="ei">⏳</div><p>Memuat riwayat…</p></div>';
-
-  try {
-    const {data,error}=await sb.from('therapy_sessions')
-      .select('*')
-      .eq('user_id',_currentUser.id)
-      .order('created_at',{ascending:false})
-      .limit(20);
-
+  try{
+    const {data,error}=await sb.from('therapy_sessions').select('*').eq('user_id',_cu.id).order('created_at',{ascending:false}).limit(20);
     if(error) throw error;
-    if(!data||data.length===0){
-      el.innerHTML='<div class="empty-state"><div class="ei">📋</div><p>Belum ada sesi terapi. Mulai sesi pertamamu!</p></div>';
-      return;
-    }
-
+    if(!data||data.length===0){el.innerHTML='<div class="empty-state"><div class="ei">📋</div><p>Belum ada sesi terapi. Mulai sesi pertamamu!</p></div>';return;}
     el.innerHTML=data.map(row=>{
-      const psev=getSev(row.pre_score,row.stage);
-      const ssev=getSev(row.post_score,row.stage);
-      const d=row.score_delta;
-      const dt=new Date(row.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const deltaHtml = d>0
-        ? `<span class="rw-delta-pos">↓ ${d} poin</span>`
-        : d===0 ? `<span class="rw-delta-eq">= Sama</span>`
-        : `<span class="rw-delta-neg">↑ ${Math.abs(d)} poin</span>`;
+      const psev=getSev(row.pre_score||0,row.stage);
+      const ssev=row.status==='completed'?getSev(row.post_score||0,row.stage):null;
+      const dt=new Date(row.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+      const statusBadge=row.status==='ongoing'
+        ?`<span style="background:rgba(212,154,42,.15);color:var(--amber);padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600">⏳ Berlangsung</span>`
+        :`<span style="background:rgba(58,158,111,.15);color:var(--green);padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600">✓ Selesai</span>`;
       return`<div class="rw-item">
-        <div class="rw-head">
-          <span class="rw-date">📅 ${dt}</span>
-          <span class="rw-tahap">${PHQ[row.stage]?.emoji||''} ${row.stage}</span>
-        </div>
+        <div class="rw-head"><span class="rw-date">📅 ${dt}</span><span class="rw-tahap">${PHQ[row.stage]?.emoji||''} ${row.stage}</span></div>
         <div style="font-size:.82rem;color:var(--muted);margin-bottom:.55rem">👤 ${row.nickname||'-'} · ${row.age||'-'} tahun · ${row.gender||'-'}</div>
-        <div class="rw-scores">
-          <span class="rw-num" style="color:${psev.col}">${row.pre_score}</span>
-          <span class="rw-arrow">→</span>
-          <span class="rw-num" style="color:${ssev.col}">${row.post_score}</span>
-          <span style="margin-left:6px">${deltaHtml}</span>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          ${statusBadge}
+          <span class="sev-badge ${psev.cls}" style="font-size:.68rem;padding:3px 9px">Awal: ${row.pre_score||0} (${psev.l})</span>
+          ${ssev?`<span class="sev-badge ${ssev.cls}" style="font-size:.68rem;padding:3px 9px">Akhir: ${row.post_score||0} (${ssev.l})</span>`:''}
         </div>
-        <div style="display:flex;gap:6px;margin-top:.5rem;flex-wrap:wrap">
-          <span class="sev-badge ${psev.cls}" style="font-size:.68rem;padding:3px 9px">${psev.l}</span>
-          <span style="color:var(--muted);font-size:.75rem;align-self:center">→</span>
-          <span class="sev-badge ${ssev.cls}" style="font-size:.68rem;padding:3px 9px">${ssev.l}</span>
-        </div>
+        ${row.status==='ongoing'?`<div class="brow" style="margin-top:.75rem"><button class="btn-sm bp" style="font-size:.75rem;padding:6px 14px" onclick="checkAndResumeSession()">Lanjutkan Sesi →</button></div>`:''}
       </div>`;
     }).join('');
-  } catch(err){
-    el.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><p>Gagal memuat: '+err.message+'</p></div>';
-  }
+  }catch(err){el.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><p>Gagal memuat: '+err.message+'</p></div>';}
 }
 
 function restartApp(){launchApp();}
 
-/* ════════ INIT: CEK SESSION ════════ */
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
 async function init(){
-  try {
-    const {data:{session}} = await sb.auth.getSession();
+  try{
+    const {data:{session}}=await sb.auth.getSession();
     if(session?.user){
-      const {data:prof} = await sb.from('profiles').select('*').eq('id',session.user.id).single();
-      const nm = prof?.full_name || session.user.user_metadata?.full_name || session.user.email;
-      setLoggedIn(session.user, nm);
+      const {data:prof}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+      const nm=prof?.full_name||session.user.user_metadata?.full_name||session.user.email;
+      setLoggedIn(session.user,nm);
     }
-  } catch(e){ /* silent */ }
+  }catch(e){}
   document.getElementById('loading-overlay').classList.add('hide');
 }
 
-// Listen auth state changes
-sb.auth.onAuthStateChange(async (event, session) => {
+sb.auth.onAuthStateChange(async(event,session)=>{
   if(event==='SIGNED_OUT') setLoggedOut();
 });
 
