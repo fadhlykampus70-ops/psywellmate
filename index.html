@@ -386,18 +386,21 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <p class="sub" id="sq-prog"></p>
       <div class="pbar-w"><div class="pbar" id="pb-sesi" style="width:0%"></div></div>
       <div class="tbubble">
-        <div class="tq-label">AI Terapis</div>
+        <div class="tq-label">Nelya</div>
         <div id="sq-bubble"></div>
       </div>
       <div id="sq-ai-response" class="ai-response" style="display:none"></div>
       <div class="chat-hist" id="sq-hist"></div>
       <div id="sq-input">
         <button class="mic-btn" id="sq-mic-btn" onclick="toggleMicSesi()">🎤</button>
-        <div class="mic-hint" id="sq-mic-hint">Tekan 🎤 untuk merekam suara, atau ketik langsung di bawah</div>
+        <div class="mic-hint" id="sq-mic-hint">Menyiapkan rekaman…</div>
         <div class="chat-iw">
           <textarea class="chat-ta" id="sq-ta" placeholder="Ceritakan di sini…" rows="3"></textarea>
           <button class="send-btn" onclick="sendSesiAnswer()">➤</button>
         </div>
+      </div>
+      <div id="sq-next-wrap" style="display:none;margin-top:.75rem">
+        <button class="btn-sm bp" id="sq-next-btn">Pertanyaan Berikutnya →</button>
       </div>
       <div id="sq-done" style="display:none">
         <div class="brow"><button class="btn-sm bp" id="sq-done-btn" onclick="finishSesi()">Lanjutkan →</button></div>
@@ -1174,7 +1177,9 @@ function beginSesiQuestions(){
   loadSesiQuestion();
 }
 
-let _recSesi=null, _isRecSesi=false;
+let _recSesi=null, _isRecSesi=false, _micSupported=false;
+// Cek dukungan mic saat load
+_micSupported = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
 function loadSesiQuestion(){
   const qs=getSesiQuestions(S.currentSesiNum);
@@ -1193,18 +1198,25 @@ function loadSesiQuestion(){
   document.getElementById('sq-prog').textContent=`Pertanyaan ${n+1} dari ${tot}`;
   document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
-  // Tampilkan AI response dari jawaban sebelumnya jika ada
+  // Reset tampilan untuk pertanyaan baru
   document.getElementById('sq-ai-response').style.display='none';
   document.getElementById('sq-hist').innerHTML='';
   document.getElementById('sq-done').style.display='none';
+  document.getElementById('sq-next-wrap').style.display='none';
   document.getElementById('sq-input').style.display='block';
   document.getElementById('sq-ta').value='';
+  document.getElementById('sq-mic-hint').textContent='Menyiapkan rekaman…';
+  document.getElementById('sq-mic-btn').classList.remove('rec');
 
   const bt=document.getElementById('sq-bubble');
   bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
   setTimeout(()=>{
     bt.textContent=qs[n];
     document.getElementById('sq-ta').focus();
+    // Auto mulai rekaman setelah pertanyaan muncul
+    if(_micSupported){
+      setTimeout(()=>startMicSesi(), 400);
+    }
   },800);
 }
 
@@ -1242,20 +1254,23 @@ async function sendSesiAnswer(){
   S.currentQIdx++;
   const qs=getSesiQuestions(S.currentSesiNum);
 
+  // Sembunyikan input, tampilkan tombol next di bawah respons Nelya
+  document.getElementById('sq-input').style.display='none';
+
   if(S.currentQIdx<qs.length){
-    // Ada pertanyaan berikutnya
-    document.getElementById('sq-input').style.display='none';
-    setTimeout(()=>{
+    // Ada pertanyaan berikutnya — tampilkan tombol "Pertanyaan Berikutnya"
+    document.getElementById('sq-next-wrap').style.display='block';
+    document.getElementById('sq-next-btn').textContent='Pertanyaan Berikutnya →';
+    document.getElementById('sq-next-btn').onclick=()=>{
+      document.getElementById('sq-next-wrap').style.display='none';
       document.getElementById('sq-ai-response').style.display='none';
       document.getElementById('sq-hist').innerHTML='';
-      document.getElementById('sq-input').style.display='block';
-      document.getElementById('sq-ta').value='';
       loadSesiQuestion();
-    },1800);
+    };
   } else {
-    // Sesi selesai
-    document.getElementById('sq-input').style.display='none';
+    // Sesi selesai — tampilkan tombol lanjutkan
     document.getElementById('pb-sesi').style.width='100%';
+    document.getElementById('sq-next-wrap').style.display='none';
     const doneBtn=document.getElementById('sq-done-btn');
     doneBtn.textContent='Sesi Selesai — Lanjutkan →';
     document.getElementById('sq-done').style.display='block';
@@ -1388,19 +1403,94 @@ function _killMicSesi(){
   if(btn) btn.classList.remove('rec');
 }
 
-function toggleMicSesi(){
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){toast('Browser tidak mendukung fitur suara.');return;}
-  if(_isRecSesi){_killMicSesi();document.getElementById('sq-mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';return;}
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const r=new SR(); r.lang='id-ID'; r.continuous=false; r.interimResults=true;
-  let collected='';
-  r.onresult=e=>{let interim='';for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)collected+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}document.getElementById('sq-ta').value=(collected+interim).trim();};
-  r.onerror=err=>{if(err.error==='no-speech'||err.error==='aborted')return;toast('⚠️ Mikrofon error: '+err.error);_killMicSesi();};
-  r.onend=()=>{const c=collected.trim();if(c)document.getElementById('sq-ta').value=c;_isRecSesi=false;_recSesi=null;document.getElementById('sq-mic-btn').classList.remove('rec');document.getElementById('sq-mic-hint').textContent='Rekaman selesai. Tekan ➤ untuk mengirim.';};
-  _recSesi=r; _isRecSesi=true;
+/* ──────────────────────────────────────
+   LOGIKA MIC BARU:
+   - startMicSesi()  : mulai rekaman (dipanggil auto & manual)
+   - toggleMicSesi() : kendali user — matikan/hidupkan
+   - Teks lama tidak dihapus, disambung dengan pemisah cerdas
+   - Kirim (sendSesiAnswer) otomatis matikan mic via _killMicSesi()
+────────────────────────────────────── */
+
+function _getMicSeparator(){
+  // Titik jika teks sebelumnya > 5 kata, koma jika pendek
+  const ta = document.getElementById('sq-ta');
+  const existing = (ta.value||'').trim();
+  if(!existing) return '';
+  const wordCount = existing.split(/\s+/).filter(Boolean).length;
+  return wordCount > 5 ? '. ' : ', ';
+}
+
+function startMicSesi(){
+  if(!_micSupported) return;
+  if(_isRecSesi) return; // sudah aktif
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const r = new SR();
+  r.lang = 'id-ID';
+  r.continuous = true;   // continuous agar tidak auto-stop saat jeda
+  r.interimResults = true;
+
+  const ta = document.getElementById('sq-ta');
+  const baseText = ta.value.trim(); // teks yang sudah ada sebelum rekaman ini
+  let sessionCollected = ''; // yang dikumpulkan di sesi rekaman ini
+
+  r.onresult = e => {
+    let interim = '';
+    let finalInThisEvent = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      if(e.results[i].isFinal){
+        finalInThisEvent += e.results[i][0].transcript;
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    if(finalInThisEvent) sessionCollected += finalInThisEvent;
+    // Tampilkan: teks lama + pemisah + hasil rekaman saat ini
+    const sep = baseText ? _getMicSeparatorFromText(baseText) : '';
+    const current = (sessionCollected + interim).trim();
+    ta.value = baseText ? (baseText + sep + current) : current;
+  };
+
+  r.onerror = err => {
+    if(err.error === 'no-speech') return; // abaikan jika hanya diam
+    if(err.error === 'aborted') return;
+    toast('⚠️ Mikrofon error: ' + err.error);
+    _killMicSesi();
+  };
+
+  r.onend = () => {
+    // Jika dimatikan paksa (_killMicSesi) tidak perlu update UI lagi
+    if(_isRecSesi){
+      // Berhenti sendiri (mis. timeout browser) — tampilkan status
+      _isRecSesi = false;
+      _recSesi = null;
+      document.getElementById('sq-mic-btn').classList.remove('rec');
+      document.getElementById('sq-mic-hint').textContent = '⏸ Rekaman berhenti. Tekan 🎤 untuk lanjutkan.';
+    }
+  };
+
+  _recSesi = r;
+  _isRecSesi = true;
   r.start();
   document.getElementById('sq-mic-btn').classList.add('rec');
-  document.getElementById('sq-mic-hint').textContent='🔴 Sedang merekam… ceritakan';
+  document.getElementById('sq-mic-hint').textContent = '🔴 Merekam… ceritakan. Tekan 🎤 untuk jeda.';
+}
+
+function _getMicSeparatorFromText(text){
+  if(!text) return '';
+  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  return wordCount > 5 ? '. ' : ', ';
+}
+
+function toggleMicSesi(){
+  if(!_micSupported){toast('Browser tidak mendukung fitur suara.');return;}
+  if(_isRecSesi){
+    // User mematikan mic untuk jeda/privasi
+    _killMicSesi();
+    document.getElementById('sq-mic-hint').textContent = '⏸ Rekaman dijeda. Tekan 🎤 untuk lanjutkan.';
+  } else {
+    // User menghidupkan kembali — sambung teks yang ada
+    startMicSesi();
+  }
 }
 
 /* ══════════════════════════════════════════
