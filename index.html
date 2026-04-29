@@ -101,12 +101,26 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .pbar-w{height:4px;background:var(--border);border-radius:4px;margin-bottom:1.4rem;overflow:hidden}
 .pbar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .4s ease}
 
-/* CHAT / THERAPY */
-.tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:12px 12px 12px 4px;padding:1rem 1.2rem;margin-bottom:.85rem;line-height:1.7;font-size:.9rem}
-.tq-label{font-size:.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem}
-.ai-response{background:rgba(107,143,113,.08);border:1px solid rgba(107,143,113,.2);border-radius:8px;padding:.7rem 1rem;font-size:.83rem;color:var(--primary);line-height:1.6;margin-bottom:.85rem;font-style:italic}
-.chat-hist{margin-bottom:.9rem;max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
-.ch-u{background:var(--primary-soft);border:1px solid var(--primary);border-radius:10px 10px 4px 10px;padding:.7rem .95rem;font-size:.84rem;color:var(--white);align-self:flex-end;max-width:92%;word-break:break-word}
+/* CHAT / THERAPY — layout seperti chat messenger */
+/* Area chat utama */
+.chat-area{display:flex;flex-direction:column;gap:10px;margin-bottom:.9rem}
+
+/* Bubble Nelya (kiri) */
+.nelya-row{display:flex;align-items:flex-end;gap:8px;max-width:88%}
+.nelya-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;margin-bottom:2px}
+.nelya-bubble-wrap{display:flex;flex-direction:column;gap:2px}
+.nelya-name{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-left:2px}
+.tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:4px 12px 12px 12px;padding:.75rem 1rem;line-height:1.7;font-size:.88rem;max-width:100%}
+.tq-label{display:none} /* Nama sudah di nelya-name */
+
+/* Bubble respons Nelya setelah jawaban user */
+.ai-response{background:rgba(107,143,113,.1);border:1px solid rgba(107,143,113,.22);border-radius:4px 12px 12px 12px;padding:.65rem .95rem;font-size:.82rem;color:var(--primary);line-height:1.6;font-style:italic;max-width:100%}
+
+/* Bubble user (kanan) */
+.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:10px}
+.ch-u{background:var(--primary);border-radius:12px 12px 4px 12px;padding:.7rem .95rem;font-size:.85rem;color:#fff;align-self:flex-end;max-width:80%;word-break:break-word;line-height:1.55}
+.ch-u-wrap{display:flex;justify-content:flex-end}
+.ch-u-label{font-size:.6rem;color:var(--muted);text-align:right;margin-bottom:2px;padding-right:2px}
 .chat-iw{position:relative;margin-top:.6rem}
 .chat-ta{width:100%;padding:11px 46px 11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:80px;transition:.2s;line-height:1.5}
 .chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
@@ -385,12 +399,26 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <h2 id="sq-title">Sesi 1</h2>
       <p class="sub" id="sq-prog"></p>
       <div class="pbar-w"><div class="pbar" id="pb-sesi" style="width:0%"></div></div>
-      <div class="tbubble">
-        <div class="tq-label">Nelya</div>
-        <div id="sq-bubble"></div>
+      <div class="chat-area" id="sq-chat-area">
+        <!-- Pertanyaan Nelya -->
+        <div class="nelya-row" id="sq-nelya-q-row">
+          <div class="nelya-avatar">N</div>
+          <div class="nelya-bubble-wrap">
+            <div class="nelya-name">Nelya</div>
+            <div class="tbubble" id="sq-bubble"></div>
+          </div>
+        </div>
+        <!-- Jawaban user (muncul setelah kirim) -->
+        <div class="chat-hist" id="sq-hist"></div>
+        <!-- Respons Nelya setelah jawaban user -->
+        <div class="nelya-row" id="sq-nelya-resp-row" style="display:none">
+          <div class="nelya-avatar">N</div>
+          <div class="nelya-bubble-wrap">
+            <div class="nelya-name">Nelya</div>
+            <div class="ai-response" id="sq-ai-response"></div>
+          </div>
+        </div>
       </div>
-      <div id="sq-ai-response" class="ai-response" style="display:none"></div>
-      <div class="chat-hist" id="sq-hist"></div>
       <div id="sq-input">
         <button class="mic-btn" id="sq-mic-btn" onclick="toggleMicSesi()">🎤</button>
         <div class="mic-hint" id="sq-mic-hint">Menyiapkan rekaman…</div>
@@ -1199,7 +1227,7 @@ function loadSesiQuestion(){
   document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
   // Reset tampilan untuk pertanyaan baru
-  document.getElementById('sq-ai-response').style.display='none';
+  document.getElementById('sq-nelya-resp-row').style.display='none';
   document.getElementById('sq-hist').innerHTML='';
   document.getElementById('sq-done').style.display='none';
   document.getElementById('sq-next-wrap').style.display='none';
@@ -1230,14 +1258,22 @@ async function sendSesiAnswer(){
   const nlp=analyzeNLP(txt);
   const aiResp=getAIResponse(nlp, S.currentSesiNum, S.currentQIdx);
 
-  // Tampilkan jawaban user di histori
+  // Tampilkan jawaban user di kanan (bubble user)
   const hist=document.getElementById('sq-hist');
-  const d=document.createElement('div');d.className='ch-u';d.textContent=txt;hist.appendChild(d);
+  const wrap=document.createElement('div');wrap.className='ch-u-wrap';
+  const lbl=document.createElement('div');lbl.className='ch-u-label';
+  lbl.textContent=S.nama||'Kamu';
+  const bubble=document.createElement('div');bubble.className='ch-u';
+  bubble.textContent=txt;
+  const inner=document.createElement('div');
+  inner.appendChild(lbl);inner.appendChild(bubble);
+  wrap.appendChild(inner);
+  hist.appendChild(wrap);
 
-  // Tampilkan respons AI
+  // Tampilkan respons Nelya di kiri
   const respEl=document.getElementById('sq-ai-response');
   respEl.textContent=aiResp;
-  respEl.style.display='block';
+  document.getElementById('sq-nelya-resp-row').style.display='flex';
 
   // Simpan ke Supabase
   if(S.sessionId){
@@ -1263,7 +1299,7 @@ async function sendSesiAnswer(){
     document.getElementById('sq-next-btn').textContent='Pertanyaan Berikutnya →';
     document.getElementById('sq-next-btn').onclick=()=>{
       document.getElementById('sq-next-wrap').style.display='none';
-      document.getElementById('sq-ai-response').style.display='none';
+      document.getElementById('sq-nelya-resp-row').style.display='none';
       document.getElementById('sq-hist').innerHTML='';
       loadSesiQuestion();
     };
@@ -1422,45 +1458,61 @@ function _getMicSeparator(){
 
 function startMicSesi(){
   if(!_micSupported) return;
-  if(_isRecSesi) return; // sudah aktif
+  if(_isRecSesi) return;
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const r = new SR();
   r.lang = 'id-ID';
-  r.continuous = true;   // continuous agar tidak auto-stop saat jeda
   r.interimResults = true;
 
+  // Deteksi mobile — mobile tidak support continuous dengan baik
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  r.continuous = !isMobile; // desktop: continuous, mobile: per-utterance
+
   const ta = document.getElementById('sq-ta');
-  const baseText = ta.value.trim(); // teks yang sudah ada sebelum rekaman ini
-  let sessionCollected = ''; // yang dikumpulkan di sesi rekaman ini
+  const baseText = ta.value.trim(); // teks sebelum sesi rekaman ini
+  // finalBuffer: akumulasi final dari sesi rekaman ini saja
+  let finalBuffer = '';
+  // Gunakan index untuk cegah duplikasi di desktop
+  let lastFinalIndex = 0;
 
   r.onresult = e => {
-    let interim = '';
-    let finalInThisEvent = '';
+    let interimText = '';
+    // Proses hanya dari resultIndex baru untuk cegah duplikasi
     for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        finalInThisEvent += e.results[i][0].transcript;
+        finalBuffer += e.results[i][0].transcript + ' ';
       } else {
-        interim += e.results[i][0].transcript;
+        interimText += e.results[i][0].transcript;
       }
     }
-    if(finalInThisEvent) sessionCollected += finalInThisEvent;
-    // Tampilkan: teks lama + pemisah + hasil rekaman saat ini
+    // Tampilkan: teks lama + pemisah + (final + interim saat ini)
     const sep = baseText ? _getMicSeparatorFromText(baseText) : '';
-    const current = (sessionCollected + interim).trim();
-    ta.value = baseText ? (baseText + sep + current) : current;
+    const newPart = (finalBuffer + interimText).trim();
+    ta.value = baseText
+      ? (newPart ? baseText + sep + newPart : baseText)
+      : newPart;
   };
 
   r.onerror = err => {
-    if(err.error === 'no-speech') return; // abaikan jika hanya diam
+    if(err.error === 'no-speech') return;
     if(err.error === 'aborted') return;
     toast('⚠️ Mikrofon error: ' + err.error);
     _killMicSesi();
   };
 
   r.onend = () => {
-    // Jika dimatikan paksa (_killMicSesi) tidak perlu update UI lagi
     if(_isRecSesi){
-      // Berhenti sendiri (mis. timeout browser) — tampilkan status
+      if(isMobile && finalBuffer.trim()){
+        // Mobile: satu utterance selesai, restart otomatis untuk lanjut
+        // tapi hanya jika user belum matikan secara manual
+        try{
+          // Update baseText untuk rekaman berikutnya
+          // sudah terupdate di textarea, tidak perlu restart manual
+          // Cukup update status saja
+        }catch(e){}
+      }
+      // Jika berhenti sendiri (timeout/mobile utterance end)
       _isRecSesi = false;
       _recSesi = null;
       document.getElementById('sq-mic-btn').classList.remove('rec');
@@ -1472,7 +1524,9 @@ function startMicSesi(){
   _isRecSesi = true;
   r.start();
   document.getElementById('sq-mic-btn').classList.add('rec');
-  document.getElementById('sq-mic-hint').textContent = '🔴 Merekam… ceritakan. Tekan 🎤 untuk jeda.';
+  document.getElementById('sq-mic-hint').textContent = isMobile
+    ? '🔴 Merekam… bicara lalu tekan 🎤 untuk lanjut.'
+    : '🔴 Merekam… ceritakan. Tekan 🎤 untuk jeda.';
 }
 
 function _getMicSeparatorFromText(text){
