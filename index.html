@@ -54,7 +54,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 .hero p{font-size:.97rem;color:var(--muted);max-width:480px;margin:0 auto 2.4rem;line-height:1.8;font-weight:300}
 .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn-solid{padding:12px 28px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:500;cursor:pointer;transition:.2s;box-shadow:0 4px 22px rgba(107,143,113,.28)}.btn-solid:hover{opacity:.87;transform:translateY(-1px)}
+.btn-solid{padding:12px 28px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:500;cursor:pointer;transition:.2s;box-shadow:0 4px 22px rgba(107,143,113,.28)}.btn-solid:hover{opacity:.87;transform:translateY(-1px)}.btn-solid:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-ghost{padding:12px 28px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.92rem;cursor:pointer;transition:.2s}.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
 .feat-grid{max-width:860px;margin:3rem auto 2rem;padding:0 2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .fc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.4rem;transition:.25s}.fc:hover{border-color:var(--primary-soft);transform:translateY(-3px)}
@@ -271,7 +271,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
     <p>Tes depresi klinis, sesi Life Review Therapy berbasis AI, dan perbandingan skor sebelum &amp; sesudah — hangat, privat, gratis.</p>
     <div class="hero-btns">
-      <button class="btn-solid" onclick="goPage('register')">Mulai Gratis Sekarang</button>
+      <button class="btn-solid" onclick="if(!_cu){goPage('register')}else{this.disabled=true;launchApp().finally(()=>this.disabled=false)}">Mulai Gratis Sekarang</button>
       <button class="btn-ghost" onclick="goPage('tentang')">Pelajari Lebih Lanjut</button>
     </div>
   </section>
@@ -279,6 +279,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <div class="fc"><div class="fi">🧪</div><h3>Tes Depresi Klinis</h3><p>Asesmen berbasis standar PHQ disesuaikan untuk 3 tahap kehidupan: Anak/Remaja, Dewasa, dan Lansia.</p></div>
     <div class="fc"><div class="fi">🎙️</div><h3>Life Review Therapy</h3><p>Perjalanan terapeutik menelusuri pengalaman hidup — dari masa kecil hingga saat ini — dipandu AI yang hangat.</p></div>
     <div class="fc"><div class="fi">📊</div><h3>Perbandingan Skor</h3><p>Lihat perubahan kondisi mentalmu secara terukur sebelum dan sesudah menjalani sesi terapi.</p></div>
+    <div class="fc"><div class="fi">🔒</div><h3>Privasi Penuh</h3><p>Data tersimpan aman di database terenkripsi. Hanya kamu yang bisa mengaksesnya.</p></div>
   </div>
 </div>
 
@@ -1011,8 +1012,18 @@ async function checkAndResumeSession(){
       loadSesiQuestion();
     }
   } else {
-    // Tidak ada sesi ongoing → mulai baru
-    launchApp();
+    // Tidak ada sesi ongoing yang sudah melewati PHQ
+    // Langsung mulai baru dari Data Diri — tidak ada resume Data Diri/PHQ
+    Object.assign(S,{
+      nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',
+      tahap:'',avail:[],preScore:0,postScore:0,
+      sessionId:null,sesiList:[],currentSesiIdx:0,currentSesiNum:1,
+      currentQIdx:0,phqPhase:'',phqQIdx:0,phqScores:[],
+      _retryTotal:null,_retrySev:null
+    });
+    goPage('app');
+    renderSteps(0);
+    showSc('sc-data');
   }
 }
 
@@ -1028,9 +1039,31 @@ function buildTahapFromResume(){
   buildTahap();
 }
 
-function launchApp(){
+async function launchApp(){
   if(!_cu){toast('⚠️ Silakan login terlebih dahulu');goPage('login');return;}
-  Object.assign(S,{nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',tahap:'',avail:[],preScore:0,postScore:0,sessionId:null,sesiList:[],currentSesiIdx:0,currentSesiNum:1,currentQIdx:0,phqPhase:'',phqQIdx:0,phqScores:[]});
+
+  // Tutup semua sesi ongoing yang sudah punya sessionId (sudah lewati PHQ)
+  // menjadi 'abandoned' sebelum mulai sesi baru
+  try{
+    await sb.from('therapy_sessions')
+      .update({status:'abandoned', completed_at:new Date().toISOString()})
+      .eq('user_id',_cu.id)
+      .eq('status','ongoing');
+  }catch(e){
+    // Jika gagal update, tetap lanjut — tidak blokir user
+    console.warn('Gagal update sesi lama:', e);
+  }
+
+  // Reset semua state
+  Object.assign(S,{
+    nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',
+    tahap:'',avail:[],preScore:0,postScore:0,
+    sessionId:null,  // Belum ada sessionId — baru dibuat setelah PHQ selesai
+    sesiList:[],currentSesiIdx:0,currentSesiNum:1,currentQIdx:0,
+    phqPhase:'',phqQIdx:0,phqScores:[],
+    _retryTotal:null,_retrySev:null
+  });
+
   goPage('app');
   renderSteps(0);
   showSc('sc-data');
@@ -1142,32 +1175,62 @@ async function finishPHQ(){
 
   if(S.phqPhase==='pre'){
     S.preScore=total;
-    // Buat session baru di Supabase
-    const {data:sess,error:sessErr}=await sb.from('therapy_sessions').insert({
-      user_id:_cu.id, stage:S.tahap, nickname:S.nama, age:S.usia, gender:S.jk,
-      chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
-      pre_score:total, post_score:0, score_delta:0,
-      severity_pre:sev.l, status:'ongoing', created_at:new Date().toISOString()
-    }).select().single();
-    if(!sessErr && sess) S.sessionId=sess.id;
 
-    // Simpan PHQ pre ke phq_assessments
-    await sb.from('phq_assessments').insert({
-      user_id:_cu.id, session_id:S.sessionId, phase:'pre',
-      stage:S.tahap, score:total, severity:sev.l,
-      answers:PHQ[S.tahap].qs.map((q,i)=>({q,v:S.phqScores[i]||0})),
-      created_at:new Date().toISOString()
-    });
+    // GUARD: Jika sessionId sudah ada, jangan insert lagi
+    // Ini mencegah double insert jika user refresh atau back-forward
+    if(S.sessionId){
+      showPHQPreResult(total, sev);
+      return;
+    }
 
-    // Juga simpan profil pasien
-    await sb.from('patient_profiles').upsert({
-      user_id:_cu.id, nickname:S.nama, age:S.usia, gender:S.jk,
-      chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
-      updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
+    // Tampilkan loading indicator
+    const saveEl=document.getElementById('save-status');
+    if(saveEl){saveEl.style.display='flex';saveEl.innerHTML='<div class="save-dot"></div><span>Menyimpan data...</span>';}
 
-    // Tampilkan hasil
-    showPHQPreResult(total, sev);
+    try{
+      // Buat session baru di Supabase — hanya sekali setelah PHQ selesai
+      const {data:sess,error:sessErr}=await sb.from('therapy_sessions').insert({
+        user_id:_cu.id, stage:S.tahap, nickname:S.nama, age:S.usia, gender:S.jk,
+        chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
+        pre_score:total, post_score:0, score_delta:0,
+        severity_pre:sev.l, status:'ongoing', created_at:new Date().toISOString()
+      }).select().single();
+
+      if(sessErr) throw sessErr;
+      S.sessionId=sess.id;
+
+      // Simpan PHQ pre ke phq_assessments
+      await sb.from('phq_assessments').insert({
+        user_id:_cu.id, session_id:S.sessionId, phase:'pre',
+        stage:S.tahap, score:total, severity:sev.l,
+        answers:PHQ[S.tahap].qs.map((q,i)=>({q,v:S.phqScores[i]||0})),
+        created_at:new Date().toISOString()
+      });
+
+      // Simpan profil pasien
+      await sb.from('patient_profiles').upsert({
+        user_id:_cu.id, nickname:S.nama, age:S.usia, gender:S.jk,
+        chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
+        updated_at:new Date().toISOString()
+      },{onConflict:'user_id'});
+
+      if(saveEl) saveEl.style.display='none';
+      showPHQPreResult(total, sev);
+
+    } catch(err){
+      // Jika gagal simpan, tampilkan tombol retry — jangan mulai dari awal
+      if(saveEl){
+        saveEl.style.display='flex';
+        saveEl.innerHTML=`<span style="color:var(--red)">⚠️ Gagal menyimpan. 
+          <button onclick="retryFinishPHQ(${total},'${sev.l}')" 
+          style="background:var(--primary);color:#fff;border:none;border-radius:5px;
+          padding:4px 10px;font-size:.75rem;cursor:pointer;margin-left:6px">
+          Coba Lagi</button></span>`;
+      }
+      // Simpan data PHQ di state untuk retry
+      S._retryTotal=total; S._retrySev=sev;
+    }
+
   } else {
     S.postScore=total;
     await sb.from('phq_assessments').insert({
@@ -1178,6 +1241,15 @@ async function finishPHQ(){
     });
     showFinal();
   }
+}
+
+// Retry jika koneksi terputus saat simpan
+async function retryFinishPHQ(total, sevL){
+  const sev=getSev(total,S.tahap);
+  // Reset agar bisa insert ulang
+  S.sessionId=null;
+  S.phqScores=PHQ[S.tahap].qs.map((_,i)=>S.phqScores[i]||0);
+  await finishPHQ();
 }
 
 function showPHQPreResult(score, sev){
