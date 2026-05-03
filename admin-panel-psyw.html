@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{
   --bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--surface3:#252d40;
@@ -159,6 +160,26 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .ibox{background:var(--primary-soft);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:.75rem 1rem;font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
 .ibox strong{color:var(--primary)}
 
+/* CHART CARDS */
+.chart-row{display:grid;gap:12px;margin-bottom:12px}
+.chart-row-2{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
+.chart-row-2b{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem}
+.chart-card h3{font-size:.82rem;font-weight:600;color:var(--white);margin-bottom:.2rem}
+.chart-card .cc-sub{font-size:.72rem;color:var(--muted);margin-bottom:.85rem}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:.75rem;font-size:.72rem;color:var(--muted)}
+.chart-legend span{display:flex;align-items:center;gap:5px}
+.chart-legend i{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.prog-ring-list{display:flex;flex-direction:column;gap:12px}
+.prog-ring-item{display:flex;align-items:center;gap:12px}
+.prog-ring-info .pri-val{font-size:.85rem;font-weight:600;color:var(--white)}
+.prog-ring-info .pri-lbl{font-size:.7rem;color:var(--muted)}
+.dist-bar-list{display:flex;flex-direction:column;gap:12px}
+.dist-bar-item .dbi-head{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-bottom:5px}
+.dist-bar-item .dbi-head span:last-child{color:var(--white);font-weight:600}
+.dist-bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.dist-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
 /* PAGINATION */
 .pagi{display:flex;align-items:center;gap:6px;margin-top:1rem;justify-content:flex-end}
 .pagi-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.75rem;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center}.pagi-btn:hover{border-color:var(--primary);color:var(--primary)}.pagi-btn.act{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -239,16 +260,105 @@ tr:hover td{background:rgba(255,255,255,.015)}
           <h2>Overview</h2>
           <p>Ringkasan data keseluruhan platform PsyWellMate</p>
         </div>
+
+        <!-- Baris atas: 4 stat cards -->
         <div class="stats-grid" id="stats-grid">
           <div class="stat-card"><div class="stat-val" id="st-users">—</div><div class="stat-lbl">Total User</div></div>
           <div class="stat-card"><div class="stat-val" id="st-sess">—</div><div class="stat-lbl">Total Sesi</div></div>
           <div class="stat-card"><div class="stat-val" id="st-done">—</div><div class="stat-lbl">Sesi Selesai</div><div class="stat-sub"><span class="badge b-green" id="st-done-pct">—</span></div></div>
           <div class="stat-card"><div class="stat-val" id="st-avg">—</div><div class="stat-lbl">Rata-rata Skor Pre</div></div>
         </div>
-        <div class="tbl-wrap">
-          <div class="tbl-head"><div class="tbl-title">Sesi Terapi Terbaru</div></div>
-          <table><thead><tr><th>User</th><th>Usia</th><th>Tahap</th><th>Skor Pre</th><th>Skor Post</th><th>Status</th><th>Tanggal</th></tr></thead>
-          <tbody id="recent-tbody"></tbody></table>
+
+        <!-- Baris tengah: Donut distribusi depresi + Bar pre vs post -->
+        <div class="chart-row chart-row-2">
+          <!-- Donut: distribusi depresi -->
+          <div class="chart-card">
+            <h3>Distribusi tingkat depresi</h3>
+            <div class="cc-sub">Berdasarkan skor PHQ pre</div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="position:relative;width:120px;height:120px;flex-shrink:0">
+                <canvas id="donutChart" role="img" aria-label="Donut chart distribusi tingkat depresi pengguna">Data distribusi depresi.</canvas>
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:none">
+                  <div style="font-size:1.3rem;font-weight:600;color:var(--white)" id="donut-total">—</div>
+                  <div style="font-size:.62rem;color:var(--muted)">sesi</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:.72rem;flex:1">
+                <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#3a9e6f;flex-shrink:0"></span><span style="color:var(--muted)">Minimal</span><span style="margin-left:auto;font-weight:600;color:var(--white)" id="d-minimal">—</span></div>
+                <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#d4a017;flex-shrink:0"></span><span style="color:var(--muted)">Ringan</span><span style="margin-left:auto;font-weight:600;color:var(--white)" id="d-ringan">—</span></div>
+                <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#c4845a;flex-shrink:0"></span><span style="color:var(--muted)">Sedang</span><span style="margin-left:auto;font-weight:600;color:var(--white)" id="d-sedang">—</span></div>
+                <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#c95c5c;flex-shrink:0"></span><span style="color:var(--muted)">Berat</span><span style="margin-left:auto;font-weight:600;color:var(--white)" id="d-berat">—</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bar: Pre vs Post per tahap -->
+          <div class="chart-card">
+            <h3>Perbandingan skor pre vs post</h3>
+            <div class="cc-sub">Rata-rata per tahap usia</div>
+            <div class="chart-legend">
+              <span><i style="background:#6a9e7f"></i>Sebelum terapi</span>
+              <span><i style="background:#c4845a"></i>Sesudah terapi</span>
+            </div>
+            <div style="position:relative;height:160px">
+              <canvas id="barChart" role="img" aria-label="Bar chart perbandingan rata-rata skor PHQ sebelum dan sesudah terapi per tahap usia">Data perbandingan skor pre dan post terapi.</canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris bawah: Distribusi tahap usia + Status sesi -->
+        <div class="chart-row chart-row-2b">
+          <!-- Bar horizontal: distribusi tahap usia -->
+          <div class="chart-card">
+            <h3>Distribusi tahap usia</h3>
+            <div class="cc-sub">Jumlah sesi per kelompok usia</div>
+            <div class="dist-bar-list" id="dist-tahap">
+              <div class="dist-bar-item">
+                <div class="dbi-head"><span>Anak & Remaja</span><span id="dt-anak">—</span></div>
+                <div class="dist-bar-track"><div class="dist-bar-fill" id="dt-anak-bar" style="width:0%;background:#6a9e7f"></div></div>
+              </div>
+              <div class="dist-bar-item">
+                <div class="dbi-head"><span>Dewasa</span><span id="dt-dewasa">—</span></div>
+                <div class="dist-bar-track"><div class="dist-bar-fill" id="dt-dewasa-bar" style="width:0%;background:#6a9e7f"></div></div>
+              </div>
+              <div class="dist-bar-item">
+                <div class="dbi-head"><span>Lansia</span><span id="dt-lansia">—</span></div>
+                <div class="dist-bar-track"><div class="dist-bar-fill" id="dt-lansia-bar" style="width:0%;background:#6a9e7f"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress rings: status sesi -->
+          <div class="chart-card">
+            <h3>Status sesi</h3>
+            <div class="cc-sub" id="status-total-lbl">Dari total — sesi</div>
+            <div class="prog-ring-list">
+              <div class="prog-ring-item">
+                <svg width="48" height="48" viewBox="0 0 48 48" style="flex-shrink:0">
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="var(--surface2)" stroke-width="5.5"/>
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="#3a9e6f" stroke-width="5.5" stroke-linecap="round" transform="rotate(-90 24 24)" id="ring-completed" stroke-dasharray="0 120"/>
+                </svg>
+                <div class="prog-ring-info"><div class="pri-val" id="ring-completed-val">— selesai</div><div class="pri-lbl">Completed</div></div>
+                <span class="badge b-green" style="margin-left:auto" id="ring-completed-pct">—</span>
+              </div>
+              <div class="prog-ring-item">
+                <svg width="48" height="48" viewBox="0 0 48 48" style="flex-shrink:0">
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="var(--surface2)" stroke-width="5.5"/>
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="#d4a017" stroke-width="5.5" stroke-linecap="round" transform="rotate(-90 24 24)" id="ring-ongoing" stroke-dasharray="0 120"/>
+                </svg>
+                <div class="prog-ring-info"><div class="pri-val" id="ring-ongoing-val">— berlangsung</div><div class="pri-lbl">Ongoing</div></div>
+                <span class="badge b-amber" style="margin-left:auto" id="ring-ongoing-pct">—</span>
+              </div>
+              <div class="prog-ring-item">
+                <svg width="48" height="48" viewBox="0 0 48 48" style="flex-shrink:0">
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="var(--surface2)" stroke-width="5.5"/>
+                  <circle cx="24" cy="24" r="19" fill="none" stroke="var(--muted)" stroke-width="5.5" stroke-linecap="round" transform="rotate(-90 24 24)" id="ring-abandoned" stroke-dasharray="0 120"/>
+                </svg>
+                <div class="prog-ring-info"><div class="pri-val" id="ring-abandoned-val">— ditinggalkan</div><div class="pri-lbl">Abandoned</div></div>
+                <span class="badge" style="margin-left:auto;background:rgba(107,122,153,.15);color:var(--muted)" id="ring-abandoned-pct">—</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -650,34 +760,116 @@ async function loadAllData(){
 /* ════════════════════════════════════
    RENDER OVERVIEW
 ════════════════════════════════════ */
+let _donutChart = null, _barChart = null;
+
 function renderOverview(){
+  // ── Stat cards ──
   document.getElementById('st-users').textContent = _allUsers.length;
   document.getElementById('st-sess').textContent = _allSessions.length;
   const done = _allSessions.filter(s=>s.status==='completed').length;
+  const ongoing = _allSessions.filter(s=>s.status==='ongoing').length;
+  const abandoned = _allSessions.filter(s=>s.status==='abandoned').length;
+  const total = _allSessions.length;
   document.getElementById('st-done').textContent = done;
-  document.getElementById('st-done-pct').textContent = _allSessions.length ? Math.round(done/_allSessions.length*100)+'%' : '0%';
-
+  document.getElementById('st-done-pct').textContent = total ? Math.round(done/total*100)+'%' : '0%';
   const preScores = _allSessions.filter(s=>s.pre_score!=null).map(s=>s.pre_score);
   const avg = preScores.length ? (preScores.reduce((a,b)=>a+b,0)/preScores.length).toFixed(1) : '—';
   document.getElementById('st-avg').textContent = avg;
 
-  const recent = _allSessions.slice(0,8);
-  const tbody = document.getElementById('recent-tbody');
-  if(!recent.length){ tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">Belum ada data</td></tr>`; return; }
+  // ── Distribusi depresi (donut) ──
+  const sevMap = {minimal:0, ringan:0, sedang:0, berat:0};
+  _allPHQ.filter(p=>p.phase==='pre').forEach(p=>{
+    const s = (p.severity||'').toLowerCase();
+    if(s.includes('minimal')||s.includes('tidak')) sevMap.minimal++;
+    else if(s.includes('ringan')) sevMap.ringan++;
+    else if(s.includes('sedang')) sevMap.sedang++;
+    else if(s.includes('berat')) sevMap.berat++;
+  });
+  const totalPHQ = sevMap.minimal+sevMap.ringan+sevMap.sedang+sevMap.berat;
+  document.getElementById('donut-total').textContent = totalPHQ||'—';
+  const pct = v => totalPHQ ? Math.round(v/totalPHQ*100)+'%' : '—';
+  document.getElementById('d-minimal').textContent = `${sevMap.minimal} (${pct(sevMap.minimal)})`;
+  document.getElementById('d-ringan').textContent = `${sevMap.ringan} (${pct(sevMap.ringan)})`;
+  document.getElementById('d-sedang').textContent = `${sevMap.sedang} (${pct(sevMap.sedang)})`;
+  document.getElementById('d-berat').textContent = `${sevMap.berat} (${pct(sevMap.berat)})`;
 
-  // Buat map user_id → nama
-  const userMap = {};
-  _allUsers.forEach(u=>userMap[u.id]=u.full_name);
+  if(_donutChart) _donutChart.destroy();
+  _donutChart = new Chart(document.getElementById('donutChart'),{
+    type:'doughnut',
+    data:{
+      labels:['Minimal','Ringan','Sedang','Berat'],
+      datasets:[{
+        data:[sevMap.minimal,sevMap.ringan,sevMap.sedang,sevMap.berat],
+        backgroundColor:['#3a9e6f','#d4a017','#c4845a','#c95c5c'],
+        borderWidth:0, hoverOffset:4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true, cutout:'72%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}`}}}
+    }
+  });
 
-  tbody.innerHTML = recent.map(s=>`<tr>
-    <td>${s.nickname||userMap[s.user_id]||'—'}</td>
-    <td>${s.age||'—'}</td>
-    <td>${stageBadge(s.stage)}</td>
-    <td>${s.pre_score!=null?s.pre_score:'—'}</td>
-    <td>${s.post_score&&s.status==='completed'?s.post_score:'—'}</td>
-    <td>${statusBadge(s.status)}</td>
-    <td style="white-space:nowrap;color:var(--muted)">${fmtDateShort(s.created_at)}</td>
-  </tr>`).join('');
+  // ── Bar pre vs post per tahap ──
+  const stages = ['anak','dewasa','lansia'];
+  const stageLabels = ['Anak & Remaja','Dewasa','Lansia'];
+  const preAvg = stages.map(st=>{
+    const sc = _allSessions.filter(s=>s.stage===st&&s.pre_score!=null).map(s=>s.pre_score);
+    return sc.length ? Math.round(sc.reduce((a,b)=>a+b,0)/sc.length) : 0;
+  });
+  const postAvg = stages.map(st=>{
+    const sc = _allSessions.filter(s=>s.stage===st&&s.status==='completed'&&s.post_score!=null).map(s=>s.post_score);
+    return sc.length ? Math.round(sc.reduce((a,b)=>a+b,0)/sc.length) : 0;
+  });
+
+  if(_barChart) _barChart.destroy();
+  _barChart = new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{
+      labels:stageLabels,
+      datasets:[
+        {label:'Sebelum',data:preAvg,backgroundColor:'#6a9e7f',borderRadius:4,borderSkipped:false},
+        {label:'Sesudah',data:postAvg,backgroundColor:'#c4845a',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7a99',font:{size:11}}},
+        y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#6b7a99',font:{size:11}},beginAtZero:true}
+      }
+    }
+  });
+
+  // ── Distribusi tahap usia (bar horizontal) ──
+  const anakCount = _allSessions.filter(s=>s.stage==='anak').length;
+  const dewasaCount = _allSessions.filter(s=>s.stage==='dewasa').length;
+  const lansiaCount = _allSessions.filter(s=>s.stage==='lansia').length;
+  const maxCount = Math.max(anakCount, dewasaCount, lansiaCount, 1);
+  document.getElementById('dt-anak').textContent = anakCount+' sesi';
+  document.getElementById('dt-dewasa').textContent = dewasaCount+' sesi';
+  document.getElementById('dt-lansia').textContent = lansiaCount+' sesi';
+  document.getElementById('dt-anak-bar').style.width = Math.round(anakCount/maxCount*100)+'%';
+  document.getElementById('dt-dewasa-bar').style.width = Math.round(dewasaCount/maxCount*100)+'%';
+  document.getElementById('dt-lansia-bar').style.width = Math.round(lansiaCount/maxCount*100)+'%';
+
+  // ── Progress rings status sesi ──
+  const CIRC = 2 * Math.PI * 19; // circumference r=19
+  const toArc = pct => Math.round(pct/100*CIRC);
+  document.getElementById('status-total-lbl').textContent = `Dari total ${total} sesi`;
+  const donePct = total ? Math.round(done/total*100) : 0;
+  const ongoingPct = total ? Math.round(ongoing/total*100) : 0;
+  const abandonedPct = total ? Math.round(abandoned/total*100) : 0;
+  document.getElementById('ring-completed').setAttribute('stroke-dasharray',`${toArc(donePct)} ${CIRC}`);
+  document.getElementById('ring-ongoing').setAttribute('stroke-dasharray',`${toArc(ongoingPct)} ${CIRC}`);
+  document.getElementById('ring-abandoned').setAttribute('stroke-dasharray',`${toArc(abandonedPct)} ${CIRC}`);
+  document.getElementById('ring-completed-val').textContent = `${done} selesai`;
+  document.getElementById('ring-ongoing-val').textContent = `${ongoing} berlangsung`;
+  document.getElementById('ring-abandoned-val').textContent = `${abandoned} ditinggalkan`;
+  document.getElementById('ring-completed-pct').textContent = donePct+'%';
+  document.getElementById('ring-ongoing-pct').textContent = ongoingPct+'%';
+  document.getElementById('ring-abandoned-pct').textContent = abandonedPct+'%';
 }
 
 /* ════════════════════════════════════
