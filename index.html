@@ -120,15 +120,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 /* Area chat utama */
 .chat-area{display:flex;flex-direction:column;gap:10px;margin-bottom:.9rem}
 
-/* Bubble Nelya (kiri) */
-.nelya-row{display:flex;align-items:flex-end;gap:8px;max-width:88%}
-.nelya-avatar{width:28px;height:28px;border-radius:50%;background:#6a9e7f;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;margin-bottom:2px}
-.nelya-bubble-wrap{display:flex;flex-direction:column;gap:2px}
-.nelya-name{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-left:2px}
+/* Bubble Elina (kiri) */
+.elina-row{display:flex;align-items:flex-end;gap:8px;max-width:88%}
+.elina-avatar{width:28px;height:28px;border-radius:50%;background:#6a9e7f;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;margin-bottom:2px}
+.elina-bubble-wrap{display:flex;flex-direction:column;gap:2px}
+.elina-name{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-left:2px}
 .tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:4px 12px 12px 12px;padding:.75rem 1rem;line-height:1.7;font-size:.88rem;max-width:100%}
-.tq-label{display:none} /* Nama sudah di nelya-name */
+.tq-label{display:none} /* Nama sudah di elina-name */
 
-/* Bubble respons Nelya setelah jawaban user */
+/* Bubble respons Elina setelah jawaban user */
 .ai-response{background:rgba(107,143,113,.1);border:1px solid rgba(107,143,113,.22);border-radius:4px 12px 12px 12px;padding:.65rem .95rem;font-size:.82rem;color:var(--primary);line-height:1.6;font-style:italic;max-width:100%}
 
 /* Bubble user (kanan) */
@@ -376,7 +376,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <!-- SC: TES PHQ PRE -->
     <div id="sc-phq-pre" class="card" style="display:none">
       <h2 id="phq-pre-h">Tes Depresi Awal</h2>
-      <p class="sub">Pilih seberapa sering kamu/Anda merasakan hal berikut <strong>dalam 2 minggu terakhir</strong>.</p>
+      <p class="sub">Pilih seberapa sering merasakan hal berikut <strong>dalam 2 minggu terakhir</strong>.</p>
       <div class="pbar-w"><div class="pbar" id="pb-pre" style="width:0%"></div></div>
       <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Pertanyaan <span id="pn-pre">1</span> dari <span id="pt-pre"></span></p>
       <div id="phq-pre-body"></div>
@@ -424,21 +424,21 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <p class="sub" id="sq-prog"></p>
       <div class="pbar-w"><div class="pbar" id="pb-sesi" style="width:0%"></div></div>
       <div class="chat-area" id="sq-chat-area">
-        <!-- Pertanyaan Nelya -->
-        <div class="nelya-row" id="sq-nelya-q-row">
-          <div class="nelya-avatar">N</div>
-          <div class="nelya-bubble-wrap">
-            <div class="nelya-name">Nelya</div>
+        <!-- Pertanyaan Elina -->
+        <div class="elina-row" id="sq-elina-q-row">
+          <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="elina-bubble-wrap">
+            <div class="elina-name">✦ Elina</div>
             <div class="tbubble" id="sq-bubble"></div>
           </div>
         </div>
         <!-- Jawaban user (muncul setelah kirim) -->
         <div class="chat-hist" id="sq-hist"></div>
-        <!-- Respons Nelya setelah jawaban user -->
-        <div class="nelya-row" id="sq-nelya-resp-row" style="display:none">
-          <div class="nelya-avatar">N</div>
-          <div class="nelya-bubble-wrap">
-            <div class="nelya-name">Nelya</div>
+        <!-- Respons Elina setelah jawaban user -->
+        <div class="elina-row" id="sq-elina-resp-row" style="display:none">
+          <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="elina-bubble-wrap">
+            <div class="elina-name">✦ Elina</div>
             <div class="ai-response" id="sq-ai-response"></div>
           </div>
         </div>
@@ -621,6 +621,25 @@ async function doLogout(){
 }
 
 /* ══════════════════════════════════════════
+   SAPAAN HELPER
+══════════════════════════════════════════ */
+function getSapaan(){
+  // Anak (0-11) dan Remaja (12-19) → kamu
+  if(S.usia <= 19) return 'kamu';
+  // Dewasa & Lansia → Bapak atau Ibu berdasarkan jenis kelamin
+  const jk = (S.jk||'').toLowerCase();
+  if(jk.includes('laki')) return 'Bapak';
+  if(jk.includes('perempuan')) return 'Ibu';
+  return 'Anda'; // fallback jika jenis kelamin "lainnya"
+}
+
+function sapaanCap(){
+  // Versi kapital di awal kalimat
+  const s = getSapaan();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* ══════════════════════════════════════════
    NLP SEDERHANA (Rule-Based)
 ══════════════════════════════════════════ */
 const NLP = {
@@ -671,14 +690,14 @@ function analyzeNLP(text){
 
 function getAIResponse(nlp, sesiNum, qIdx){
   const {sentiment, emotion, topics} = nlp;
-  const sapaan = S.usia <= 17 ? 'kamu' : 'Anda';
+  const sapaan = getSapaan();
 
   // Template respons berdasarkan kombinasi sentimen dan emosi
   const templates = {
     positif: [
       `Terima kasih sudah berbagi, ${sapaan} tampak memiliki kenangan yang sangat berharga dari pengalaman itu.`,
       `Sungguh indah mendengar cerita ${sapaan}, ada hal-hal bermakna yang telah ${sapaan} lalui.`,
-      `${sapaan.charAt(0).toUpperCase()+sapaan.slice(1)} telah melalui momen yang penuh arti, dan itu adalah kekuatan nyata dalam hidup ${sapaan}.`,
+      `${sapaanCap()} telah melalui momen yang penuh arti, dan itu adalah kekuatan nyata dalam hidup ${sapaan}.`,
       `Cerita ${sapaan} mengingatkan kita bahwa ada banyak hal berharga yang telah dijalani dengan baik.`
     ],
     negatif: {
@@ -686,7 +705,7 @@ function getAIResponse(nlp, sesiNum, qIdx){
       marah: [`Perasaan ${sapaan} sepenuhnya valid, dan mengakui emosi itu adalah langkah yang penting.`,`Terima kasih sudah jujur tentang perasaan ${sapaan}, itu membutuhkan keberanian.`],
       takut: [`Kekhawatiran ${sapaan} sangat bisa dipahami, dan berbagi rasa takut itu sudah merupakan langkah yang kuat.`,`Wajar untuk merasa seperti itu, dan ${sapaan} tidak harus menghadapinya sendirian.`],
       malu: [`Cerita ${sapaan} membutuhkan keberanian besar untuk diungkapkan, dan itu sangat dihargai.`,`Tidak ada yang perlu disembunyikan di sini, ${sapaan} aman untuk bercerita.`],
-      default: [`Terima kasih sudah mempercayakan cerita ini, ${sapaan} sudah melakukan hal yang luar biasa dengan berbicara.`,`${sapaan.charAt(0).toUpperCase()+sapaan.slice(1)} tidak harus menanggung ini sendirian, dan cerita ${sapaan} sangat berarti.`]
+      default: [`Terima kasih sudah mempercayakan cerita ini, ${sapaan} sudah melakukan hal yang luar biasa dengan berbicara.`,`${sapaanCap()} tidak harus menanggung ini sendirian, dan cerita ${sapaan} sangat berarti.`]
     },
     netral: [
       `Terima kasih sudah bercerita, ${sapaan}. Mari kita lanjutkan perjalanan ini bersama.`,
@@ -1322,7 +1341,7 @@ function loadSesiQuestion(){
   document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
   // Reset tampilan untuk pertanyaan baru
-  document.getElementById('sq-nelya-resp-row').style.display='none';
+  document.getElementById('sq-elina-resp-row').style.display='none';
   document.getElementById('sq-hist').innerHTML='';
   document.getElementById('sq-done').style.display='none';
   document.getElementById('sq-next-wrap').style.display='none';
@@ -1357,7 +1376,7 @@ async function sendSesiAnswer(){
   const hist=document.getElementById('sq-hist');
   const wrap=document.createElement('div');wrap.className='ch-u-wrap';
   const lbl=document.createElement('div');lbl.className='ch-u-label';
-  lbl.textContent=S.nama||'Kamu';
+  lbl.textContent=S.nama||getSapaan();
   const bubble=document.createElement('div');bubble.className='ch-u';
   bubble.textContent=txt;
   const inner=document.createElement('div');
@@ -1365,10 +1384,10 @@ async function sendSesiAnswer(){
   wrap.appendChild(inner);
   hist.appendChild(wrap);
 
-  // Tampilkan respons Nelya di kiri
+  // Tampilkan respons Elina di kiri
   const respEl=document.getElementById('sq-ai-response');
   respEl.textContent=aiResp;
-  document.getElementById('sq-nelya-resp-row').style.display='flex';
+  document.getElementById('sq-elina-resp-row').style.display='flex';
 
   // Simpan ke Supabase
   if(S.sessionId){
@@ -1385,7 +1404,7 @@ async function sendSesiAnswer(){
   S.currentQIdx++;
   const qs=getSesiQuestions(S.currentSesiNum);
 
-  // Sembunyikan input, tampilkan tombol next di bawah respons Nelya
+  // Sembunyikan input, tampilkan tombol next di bawah respons Elina
   document.getElementById('sq-input').style.display='none';
 
   if(S.currentQIdx<qs.length){
@@ -1394,7 +1413,7 @@ async function sendSesiAnswer(){
     document.getElementById('sq-next-btn').textContent='Pertanyaan Berikutnya →';
     document.getElementById('sq-next-btn').onclick=()=>{
       document.getElementById('sq-next-wrap').style.display='none';
-      document.getElementById('sq-nelya-resp-row').style.display='none';
+      document.getElementById('sq-elina-resp-row').style.display='none';
       document.getElementById('sq-hist').innerHTML='';
       loadSesiQuestion();
     };
@@ -1437,7 +1456,7 @@ async function finishSesi(){
 function showRingkasanSesi(sesiNum, progressData){
   const meta=SESI_META[sesiNum];
   document.getElementById('rk-title').textContent=`Ringkasan Sesi ${sesiNum} — ${meta.title}`;
-  document.getElementById('rk-sub').textContent=`Berikut adalah apa yang sudah ${S.usia<=17?'kamu':'Anda'} ceritakan di Sesi ${sesiNum}.`;
+  document.getElementById('rk-sub').textContent=`Berikut adalah apa yang sudah ${getSapaan()} ceritakan di Sesi ${sesiNum}.`;
 
   const body=document.getElementById('rk-body');
   if(!progressData || progressData.length===0){
