@@ -131,11 +131,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 /* Bubble respons Elina setelah jawaban user */
 .ai-response{background:rgba(107,143,113,.1);border:1px solid rgba(107,143,113,.22);border-radius:4px 12px 12px 12px;padding:.65rem .95rem;font-size:.82rem;color:var(--primary);line-height:1.6;font-style:italic;max-width:100%}
 
-/* Bubble user (kanan) */
-.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:10px}
-.ch-u{background:var(--primary);border-radius:12px 12px 4px 12px;padding:.7rem .95rem;font-size:.85rem;color:#fff;align-self:flex-end;max-width:80%;word-break:break-word;line-height:1.55}
-.ch-u-wrap{display:flex;justify-content:flex-end}
-.ch-u-label{font-size:.6rem;color:var(--muted);text-align:right;margin-bottom:2px;padding-right:2px}
+/* Bubble user (kanan) — simetris dengan Elina */
+.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:12px}
+
+/* Row pasien: avatar + nama + bubble — di sisi kanan */
+.ch-u-row{display:flex;align-items:flex-end;gap:8px;max-width:88%;align-self:flex-end;flex-direction:row-reverse}
+.ch-u-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:2px}
+.ch-u-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.ch-u-label{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-right:2px;text-align:right}
+.ch-u{background:var(--primary);border-radius:12px 12px 4px 12px;padding:.7rem .95rem;font-size:.85rem;color:#fff;max-width:100%;word-break:break-word;line-height:1.55}
 .chat-iw{position:relative;margin-top:.6rem}
 .chat-ta{width:100%;padding:11px 46px 11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:80px;transition:.2s;line-height:1.5}
 .chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
@@ -1374,15 +1378,26 @@ async function sendSesiAnswer(){
 
   // Tampilkan jawaban user di kanan (bubble user)
   const hist=document.getElementById('sq-hist');
+
+  // Buat row pasien (mirror Elina tapi di kanan)
+  const row=document.createElement('div');row.className='ch-u-row';
+
+  // Avatar ikon pasien
+  const avatarDiv=document.createElement('div');avatarDiv.className='ch-u-avatar';
+  avatarDiv.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+  // Wrap nama + bubble
   const wrap=document.createElement('div');wrap.className='ch-u-wrap';
   const lbl=document.createElement('div');lbl.className='ch-u-label';
   lbl.textContent=S.nama||getSapaan();
   const bubble=document.createElement('div');bubble.className='ch-u';
   bubble.textContent=txt;
-  const inner=document.createElement('div');
-  inner.appendChild(lbl);inner.appendChild(bubble);
-  wrap.appendChild(inner);
-  hist.appendChild(wrap);
+  wrap.appendChild(lbl);
+  wrap.appendChild(bubble);
+
+  row.appendChild(wrap);
+  row.appendChild(avatarDiv);
+  hist.appendChild(row);
 
   // Tampilkan respons Elina di kiri
   const respEl=document.getElementById('sq-ai-response');
