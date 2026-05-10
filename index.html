@@ -234,6 +234,32 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .sess-dot.done{background:var(--primary);border-color:var(--primary);color:#fff}
 .sess-dot.active{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(196,132,90,.18)}
 .sess-dot.locked{opacity:.35}
+
+/* ── JEDA 3 HARI: Kartu sambutan & countdown ── */
+.jeda-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem 1.75rem;text-align:center;max-width:480px;margin:0 auto}
+.jeda-wave{font-size:2.4rem;margin-bottom:.75rem;display:block;animation:pop .5s ease}
+.jeda-title{font-family:'Lora',serif;font-size:1.35rem;color:var(--white);margin-bottom:.4rem}
+.jeda-sub{font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem}
+.countdown-wrap{display:flex;gap:10px;justify-content:center;margin-bottom:.85rem;flex-wrap:wrap}
+.cd-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.65rem .9rem;min-width:64px;text-align:center}
+.cd-num{font-family:'Lora',serif;font-size:1.6rem;font-weight:600;color:var(--primary);line-height:1}
+.cd-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+.jeda-tanggal{font-size:.8rem;color:var(--muted);margin-bottom:1.25rem}
+.jeda-tanggal strong{color:var(--text)}
+.jeda-btn-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
+.jeda-warning{font-size:.75rem;color:var(--muted);font-style:italic;margin-top:.3rem;line-height:1.5;max-width:300px}
+
+/* Modal jeda (muncul saat tombol diklik sebelum waktunya) */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fup .25s ease}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.85rem;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-icon{font-size:2rem;margin-bottom:.65rem;display:block}
+.modal-title{font-family:'Lora',serif;font-size:1.2rem;color:var(--white);margin-bottom:.5rem}
+.modal-body{font-size:.86rem;color:var(--muted);line-height:1.75;margin-bottom:.85rem}
+.modal-cd{display:flex;gap:8px;justify-content:center;margin-bottom:1.1rem}
+.modal-cd .cd-box{min-width:56px;padding:.5rem .7rem}
+.modal-cd .cd-num{font-size:1.35rem}
+.modal-tanggal{font-size:.78rem;color:var(--muted);margin-bottom:1.1rem}
+.modal-tanggal strong{color:var(--text)}
 </style>
 </head>
 <body>
@@ -422,6 +448,46 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
     </div>
 
+
+    <!-- SC: JEDA 3 HARI -->
+    <div id="sc-jeda" class="card" style="display:none">
+      <div class="jeda-card">
+        <span class="jeda-wave" id="jeda-wave">👋</span>
+        <div class="jeda-title" id="jeda-title">Selamat Datang Kembali!</div>
+        <p class="jeda-sub" id="jeda-sub">Kamu sudah menyelesaikan sesi sebelumnya dengan luar biasa. Sesi berikutnya dirancang setelah jeda agar proses refleksimu bisa berjalan lebih optimal.</p>
+        <div class="countdown-wrap" id="jeda-cd-wrap">
+          <div class="cd-box"><div class="cd-num" id="cd-hari">-</div><div class="cd-lbl">Hari</div></div>
+          <div class="cd-box"><div class="cd-num" id="cd-jam">-</div><div class="cd-lbl">Jam</div></div>
+          <div class="cd-box"><div class="cd-num" id="cd-menit">-</div><div class="cd-lbl">Menit</div></div>
+        </div>
+        <div class="jeda-tanggal" id="jeda-tanggal">📅 Tersedia pada: <strong id="jeda-tgl-val">-</strong></div>
+        <div class="jeda-btn-wrap">
+          <button class="btn-sm bp" id="jeda-lanjut-btn" onclick="cekDanLanjutSesi()">
+            <span id="jeda-btn-label">Lanjutkan Sesi →</span>
+          </button>
+          <div class="jeda-warning" id="jeda-warning" style="display:none">
+            Sesi ini dirancang untuk dimulai setelah istirahat 3 hari agar proses refleksi bisa berjalan lebih baik. Waktu jeda ini adalah bagian dari terapimu. 🌿
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Peringatan jeda belum selesai -->
+    <div id="modal-jeda" class="modal-overlay" style="display:none" onclick="if(event.target===this)tutupModalJeda()">
+      <div class="modal-box">
+        <span class="modal-icon">⏳</span>
+        <div class="modal-title">Sesi Belum Tersedia</div>
+        <div class="modal-body">Jeda ini adalah bagian dari proses terapi. Istirahat memberi ruang bagi pikiran untuk mengolah kenangan dan pengalaman yang telah dibagikan.</div>
+        <div class="modal-cd">
+          <div class="cd-box"><div class="cd-num" id="mcd-hari">-</div><div class="cd-lbl">Hari</div></div>
+          <div class="cd-box"><div class="cd-num" id="mcd-jam">-</div><div class="cd-lbl">Jam</div></div>
+          <div class="cd-box"><div class="cd-num" id="mcd-menit">-</div><div class="cd-lbl">Menit</div></div>
+        </div>
+        <div class="modal-tanggal">📅 Tersedia pada: <strong id="mcd-tgl">-</strong></div>
+        <button class="btn-sm bp" onclick="tutupModalJeda()" style="width:100%">Oke, Saya Mengerti</button>
+      </div>
+    </div>
+
     <!-- SC: PERTANYAAN SESI LIFE REVIEW -->
     <div id="sc-sesi-q" class="card" style="display:none">
       <h2 id="sq-title">Sesi 1</h2>
@@ -531,7 +597,7 @@ function goPage(id){
 }
 
 function showSc(id){
-  ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-sesi-q','sc-phq-post','sc-final'].forEach(s=>{
+  ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-jeda','sc-sesi-q','sc-phq-post','sc-final'].forEach(s=>{
     const e=document.getElementById(s);if(e)e.style.display='none';
   });
   document.getElementById(id).style.display='block';
@@ -943,12 +1009,15 @@ const S = {
   tahap:'', avail:[],
   preScore:0, postScore:0,
   sessionId: null,        // ID di tabel therapy_sessions
-  sesiList: [],           // [1,2,3,6] atau [1,2,3,4,6] dst
+  sesiList: [],           // [1,2,6] / [1,2,3,6] / [1,2,3,4,6] / [1,2,3,4,5,6]
   currentSesiIdx: 0,      // index di sesiList
   currentSesiNum: 1,      // nomor sesi aktual (1-6)
   currentQIdx: 0,         // index pertanyaan dalam sesi
   phqPhase: '',
-  phqQIdx: 0, phqScores: []
+  phqQIdx: 0, phqScores: [],
+  _jedaUnlockedAt: null,  // ISO string waktu sesi berikutnya bisa dimulai
+  _jedaDariSesi: null,    // nomor sesi yang baru selesai (untuk tampil di sc-jeda)
+  _retryTotal: null, _retrySev: null
 };
 
 /* ══════════════════════════════════════════
@@ -1030,13 +1099,30 @@ async function checkAndResumeSession(){
     const answeredInLastSesi = progress.filter(p=>p.session_number===lastSesiNum).length;
 
     if(answeredInLastSesi >= totalQInLastSesi){
-      // Sesi terakhir sudah selesai penuh → tampilkan ringkasan
+      // Sesi terakhir sudah selesai penuh
       const nextSesiIdx = S.sesiList.indexOf(lastSesiNum) + 1;
       if(nextSesiIdx < S.sesiList.length){
         S.currentSesiIdx = nextSesiIdx;
         S.currentSesiNum = S.sesiList[nextSesiIdx];
         S.currentQIdx = 0;
-        showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
+
+        if(perluJeda(lastSesiNum)){
+          // Cek checkpoint di Supabase
+          const ck = await getLastCheckpoint();
+          if(ck){
+            const unlockedAt = new Date(ck.unlocked_at);
+            const sudahBisa  = hitungSisaWaktu(unlockedAt).selesai;
+            if(!sudahBisa){
+              // Masih dalam jeda — tampilkan sc-jeda langsung (sambutan kembali)
+              showJedaScreen(lastSesiNum, unlockedAt);
+              return;
+            }
+          }
+          // Jeda sudah lewat atau checkpoint tidak ada → lanjut normal
+          showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
+        } else {
+          showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
+        }
       } else {
         // Semua sesi selesai → langsung PHQ post
         beginPHQ('post');
@@ -1472,22 +1558,41 @@ function completeSesi(){
 }
 
 async function finishSesi(){
-  // Cek apakah ada sesi berikutnya
-  const nextSesiIdx=S.currentSesiIdx+1;
-  if(nextSesiIdx<S.sesiList.length){
-    // Ada sesi berikutnya — ambil jawaban sesi ini untuk ringkasan
-    const {data:progress}=await sb.from('life_review_progress')
+  const sesiYangSelesai = S.currentSesiNum;
+  const nextSesiIdx = S.currentSesiIdx + 1;
+
+  if(nextSesiIdx < S.sesiList.length){
+    // Ada sesi berikutnya
+    const {data:progress} = await sb.from('life_review_progress')
       .select('*').eq('user_id',_cu.id).eq('session_id',S.sessionId)
-      .eq('session_number',S.currentSesiNum)
+      .eq('session_number',sesiYangSelesai)
       .order('question_index',{ascending:true});
 
-    S.currentSesiIdx=nextSesiIdx;
-    S.currentSesiNum=S.sesiList[nextSesiIdx];
-    S.currentQIdx=0;
+    // Update state ke sesi berikutnya
+    S.currentSesiIdx = nextSesiIdx;
+    S.currentSesiNum = S.sesiList[nextSesiIdx];
+    S.currentQIdx = 0;
 
-    showRingkasanSesi(S.sesiList[S.currentSesiIdx-1], progress||[]);
+    if(perluJeda(sesiYangSelesai)){
+      // Sesi 2+ → simpan checkpoint lalu tampilkan jeda screen
+      const ck = await simpanSesiCheckpoint(sesiYangSelesai);
+      const unlockedAt = ck
+        ? new Date(ck.unlocked_at)
+        : new Date(Date.now() + 3*24*60*60*1000); // fallback jika DB error
+
+      // Tampilkan ringkasan dulu, lalu sc-jeda lewat tombol
+      // Tapi sesuai flow: ringkasan → goToNextSesiIntro → sc-jeda
+      // Kita simpan unlockedAt di state agar bisa diakses dari goToNextSesiIntro
+      S._jedaUnlockedAt = unlockedAt.toISOString();
+      S._jedaDariSesi   = sesiYangSelesai;
+
+      showRingkasanSesi(sesiYangSelesai, progress||[]);
+    } else {
+      // Sesi 1 → langsung ke sesi 2 tanpa jeda
+      showRingkasanSesi(sesiYangSelesai, progress||[]);
+    }
   } else {
-    // Semua sesi selesai
+    // Semua sesi selesai → langsung PHQ post (apresiasi sudah dihapus)
     showApresiasi();
   }
 }
@@ -1516,8 +1621,187 @@ function showRingkasanSesi(sesiNum, progressData){
 }
 
 function goToNextSesiIntro(){
-  showSesiIntro(S.currentSesiNum);
+  // Cek apakah ada jeda yang perlu ditampilkan
+  if(S._jedaUnlockedAt){
+    const unlockedAt = new Date(S._jedaUnlockedAt);
+    const dariSesi   = S._jedaDariSesi;
+    // Clear state jeda agar tidak muncul lagi setelah lewat
+    S._jedaUnlockedAt = null;
+    S._jedaDariSesi   = null;
+    showJedaScreen(dariSesi, unlockedAt);
+  } else {
+    showSesiIntro(S.currentSesiNum);
+  }
 }
+
+/* ══════════════════════════════════════════
+   JEDA 3 HARI — LOGIKA & UI
+   Alur:
+   - Sesi 1 → 2: langsung (tidak ada jeda)
+   - Sesi 2+  : cek sesi_checkpoints → jika belum 3 hari → tampilkan sc-jeda
+   - Sesi Penutup selesai → langsung PHQ post
+══════════════════════════════════════════ */
+
+// Sesi mana yang membutuhkan jeda 3 hari sebelumnya
+// Jeda berlaku SETELAH sesi ke-N selesai (sebelum lanjut ke sesi berikutnya)
+// Aturan: sesi 1→2 langsung, sesi 2→3, 3→4, 4→5, 5→6 jeda 3 hari
+function perluJeda(dariSesiNum){
+  // dariSesiNum = nomor sesi yang baru selesai
+  // Tidak ada jeda dari sesi 1 (langsung ke sesi 2)
+  return dariSesiNum >= 2;
+}
+
+// Format tanggal Indonesia
+function formatTanggalID(date){
+  const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return `${hari[date.getDay()]}, ${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()} · ${String(date.getHours()).padStart(2,'0')}.${String(date.getMinutes()).padStart(2,'0')} WIB`;
+}
+
+// Hitung sisa waktu jeda
+function hitungSisaWaktu(unlockedAt){
+  const now = new Date();
+  const diff = unlockedAt - now;
+  if(diff <= 0) return {hari:0,jam:0,menit:0,selesai:true};
+  const hari = Math.floor(diff / (1000*60*60*24));
+  const jam  = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const menit= Math.floor((diff % (1000*60*60)) / (1000*60));
+  return {hari,jam,menit,selesai:false};
+}
+
+// State countdown interval
+let _jedaInterval = null;
+let _jedaUnlockedAt = null;
+let _jedaSudahBisa = false;
+
+function stopJedaInterval(){
+  if(_jedaInterval){clearInterval(_jedaInterval);_jedaInterval=null;}
+}
+
+// Update angka countdown di sc-jeda dan modal
+function updateCountdownUI(){
+  if(!_jedaUnlockedAt) return;
+  const sisa = hitungSisaWaktu(_jedaUnlockedAt);
+
+  // Update sc-jeda
+  document.getElementById('cd-hari').textContent  = String(sisa.hari).padStart(2,'0');
+  document.getElementById('cd-jam').textContent   = String(sisa.jam).padStart(2,'0');
+  document.getElementById('cd-menit').textContent = String(sisa.menit).padStart(2,'0');
+
+  // Update modal
+  document.getElementById('mcd-hari').textContent  = String(sisa.hari).padStart(2,'0');
+  document.getElementById('mcd-jam').textContent   = String(sisa.jam).padStart(2,'0');
+  document.getElementById('mcd-menit').textContent = String(sisa.menit).padStart(2,'0');
+
+  if(sisa.selesai){
+    // Waktu sudah tiba — update tombol jadi aktif visual
+    _jedaSudahBisa = true;
+    stopJedaInterval();
+    document.getElementById('jeda-btn-label').textContent = 'Mulai Sesi Sekarang →';
+    document.getElementById('jeda-cd-wrap').style.display = 'none';
+    document.getElementById('jeda-tanggal').style.display = 'none';
+    document.getElementById('jeda-sub').textContent = 'Waktu istirahat sudah selesai. Kamu siap melanjutkan sesi berikutnya! 🌿';
+  }
+}
+
+// Tampilkan sc-jeda dengan data checkpoint
+async function showJedaScreen(sesiYangSelesai, unlockedAt){
+  _jedaUnlockedAt = unlockedAt;
+  _jedaSudahBisa  = hitungSisaWaktu(unlockedAt).selesai;
+
+  const sp = getSapaan();
+  const spCap = sp.charAt(0).toUpperCase()+sp.slice(1);
+  const nextSesiNum = S.sesiList[S.sesiList.indexOf(sesiYangSelesai)+1];
+  const nextMeta = SESI_META[nextSesiNum];
+
+  // Isi teks sambutan
+  document.getElementById('jeda-title').textContent =
+    `Selamat Datang Kembali, ${S.nama}!`;
+  document.getElementById('jeda-sub').textContent =
+    `${spCap} sudah menyelesaikan Sesi ${sesiYangSelesai} dengan luar biasa. ` +
+    `Jeda ini adalah bagian dari terapi — memberi ruang bagi pikiran untuk ` +
+    `mengolah pengalaman yang telah dibagikan sebelum melanjutkan ke Sesi ${nextSesiNum}.`;
+
+  // Tanggal tersedia
+  const tglStr = formatTanggalID(unlockedAt);
+  document.getElementById('jeda-tgl-val').textContent = tglStr;
+  document.getElementById('mcd-tgl').textContent = tglStr;
+
+  // Tombol label
+  if(_jedaSudahBisa){
+    document.getElementById('jeda-btn-label').textContent = 'Mulai Sesi Sekarang →';
+    document.getElementById('jeda-cd-wrap').style.display = 'none';
+    document.getElementById('jeda-tanggal').style.display = 'none';
+  } else {
+    document.getElementById('jeda-btn-label').textContent = 'Lanjutkan Sesi →';
+    document.getElementById('jeda-cd-wrap').style.display = 'flex';
+    document.getElementById('jeda-tanggal').style.display = 'block';
+    document.getElementById('jeda-warning').style.display = 'none';
+    // Mulai countdown real-time
+    updateCountdownUI();
+    stopJedaInterval();
+    _jedaInterval = setInterval(updateCountdownUI, 30000); // update tiap 30 detik
+  }
+
+  showSc('sc-jeda');
+}
+
+// Dipanggil saat user klik tombol di sc-jeda
+function cekDanLanjutSesi(){
+  if(_jedaSudahBisa){
+    // Waktunya sudah tiba — lanjut normal
+    stopJedaInterval();
+    goToNextSesiIntro();
+  } else {
+    // Belum waktunya — tampilkan modal peringatan
+    updateCountdownUI();
+    document.getElementById('jeda-warning').style.display = 'block';
+    document.getElementById('modal-jeda').style.display = 'flex';
+  }
+}
+
+function tutupModalJeda(){
+  document.getElementById('modal-jeda').style.display = 'none';
+}
+
+// Simpan checkpoint ke Supabase setelah sesi selesai
+async function simpanSesiCheckpoint(sesiNum){
+  if(!_cu || !S.sessionId) return null;
+  const completedAt = new Date();
+  const unlockedAt  = new Date(completedAt.getTime() + 3*24*60*60*1000); // +3 hari
+  try {
+    const {data, error} = await sb.from('sesi_checkpoints').insert({
+      user_id:      _cu.id,
+      session_id:   S.sessionId,
+      sesi_number:  sesiNum,
+      completed_at: completedAt.toISOString(),
+      unlocked_at:  unlockedAt.toISOString()
+    }).select().maybeSingle();
+    if(error) console.warn('simpanSesiCheckpoint error:', error);
+    return data;
+  } catch(e){
+    console.warn('simpanSesiCheckpoint exception:', e);
+    return null;
+  }
+}
+
+// Ambil checkpoint terbaru dari Supabase
+async function getLastCheckpoint(){
+  if(!_cu || !S.sessionId) return null;
+  try {
+    const {data} = await sb.from('sesi_checkpoints')
+      .select('*')
+      .eq('user_id', _cu.id)
+      .eq('session_id', S.sessionId)
+      .order('sesi_number', {ascending:false})
+      .limit(1).maybeSingle();
+    return data;
+  } catch(e){
+    return null;
+  }
+}
+
+
 
 /* ══════════════════════════════════════════
    APRESIASI — dihapus (Revisi 9)
