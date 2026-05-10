@@ -175,6 +175,19 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .ringkasan-q{font-size:.76rem;font-weight:600;color:var(--accent);margin-bottom:.3rem;line-height:1.4}
 .ringkasan-a{font-size:.86rem;color:var(--text);line-height:1.6}
 
+/* ── KESIMPULAN NARATIF ── */
+.ks-header{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem}
+.ks-icon{width:40px;height:40px;background:var(--primary-soft);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.ks-label{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--primary);margin-bottom:2px}
+.ks-sesi{font-family:'Lora',serif;font-size:1.05rem;color:var(--white)}
+.ks-divider{height:1px;background:var(--border);margin:1rem 0}
+.ks-narasi{font-size:.9rem;color:var(--text);line-height:1.85;margin-bottom:.9rem}
+.ks-narasi p{margin-bottom:.75rem}
+.ks-narasi p:last-child{margin-bottom:0}
+.ks-topik-wrap{display:flex;gap:6px;flex-wrap:wrap;margin:1rem 0}
+.ks-topik-pill{display:inline-flex;align-items:center;gap:4px;background:var(--primary-soft);color:var(--primary);border:1px solid rgba(106,158,127,.25);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:600}
+.ks-quote{background:var(--surface2);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:.75rem 1rem;margin:1rem 0;font-size:.86rem;color:var(--muted);font-style:italic;line-height:1.65}
+
 /* APPRECIATION */
 /* ap-card CSS dihapus */
 @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
@@ -260,6 +273,30 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .modal-cd .cd-num{font-size:1.35rem}
 .modal-tanggal{font-size:.78rem;color:var(--muted);margin-bottom:1.1rem}
 .modal-tanggal strong{color:var(--text)}
+
+/* ── TTS ELINA ── */
+.tts-wave{display:inline-flex;align-items:center;gap:2px;margin-left:6px;vertical-align:middle}
+.tts-wave span{display:inline-block;width:3px;border-radius:2px;background:var(--primary);animation:tts-bar .7s ease-in-out infinite}
+.tts-wave span:nth-child(1){height:6px;animation-delay:0s}
+.tts-wave span:nth-child(2){height:10px;animation-delay:.1s}
+.tts-wave span:nth-child(3){height:14px;animation-delay:.2s}
+.tts-wave span:nth-child(4){height:10px;animation-delay:.3s}
+.tts-wave span:nth-child(5){height:6px;animation-delay:.4s}
+@keyframes tts-bar{0%,100%{transform:scaleY(.5);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+
+/* Tombol aktifkan suara (iOS gesture unlock) */
+.tts-unlock-bar{background:var(--primary-soft);border:1px solid rgba(106,158,127,.3);border-radius:8px;padding:.55rem .85rem;display:flex;align-items:center;gap:8px;margin-bottom:.75rem;cursor:pointer;transition:.2s}
+.tts-unlock-bar:hover{background:rgba(106,158,127,.2)}
+.tts-unlock-bar span{font-size:.78rem;color:var(--primary);font-weight:500}
+
+/* Disable style saat Elina berbicara */
+.sq-input-disabled .chat-ta{opacity:.45;pointer-events:none}
+.sq-input-disabled .send-btn{opacity:.3;pointer-events:none}
+.sq-input-disabled .mic-btn{opacity:.3;pointer-events:none}
+/* Banner "Elina sedang berbicara" */
+.tts-speaking-bar{display:none;align-items:center;gap:8px;background:var(--primary-soft);border:1px solid rgba(106,158,127,.3);border-radius:8px;padding:.5rem .85rem;margin-bottom:.6rem;font-size:.78rem;color:var(--primary);font-weight:500}
+.tts-speaking-bar.show{display:flex}
+.tts-speaking-bar .tts-wave{display:inline-flex}
 </style>
 </head>
 <body>
@@ -438,13 +475,22 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
     </div>
 
-    <!-- SC: RINGKASAN SESI -->
+    <!-- SC: KESIMPULAN SESI (menggantikan ringkasan) -->
     <div id="sc-ringkasan" class="card" style="display:none">
-      <h2 id="rk-title">Ringkasan Sesi</h2>
-      <p class="sub" id="rk-sub">Berikut adalah apa yang sudah Anda ceritakan di sesi sebelumnya.</p>
-      <div id="rk-body"></div>
+      <div class="ks-header">
+        <div class="ks-icon" id="ks-icon">🌿</div>
+        <div>
+          <div class="ks-label">Kesimpulan Sesi</div>
+          <div class="ks-sesi" id="ks-sesi-title">Sesi 1</div>
+        </div>
+      </div>
+      <div class="ks-divider"></div>
+      <div id="ks-narasi" class="ks-narasi"></div>
+      <div id="ks-topik-wrap" class="ks-topik-wrap" style="display:none"></div>
+      <div id="ks-quote" class="ks-quote" style="display:none"></div>
+      <div class="ks-divider"></div>
       <div class="brow">
-        <button class="btn-sm bp" onclick="goToNextSesiIntro()">Lanjut ke Sesi Berikutnya →</button>
+        <button class="btn-sm bp" id="ks-lanjut-btn" onclick="goToNextSesiIntro()">Lanjut ke Sesi Berikutnya →</button>
       </div>
     </div>
 
@@ -490,7 +536,17 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
     <!-- SC: PERTANYAAN SESI LIFE REVIEW -->
     <div id="sc-sesi-q" class="card" style="display:none">
-      <h2 id="sq-title">Sesi 1</h2>
+      <!-- Tombol unlock TTS untuk iOS (muncul sekali) -->
+      <div class="tts-unlock-bar" id="tts-unlock-bar" style="display:none" onclick="ttsUnlockByUser()">
+        <span>🔊</span>
+        <span>Ketuk di sini untuk mengaktifkan suara Elina</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem">
+        <h2 id="sq-title" style="margin-bottom:0">Sesi 1</h2>
+        <button onclick="toggleTTS(this)" id="tts-toggle-btn" style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.72rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s" title="Aktifkan/matikan suara Elina">
+          <span id="tts-toggle-icon">🔊</span><span id="tts-toggle-label">Suara</span>
+        </button>
+      </div>
       <p class="sub" id="sq-prog"></p>
       <div class="pbar-w"><div class="pbar" id="pb-sesi" style="width:0%"></div></div>
       <div class="chat-area" id="sq-chat-area">
@@ -498,7 +554,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="elina-row" id="sq-elina-q-row">
           <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
           <div class="elina-bubble-wrap">
-            <div class="elina-name">✦ Elina</div>
+            <div class="elina-name">✦ Elina <span class="tts-wave" id="tts-wave-q" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></div>
             <div class="tbubble" id="sq-bubble"></div>
           </div>
         </div>
@@ -508,12 +564,16 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="elina-row" id="sq-elina-resp-row" style="display:none">
           <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
           <div class="elina-bubble-wrap">
-            <div class="elina-name">✦ Elina</div>
+            <div class="elina-name">✦ Elina <span class="tts-wave" id="tts-wave-resp" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></div>
             <div class="ai-response" id="sq-ai-response"></div>
           </div>
         </div>
       </div>
       <div id="sq-input">
+        <div class="tts-speaking-bar" id="tts-speaking-bar">
+          <span class="tts-wave"><span></span><span></span><span></span><span></span><span></span></span>
+          <span>Elina sedang berbicara — silakan dengarkan…</span>
+        </div>
         <button class="mic-btn" id="sq-mic-btn" onclick="toggleMicSesi()">🎤</button>
         <div class="mic-hint" id="sq-mic-hint">Menyiapkan rekaman…</div>
         <div class="chat-iw">
@@ -597,6 +657,11 @@ function goPage(id){
 }
 
 function showSc(id){
+  // Stop TTS saat berpindah halaman
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  _ttsAktif = false;
+  if(document.getElementById('tts-speaking-bar'))
+    document.getElementById('tts-speaking-bar').classList.remove('show');
   ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-jeda','sc-sesi-q','sc-phq-post','sc-final'].forEach(s=>{
     const e=document.getElementById(s);if(e)e.style.display='none';
   });
@@ -1118,9 +1183,10 @@ async function checkAndResumeSession(){
               return;
             }
           }
-          // Jeda sudah lewat atau checkpoint tidak ada → lanjut normal
+          // Jeda sudah lewat atau tidak ada → tampilkan kesimpulan
           showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
         } else {
+          // Sesi 1 selesai → langsung kesimpulan (tidak ada jeda)
           showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
         }
       } else {
@@ -1430,6 +1496,7 @@ function showSesiIntro(sesiNum){
 function beginSesiQuestions(){
   S.currentQIdx=0;
   showSc('sc-sesi-q');
+  ttsInit();       // Inisialisasi TTS — tampilkan tombol unlock jika iOS
   loadSesiQuestion();
 }
 
@@ -1468,12 +1535,24 @@ function loadSesiQuestion(){
   bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
   setTimeout(()=>{
     bt.textContent=qs[n];
-    document.getElementById('sq-ta').focus();
-    // Auto mulai rekaman setelah pertanyaan muncul
-    if(_micSupported){
-      setTimeout(()=>startMicSesi(), 400);
+    // TTS: Elina membacakan pertanyaan (profil 'pertanyaan' — pelan & hangat)
+    // Input dinonaktifkan saat Elina bicara, aktif kembali setelah selesai
+    if(_ttsUnlocked){
+      elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
+    } else {
+      // Jika belum unlock (iOS), langsung fokus & mic
+      document.getElementById('sq-ta').focus();
+      if(_micSupported) setTimeout(()=>startMicSesi(), 400);
     }
   },800);
+}
+
+// Callback setelah Elina selesai bicara pertanyaan → aktifkan mic
+// Dipanggil dari onend utterance di elinaBicara
+function _afterElinaQuestion(){
+  if(_micSupported){
+    setTimeout(()=>startMicSesi(), 300);
+  }
 }
 
 async function sendSesiAnswer(){
@@ -1513,6 +1592,16 @@ async function sendSesiAnswer(){
   const respEl=document.getElementById('sq-ai-response');
   respEl.textContent=aiResp;
   document.getElementById('sq-elina-resp-row').style.display='flex';
+
+  // TTS: Elina membacakan respons dengan intonasi sesuai konten
+  // Input sudah disembunyikan setelah kirim, TTS selesai → input tetap tersembunyi
+  // (tombol Pertanyaan Berikutnya yang jadi trigger berikutnya)
+  if(_ttsUnlocked){
+    const jenisResp = deteksiJenisRespons(aiResp);
+    // Override disable input: saat respons selesai jangan re-enable
+    // karena input memang sudah disembunyikan — override onend
+    elinaBicaraRespons(aiResp, jenisResp);
+  }
 
   // Simpan ke Supabase
   if(S.sessionId){
@@ -1597,26 +1686,244 @@ async function finishSesi(){
   }
 }
 
-function showRingkasanSesi(sesiNum, progressData){
-  const meta=SESI_META[sesiNum];
-  document.getElementById('rk-title').textContent=`Ringkasan Sesi ${sesiNum} — ${meta.title}`;
-  document.getElementById('rk-sub').textContent=`Berikut adalah apa yang sudah ${getSapaan()} ceritakan di Sesi ${sesiNum}.`;
 
-  const body=document.getElementById('rk-body');
-  if(!progressData || progressData.length===0){
-    body.innerHTML='<p style="color:var(--muted);font-size:.85rem">Tidak ada data yang tersimpan untuk sesi ini.</p>';
+/* ══════════════════════════════════════════
+   KESIMPULAN NARATIF — Rule-Based NLP
+   Membangun narasi positif dari data sesi:
+   - nlp_topics  → topik dominan yang muncul
+   - nlp_sentiment → dominan positif/negatif/campur
+   - nlp_emotion  → emosi utama
+   - answer_text  → kutipan terpilih
+══════════════════════════════════════════ */
+
+// Label topik yang user-friendly
+const TOPIK_LABEL = {
+  'keluarga':     {label:'Keluarga', icon:'👨‍👩‍👧'},
+  'pekerjaan':    {label:'Pekerjaan', icon:'💼'},
+  'kesehatan':    {label:'Kesehatan', icon:'🌱'},
+  'sosial':       {label:'Persahabatan', icon:'🤝'},
+  'masa lalu':    {label:'Kenangan', icon:'📖'},
+  'masa depan':   {label:'Harapan', icon:'✨'},
+  'spiritualitas':{label:'Spiritualitas', icon:'🙏'}
+};
+
+// Template narasi per paragraf — dipilih berdasarkan konteks
+const KS_TEMPLATE = {
+
+  // Paragraf 1: Pembuka reflektif — mengakui perjalanan sesi
+  pembuka: {
+    anak: [
+      '{nama} telah berbagi cerita yang sangat berharga dalam sesi ini. Setiap kata yang disampaikan mencerminkan pengalaman hidup yang nyata dan bermakna.',
+      'Dalam sesi ini, {nama} telah membuka diri untuk menceritakan perjalanan hidup dengan penuh keberanian. Itu adalah langkah yang luar biasa.',
+      '{nama} telah meluangkan waktu untuk menengok kembali kenangan dan perasaan. Setiap cerita yang dibagikan memiliki tempat tersendiri yang berharga.'
+    ],
+    dewasa: [
+      '{sapaan} telah berbagi perjalanan hidup yang kaya makna dalam sesi ini. Setiap cerita yang disampaikan mencerminkan kedalaman pengalaman yang sungguh berharga.',
+      'Dalam sesi ini, {sapaan} telah membuka lembaran kenangan dengan penuh keberanian dan kejujuran — sebuah langkah yang membutuhkan kekuatan besar.',
+      '{sapaan} telah meluangkan waktu untuk merefleksikan perjalanan hidup. Proses seperti ini adalah tanda dari jiwa yang bijaksana dan berani.'
+    ]
+  },
+
+  // Paragraf 2: Inti — berdasarkan topik dan sentimen dominan
+  inti: {
+    // Berdasarkan topik dominan
+    topik: {
+      'keluarga': {
+        positif: 'Keluarga tampak menjadi sumber kekuatan dan kehangatan yang sangat berarti dalam perjalanan hidup {sapaan}. Hubungan dengan orang-orang tersayang itu adalah salah satu harta yang paling berharga.',
+        negatif: 'Meskipun perjalanan bersama keluarga tidak selalu mudah, ada ketangguhan luar biasa dalam cara {sapaan} melewati setiap tantangan itu. Setiap luka yang dilewati telah membentuk {sapaan} menjadi pribadi yang lebih kuat.',
+        netral:  'Keluarga telah menjadi bagian penting dari kisah hidup {sapaan} — dengan segala dinamika dan kehangatan yang hadir di dalamnya.'
+      },
+      'pekerjaan': {
+        positif: 'Perjalanan {sapaan} di dunia kerja mencerminkan dedikasi dan kerja keras yang patut dibanggakan. Setiap pencapaian yang diraih adalah buah dari ketekunan nyata.',
+        negatif: 'Tantangan di dunia kerja yang pernah dihadapi {sapaan} menunjukkan betapa tangguhnya jiwa yang dimiliki. Tidak semua orang mampu bangkit dan terus melangkah seperti itu.',
+        netral:  'Pengalaman {sapaan} di dunia kerja telah memberikan banyak pelajaran berharga yang membentuk cara pandang dan karakter hingga hari ini.'
+      },
+      'kesehatan': {
+        positif: 'Kepedulian {sapaan} terhadap kesehatan mencerminkan rasa syukur dan penghargaan yang dalam terhadap anugerah kehidupan.',
+        negatif: 'Perjalanan melewati tantangan kesehatan yang dialami {sapaan} adalah bukti nyata dari kekuatan dan ketabahan yang luar biasa. Itu bukan hal yang mudah, namun {sapaan} telah melaluinya.',
+        netral:  'Kesehatan menjadi salah satu tema penting dalam perjalanan hidup {sapaan} — sebuah pengingat betapa berharganya setiap momen yang dimiliki.'
+      },
+      'sosial': {
+        positif: 'Hubungan dengan orang-orang di sekitar {sapaan} tampak memberi warna dan kehangatan dalam perjalanan hidup. Persahabatan yang tulus adalah salah satu anugerah terbesar.',
+        negatif: 'Dinamika dalam hubungan sosial yang pernah dihadapi {sapaan} telah mengajarkan banyak hal tentang arti ketulusan dan kepercayaan.',
+        netral:  'Orang-orang dalam lingkungan sosial {sapaan} telah menjadi bagian tak terpisahkan dari cerita hidup yang dibentuk selama ini.'
+      },
+      'masa lalu': {
+        positif: 'Kenangan-kenangan indah yang dibagikan {sapaan} menunjukkan betapa kayanya perjalanan hidup yang telah dilalui. Masa lalu itu adalah fondasi yang membentuk siapa {sapaan} hari ini.',
+        negatif: 'Keberanian {sapaan} untuk melihat kembali kenangan yang menyakitkan adalah langkah penyembuhan yang sangat berarti. Tidak semua orang mampu melakukan itu.',
+        netral:  'Kenangan masa lalu yang diceritakan {sapaan} adalah bagian penting dari mozaik kehidupan yang telah dibentuk dengan penuh makna.'
+      },
+      'masa depan': {
+        positif: 'Harapan dan impian yang masih dipeluk {sapaan} menunjukkan bahwa semangat untuk terus bertumbuh masih menyala dengan kuat. Itu adalah kekuatan yang luar biasa.',
+        negatif: 'Kekhawatiran tentang masa depan yang dirasakan {sapaan} adalah tanda kepedulian yang mendalam. Di balik kekhawatiran itu tersimpan harapan yang belum padam.',
+        netral:  'Pandangan {sapaan} tentang masa depan mencerminkan kebijaksanaan yang datang dari pengalaman panjang yang telah dilalui.'
+      },
+      'spiritualitas': {
+        positif: 'Dimensi spiritual dalam kehidupan {sapaan} tampak menjadi sumber kedamaian dan kekuatan yang sangat berarti dalam setiap langkah perjalanan.',
+        negatif: 'Di tengah kesulitan yang pernah dihadapi, spiritualitas telah menjadi pegangan yang memberi {sapaan} kekuatan untuk bertahan dan terus melangkah.',
+        netral:  'Kehidupan spiritual {sapaan} adalah salah satu pilar penting yang memberi makna dan arah dalam perjalanan panjang yang telah dilalui.'
+      }
+    },
+    // Fallback jika tidak ada topik terdeteksi
+    default: {
+      positif: 'Dalam cerita yang dibagikan {sapaan}, ada cahaya keberanian dan harapan yang sangat nyata. Setiap pengalaman positif yang pernah dilalui adalah bukti kekuatan jiwa yang sesungguhnya.',
+      negatif: 'Di balik setiap tantangan yang pernah dihadapi {sapaan}, tersimpan ketangguhan yang luar biasa. Fakta bahwa {sapaan} masih di sini dan masih mau bercerita — itu sendiri adalah kekuatan yang nyata.',
+      netral:  'Setiap cerita yang dibagikan {sapaan} dalam sesi ini memiliki nilai dan makna tersendiri. Tidak ada satu pun pengalaman hidup yang sia-sia — semuanya membentuk siapa kita hari ini.'
+    }
+  },
+
+  // Paragraf 3: Penutup penguatan — selalu positif dan hangat
+  penutup: [
+    'Terima kasih sudah mempercayakan kisah ini. Setiap kata yang dibagikan adalah langkah nyata dalam perjalanan menemukan kembali makna dan kekuatan dalam diri sendiri.',
+    'Proses seperti ini membutuhkan keberanian yang tidak kecil. {sapaan} sudah mengambil langkah yang sangat berarti hari ini, dan itu adalah sesuatu yang patut untuk dirayakan.',
+    'Setiap cerita yang dibagikan membawa {sapaan} selangkah lebih dekat pada pemahaman yang lebih dalam tentang perjalanan hidup yang unik dan berharga ini.',
+    'Kisah hidup {sapaan} adalah milik {sapaan} sepenuhnya — penuh warna, penuh makna, dan jauh lebih kuat dari yang mungkin terasa. Terima kasih sudah berbagi.'
+  ]
+};
+
+// Ambil kutipan paling bermakna dari jawaban user
+function pilihKutipan(progressData){
+  if(!progressData || progressData.length === 0) return null;
+  // Prioritaskan jawaban dengan sentimen positif dan panjang cukup
+  const positif = progressData.filter(p =>
+    p.nlp_sentiment === 'positif' && p.answer_text && p.answer_text.length > 30
+  );
+  const pool = positif.length > 0 ? positif : progressData.filter(p => p.answer_text && p.answer_text.length > 20);
+  if(pool.length === 0) return null;
+  const chosen = pool[Math.floor(Math.random() * Math.min(pool.length, 3))];
+  // Potong jika terlalu panjang
+  let teks = chosen.answer_text.trim();
+  if(teks.length > 160) teks = teks.substring(0, 157) + '...';
+  return teks;
+}
+
+// Hitung topik dominan dari semua jawaban
+function hitungTopikDominan(progressData){
+  const topikCount = {};
+  progressData.forEach(p => {
+    (p.nlp_topics || []).forEach(t => {
+      topikCount[t] = (topikCount[t] || 0) + 1;
+    });
+  });
+  // Sort dan ambil max 3 topik teratas
+  return Object.entries(topikCount)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([t]) => t);
+}
+
+// Hitung sentimen dominan
+function hitungSentimenDominan(progressData){
+  let pos=0, neg=0, net=0;
+  progressData.forEach(p => {
+    if(p.nlp_sentiment === 'positif') pos++;
+    else if(p.nlp_sentiment === 'negatif') neg++;
+    else net++;
+  });
+  if(pos >= neg && pos >= net) return 'positif';
+  if(neg > pos && neg >= net) return 'negatif';
+  return 'netral';
+}
+
+// Isi template dengan nama dan sapaan
+function isiTemplate(tpl, extra={}){
+  const sp = getSapaan();
+  return tpl
+    .replace(/\{sapaan\}/g, sp)
+    .replace(/\{nama\}/g, S.nama || sp)
+    .replace(/\{sesiNum\}/g, extra.sesiNum || '')
+    .replace(/\{topik\}/g, extra.topik || '');
+}
+
+// Fungsi utama: bangun narasi kesimpulan
+function buatKesimpulan(sesiNum, progressData){
+  const meta = SESI_META[sesiNum];
+  const isYoung = (S.tahap === 'anak' || S.tahap === 'remaja');
+
+  // Analisis data
+  const topikDominan  = hitungTopikDominan(progressData);
+  const sentimenDom   = hitungSentimenDominan(progressData);
+  const topikUtama    = topikDominan[0] || null;
+
+  // ── Paragraf 1: Pembuka ──
+  const poolPembuka = isYoung ? KS_TEMPLATE.pembuka.anak : KS_TEMPLATE.pembuka.dewasa;
+  const p1 = isiTemplate(poolPembuka[Math.floor(Math.random() * poolPembuka.length)]);
+
+  // ── Paragraf 2: Inti (berdasarkan topik dan sentimen) ──
+  let p2Raw;
+  if(topikUtama && KS_TEMPLATE.inti.topik[topikUtama]){
+    p2Raw = KS_TEMPLATE.inti.topik[topikUtama][sentimenDom] ||
+            KS_TEMPLATE.inti.topik[topikUtama]['netral'];
   } else {
-    body.innerHTML=progressData.map(p=>`
-      <div class="ringkasan-item">
-        <div class="ringkasan-q">❓ ${p.question_text}</div>
-        <div class="ringkasan-a">${p.answer_text||'-'}</div>
-        ${p.nlp_sentiment?`<div class="nlp-row">
-          <span class="nlp-tag nlp-${p.nlp_sentiment==='positif'?'pos':p.nlp_sentiment==='negatif'?'neg':'neu'}">${p.nlp_sentiment}</span>
-          ${p.nlp_emotion && p.nlp_emotion!=='netral'?`<span class="nlp-tag nlp-emo">${p.nlp_emotion}</span>`:''}
-          ${(p.nlp_topics||[]).map(t=>`<span class="nlp-tag nlp-top">${t}</span>`).join('')}
-        </div>`:''}
-      </div>`).join('');
+    p2Raw = KS_TEMPLATE.inti.default[sentimenDom];
   }
+  const p2 = isiTemplate(p2Raw);
+
+  // ── Paragraf 3: Penutup ──
+  const poolPenutup = KS_TEMPLATE.penutup;
+  const p3 = isiTemplate(poolPenutup[Math.floor(Math.random() * poolPenutup.length)]);
+
+  // ── Kutipan ──
+  const kutipan = pilihKutipan(progressData);
+
+  return { p1, p2, p3, topikDominan, kutipan, sentimenDom };
+}
+
+function showRingkasanSesi(sesiNum, progressData){
+  const meta = SESI_META[sesiNum];
+  const isLastSesi = (S.sesiList.indexOf(sesiNum) === S.sesiList.length - 1);
+
+  // Update ikon dan judul sesi
+  document.getElementById('ks-icon').textContent = meta.icon || '🌿';
+  document.getElementById('ks-sesi-title').textContent = `Sesi ${sesiNum} — ${meta.title}`;
+
+  // Update label tombol lanjut
+  const btnLanjut = document.getElementById('ks-lanjut-btn');
+  if(isLastSesi){
+    btnLanjut.textContent = 'Lanjut ke Tes Akhir →';
+  } else {
+    const nextSesiNum = S.sesiList[S.sesiList.indexOf(sesiNum)+1];
+    const nextMeta = SESI_META[nextSesiNum];
+    btnLanjut.textContent = `Lanjut ke Sesi ${nextSesiNum} →`;
+  }
+
+  // Narasi area
+  const narasiEl = document.getElementById('ks-narasi');
+  const topikEl  = document.getElementById('ks-topik-wrap');
+  const quoteEl  = document.getElementById('ks-quote');
+
+  if(!progressData || progressData.length === 0){
+    narasiEl.innerHTML = `<p>${isiTemplate(KS_TEMPLATE.pembuka[S.tahap==='anak'||S.tahap==='remaja'?'anak':'dewasa'][0])}</p>`;
+    topikEl.style.display = 'none';
+    quoteEl.style.display = 'none';
+  } else {
+    // Bangun kesimpulan
+    const ks = buatKesimpulan(sesiNum, progressData);
+
+    // Render narasi 3 paragraf
+    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${ks.p3}</p>`;
+
+    // Render topik pills
+    if(ks.topikDominan.length > 0){
+      topikEl.innerHTML = ks.topikDominan.map(t => {
+        const info = TOPIK_LABEL[t] || {label:t, icon:'📌'};
+        return `<span class="ks-topik-pill">${info.icon} ${info.label}</span>`;
+      }).join('');
+      topikEl.style.display = 'flex';
+    } else {
+      topikEl.style.display = 'none';
+    }
+
+    // Render kutipan
+    if(ks.kutipan){
+      quoteEl.textContent = `"${ks.kutipan}"`;
+      quoteEl.style.display = 'block';
+    } else {
+      quoteEl.style.display = 'none';
+    }
+  }
+
+  renderSteps(getStepIdxForSesi(sesiNum));
   showSc('sc-ringkasan');
 }
 
@@ -1852,6 +2159,270 @@ async function showFinal(){
     }catch(err){
       document.getElementById('save-status').innerHTML='<span style="color:var(--amber)">⚠️ Gagal menyimpan: '+err.message+'</span>';
     }
+  }
+}
+
+
+/* ══════════════════════════════════════════
+   TTS ELINA — Text-to-Speech dengan Intonasi
+   
+   Profil intonasi per jenis respons:
+   - pertanyaan : pelan, nada hangat (pembuka sesi)
+   - empati     : paling pelan, nada paling rendah
+   - validasi   : sedang, nada netral hangat
+   - positif    : sedikit lebih cepat, nada lebih cerah
+   - netral     : default tenang
+   
+   iOS: butuh gesture user sebelum TTS bisa jalan.
+   Android/desktop: auto-play langsung.
+══════════════════════════════════════════ */
+
+// Profil intonasi per jenis respons
+const TTS_PROFIL = {
+  pertanyaan: { rate:0.80, pitch:0.92, volume:1.0, pauseBefore:500 },
+  empati:     { rate:0.78, pitch:0.88, volume:1.0, pauseBefore:650 },
+  validasi:   { rate:0.84, pitch:0.95, volume:1.0, pauseBefore:400 },
+  positif:    { rate:0.88, pitch:1.05, volume:1.0, pauseBefore:300 },
+  netral:     { rate:0.83, pitch:0.95, volume:1.0, pauseBefore:400 }
+};
+
+// State TTS
+let _ttsAktif    = false;   // sedang bicara
+let _ttsUnlocked = false;   // sudah di-unlock (iOS gesture)
+let _ttsEnabled  = true;    // user belum matikan
+let _ttsUtterance= null;    // utterance aktif
+
+// Deteksi jenis respons dari teks untuk pilih profil intonasi
+function deteksiJenisRespons(teks){
+  const t = teks.toLowerCase();
+  // Pertanyaan terapeutik (dipakai untuk bubble pertanyaan Elina)
+  if(t.includes('?') || t.includes('ceritakan') || t.includes('bagaimana') || t.includes('apa yang')) return 'pertanyaan';
+  // Empati — respons terhadap cerita sedih/berat
+  if(t.includes('berat') || t.includes('sulit') || t.includes('menderita') || t.includes('luka') ||
+     t.includes('kehilangan') || t.includes('tidak sendiri') || t.includes('wajar merasakan') ||
+     t.includes('didengar') || t.includes('hadir untuk')) return 'empati';
+  // Positif — penguatan dan apresiasi
+  if(t.includes('luar biasa') || t.includes('hebat') || t.includes('berhasil') ||
+     t.includes('bangga') || t.includes('kuat') || t.includes('berharga') ||
+     t.includes('terima kasih') || t.includes('berani')) return 'positif';
+  // Validasi — refleksi dan konfirmasi
+  if(t.includes('tampak') || t.includes('mencerminkan') || t.includes('menunjukkan') ||
+     t.includes('membentuk') || t.includes('bermakna') || t.includes('berarti')) return 'validasi';
+  return 'netral';
+}
+
+// Cek apakah iOS
+function _isIOS(){
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// Pilih suara Indonesia jika tersedia
+function _pilihanSuara(){
+  const voices = window.speechSynthesis.getVoices();
+  // Prioritas: id-ID, lalu in-ID, lalu default
+  return voices.find(v => v.lang === 'id-ID') ||
+         voices.find(v => v.lang === 'in-ID') ||
+         voices.find(v => v.lang.startsWith('id')) ||
+         null; // null = pakai default browser
+}
+
+// Bagi teks panjang di koma/titik agar lebih natural
+function _bagiKalimat(teks){
+  // Pisahkan di tanda baca utama, tapi jaga agar tidak terlalu pendek
+  const parts = teks.split(/(?<=[.,!])\s+/);
+  const hasil = [];
+  let current = '';
+  for(const p of parts){
+    current += (current ? ' ' : '') + p;
+    if(current.length > 60){
+      hasil.push(current.trim());
+      current = '';
+    }
+  }
+  if(current.trim()) hasil.push(current.trim());
+  return hasil.length > 0 ? hasil : [teks];
+}
+
+// Tampilkan/sembunyikan animasi gelombang
+function _ttsWaveOn(waveId){
+  const el = document.getElementById(waveId);
+  if(el) el.style.display = 'inline-flex';
+}
+function _ttsWaveOff(waveId){
+  const el = document.getElementById(waveId);
+  if(el) el.style.display = 'none';
+}
+
+// Disable / enable input area saat Elina bicara
+function _ttsDisableInput(disabled){
+  const inp  = document.getElementById('sq-input');
+  const bar  = document.getElementById('tts-speaking-bar');
+  if(!inp) return;
+  if(disabled){
+    inp.classList.add('sq-input-disabled');
+    if(bar) bar.classList.add('show');
+    // Matikan mic jika sedang merekam
+    _killMicSesi();
+  } else {
+    inp.classList.remove('sq-input-disabled');
+    if(bar) bar.classList.remove('show');
+    // Fokus textarea setelah Elina selesai
+    const ta = document.getElementById('sq-ta');
+    if(ta) setTimeout(()=>ta.focus(), 150);
+  }
+}
+
+// Stop TTS yang sedang berjalan
+function ttsStop(){
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  _ttsAktif = false;
+  _ttsUtterance = null;
+  _ttsWaveOff('tts-wave-q');
+  _ttsWaveOff('tts-wave-resp');
+  _ttsDisableInput(false);
+}
+
+// Fungsi utama: bicara
+function elinaBicara(teks, jenisOverride, waveId){
+  if(!_ttsEnabled) return;
+  if(!window.speechSynthesis) return;
+
+  // Stop jika sedang bicara
+  ttsStop();
+
+  const jenis   = jenisOverride || deteksiJenisRespons(teks);
+  const profil  = TTS_PROFIL[jenis] || TTS_PROFIL.netral;
+  const waveEl  = waveId || 'tts-wave-q';
+
+  const bicara = () => {
+    // iOS kadang butuh getVoices() dipanggil ulang
+    const suara = _pilihanSuara();
+    const utt = new SpeechSynthesisUtterance(teks);
+    utt.lang   = 'id-ID';
+    utt.rate   = profil.rate;
+    utt.pitch  = profil.pitch;
+    utt.volume = profil.volume;
+    if(suara) utt.voice = suara;
+
+    utt.onstart = () => {
+      _ttsAktif = true;
+      _ttsWaveOn(waveEl);
+      _ttsDisableInput(true);
+    };
+    utt.onend = () => {
+      _ttsAktif = false;
+      _ttsWaveOff(waveEl);
+      _ttsDisableInput(false);
+      // Jika ini adalah pembacaan pertanyaan → auto mulai mic
+      if(waveEl === 'tts-wave-q' && jenisOverride === 'pertanyaan'){
+        _afterElinaQuestion();
+      }
+    };
+    utt.onerror = () => {
+      _ttsAktif = false;
+      _ttsWaveOff(waveEl);
+      _ttsDisableInput(false);
+    };
+
+    _ttsUtterance = utt;
+    window.speechSynthesis.speak(utt);
+  };
+
+  // Terapkan jeda sebelum mulai bicara
+  setTimeout(bicara, profil.pauseBefore);
+}
+
+// Versi TTS khusus untuk respons Elina setelah jawaban user
+// Berbeda dari elinaBicara: tidak perlu disable/enable input
+// karena input sudah disembunyikan oleh sendSesiAnswer
+function elinaBicaraRespons(teks, jenisOverride){
+  if(!_ttsEnabled) return;
+  if(!window.speechSynthesis) return;
+  // Stop jika masih ada TTS berjalan
+  window.speechSynthesis.cancel();
+
+  const jenis  = jenisOverride || deteksiJenisRespons(teks);
+  const profil = TTS_PROFIL[jenis] || TTS_PROFIL.netral;
+
+  const bicara = () => {
+    const suara = _pilihanSuara();
+    const utt   = new SpeechSynthesisUtterance(teks);
+    utt.lang    = 'id-ID';
+    utt.rate    = profil.rate;
+    utt.pitch   = profil.pitch;
+    utt.volume  = profil.volume;
+    if(suara) utt.voice = suara;
+
+    utt.onstart = () => {
+      _ttsAktif = true;
+      _ttsWaveOn('tts-wave-resp');
+    };
+    utt.onend = () => {
+      _ttsAktif = false;
+      _ttsWaveOff('tts-wave-resp');
+      // Setelah Elina selesai baca respons → tampilkan tombol Pertanyaan Berikutnya
+      // (tidak ada auto-scroll karena tombol sudah terlihat)
+    };
+    utt.onerror = () => {
+      _ttsAktif = false;
+      _ttsWaveOff('tts-wave-resp');
+    };
+    window.speechSynthesis.speak(utt);
+  };
+
+  setTimeout(bicara, profil.pauseBefore);
+}
+
+// Unlock TTS via gesture user (untuk iOS)
+function ttsUnlockByUser(){
+  // Mainkan utterance kosong untuk unlock AudioContext iOS
+  const utt = new SpeechSynthesisUtterance('');
+  utt.volume = 0;
+  utt.onend = () => {
+    _ttsUnlocked = true;
+    // Sembunyikan tombol unlock
+    const bar = document.getElementById('tts-unlock-bar');
+    if(bar) bar.style.display = 'none';
+    toast('🔊 Suara Elina diaktifkan!');
+    // Langsung bacakan pertanyaan yang sedang tampil
+    const bt = document.getElementById('sq-bubble');
+    if(bt && bt.textContent && bt.textContent.length > 3){
+      elinaBicara(bt.textContent, 'pertanyaan', 'tts-wave-q');
+    }
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+// Toggle TTS on/off oleh user
+function toggleTTS(btn){
+  _ttsEnabled = !_ttsEnabled;
+  const icon  = document.getElementById('tts-toggle-icon');
+  const label = document.getElementById('tts-toggle-label');
+  if(_ttsEnabled){
+    if(icon)  icon.textContent  = '🔊';
+    if(label) label.textContent = 'Suara';
+    toast('🔊 Suara Elina diaktifkan');
+  } else {
+    if(icon)  icon.textContent  = '🔇';
+    if(label) label.textContent = 'Bisu';
+    ttsStop(); // hentikan jika sedang bicara
+    toast('🔇 Suara Elina dimatikan');
+  }
+}
+
+// Inisialisasi TTS saat sc-sesi-q pertama kali tampil
+function ttsInit(){
+  if(!window.speechSynthesis) return;
+  // Pastikan voices sudah dimuat
+  if(window.speechSynthesis.getVoices().length === 0){
+    window.speechSynthesis.addEventListener('voiceschanged', ()=>{}, {once:true});
+  }
+  // Tampilkan tombol unlock di iOS (karena butuh gesture)
+  if(_isIOS() && !_ttsUnlocked){
+    const bar = document.getElementById('tts-unlock-bar');
+    if(bar) bar.style.display = 'flex';
+  } else {
+    _ttsUnlocked = true;
   }
 }
 
