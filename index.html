@@ -297,6 +297,47 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .tts-speaking-bar{display:none;align-items:center;gap:8px;background:var(--primary-soft);border:1px solid rgba(106,158,127,.3);border-radius:8px;padding:.5rem .85rem;margin-bottom:.6rem;font-size:.78rem;color:var(--primary);font-weight:500}
 .tts-speaking-bar.show{display:flex}
 .tts-speaking-bar .tts-wave{display:inline-flex}
+
+/* ══ MUSIK TERAPI — Floating Player ══ */
+#music-player{
+  position:fixed;bottom:1.4rem;right:1.4rem;z-index:250;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:.65rem .9rem;
+  display:none;  /* hidden by default, show saat sesi */
+  align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);
+  backdrop-filter:blur(12px);
+  transition:opacity .3s ease, transform .3s ease;
+  animation:slideUp .4s ease;
+}
+#music-player.hide{opacity:0;transform:translateY(8px);pointer-events:none}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.mp-icon{font-size:1.05rem;flex-shrink:0}
+.mp-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+.mp-title{font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.mp-sub{font-size:.62rem;color:var(--muted)}
+
+/* Animasi equalizer kecil saat play */
+.mp-eq{display:flex;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
+.mp-eq span{width:3px;border-radius:2px;background:var(--primary);animation:eq-bar .8s ease-in-out infinite}
+.mp-eq span:nth-child(1){height:5px;animation-delay:0s}
+.mp-eq span:nth-child(2){height:10px;animation-delay:.15s}
+.mp-eq span:nth-child(3){height:7px;animation-delay:.3s}
+.mp-eq span:nth-child(4){height:12px;animation-delay:.1s}
+.mp-eq.paused span{animation-play-state:paused;opacity:.35}
+.mp-eq.ducked span{background:var(--muted);animation-duration:1.4s;opacity:.5}
+@keyframes eq-bar{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+
+.mp-controls{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.mp-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--surface2);color:var(--text);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.mp-btn:hover{background:var(--border2)}
+.mp-btn.active{background:var(--primary);color:#fff}
+
+/* Volume slider */
+.mp-vol{width:56px;accent-color:var(--primary);cursor:pointer;-webkit-appearance:none;height:3px;border-radius:3px;outline:none;background:var(--border2)}
+.mp-vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--primary);cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -654,6 +695,10 @@ function goPage(id){
   const btns=document.querySelectorAll('.nb');
   if(map[id]!==undefined) btns[map[id]]?.classList.add('act');
   if(id==='riwayat') loadRiwayat();
+  // Pause musik & sembunyikan player saat meninggalkan halaman app
+  if(id !== 'app' && _musPlaying){
+    musicPause();
+  }
 }
 
 function showSc(id){
@@ -662,6 +707,18 @@ function showSc(id){
   _ttsAktif = false;
   if(document.getElementById('tts-speaking-bar'))
     document.getElementById('tts-speaking-bar').classList.remove('show');
+
+  // Musik: play saat masuk sesi-q, pause saat keluar
+  const wasSesiQ = document.getElementById('sc-sesi-q') &&
+                   document.getElementById('sc-sesi-q').style.display !== 'none';
+  if(id === 'sc-sesi-q'){
+    // Masuk ke sesi — start musik
+    setTimeout(()=>musicStart(), 300);
+  } else if(wasSesiQ && id !== 'sc-sesi-q'){
+    // Keluar dari sesi — pause musik (tapi jangan stop total)
+    musicPause();
+  }
+
   ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-jeda','sc-sesi-q','sc-phq-post','sc-final'].forEach(s=>{
     const e=document.getElementById(s);if(e)e.style.display='none';
   });
@@ -2308,11 +2365,13 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsAktif = true;
       _ttsWaveOn(waveEl);
       _ttsDisableInput(true);
+      musicDuck();    // kecilkan musik saat Elina bicara
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
+      musicUnduck();  // kembalikan volume musik
       // Jika ini adalah pembacaan pertanyaan → auto mulai mic
       if(waveEl === 'tts-wave-q' && jenisOverride === 'pertanyaan'){
         _afterElinaQuestion();
@@ -2322,6 +2381,7 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
+      musicUnduck();  // pastikan volume kembali normal jika error
     };
 
     _ttsUtterance = utt;
@@ -2356,16 +2416,17 @@ function elinaBicaraRespons(teks, jenisOverride){
     utt.onstart = () => {
       _ttsAktif = true;
       _ttsWaveOn('tts-wave-resp');
+      musicDuck();    // kecilkan musik saat Elina bicara respons
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
-      // Setelah Elina selesai baca respons → tampilkan tombol Pertanyaan Berikutnya
-      // (tidak ada auto-scroll karena tombol sudah terlihat)
+      musicUnduck();  // kembalikan volume musik
     };
     utt.onerror = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
+      musicUnduck();
     };
     window.speechSynthesis.speak(utt);
   };
@@ -2597,7 +2658,204 @@ sb.auth.onAuthStateChange(async(event,session)=>{
   if(event==='SIGNED_OUT') setLoggedOut();
 });
 
+/* ══════════════════════════════════════════
+   MUSIK TERAPI — Alam + Piano
+   Track list: 4 lagu royalty-free (Pixabay CC0)
+   Auto-play saat sc-sesi-q, pause saat keluar
+══════════════════════════════════════════ */
+
+// ── Track list musik terapi ──
+// Semua dari Pixabay (royalty-free, browser-accessible)
+// Format fallback: jika track gagal → auto-skip ke berikutnya via error handler
+// Saran jangka panjang: upload ke Supabase Storage sendiri untuk keandalan penuh
+const MUSIK_LIST = [
+  {
+    title: 'Hujan & Piano',
+    sub:   'Alam · Piano · 3 mnt',
+    icon:  '🌧️',
+    url:   'https://cdn.pixabay.com/audio/2024/03/07/audio_b62b3e1e0f.mp3'
+  },
+  {
+    title: 'Sungai Hutan',
+    sub:   'Alam · Air mengalir · 4 mnt',
+    icon:  '🌿',
+    url:   'https://cdn.pixabay.com/audio/2023/10/22/audio_946bc4d8fb.mp3'
+  },
+  {
+    title: 'Piano Meditasi',
+    sub:   'Instrumental · Tenang · 5 mnt',
+    icon:  '🎹',
+    url:   'https://cdn.pixabay.com/audio/2024/01/15/audio_2dde668d05.mp3'
+  },
+  {
+    title: 'Burung & Embun',
+    sub:   'Alam pagi · Ambient · 3 mnt',
+    icon:  '🐦',
+    url:   'https://cdn.pixabay.com/audio/2023/06/18/audio_740a42614d.mp3'
+  },
+  {
+    title: 'Angin & Dedaunan',
+    sub:   'Alam · Piano lembut · 4 mnt',
+    icon:  '🍃',
+    url:   'https://cdn.pixabay.com/audio/2022/12/05/audio_1e30a3882f.mp3'
+  }
+];
+
+// Volume saat normal vs saat TTS bicara (ducking)
+const MUS_VOL_NORMAL = 0.28;
+const MUS_VOL_DUCK   = 0.07;  // kecil saat Elina bicara
+
+let _musIdx=0, _musPlaying=false, _musInited=false, _musVolume=MUS_VOL_NORMAL, _musDucked=false;
+
+function _musAudio(){ return document.getElementById('music-audio'); }
+function _musPlayer(){ return document.getElementById('music-player'); }
+
+function _musLoad(idx, autoplay){
+  const track=MUSIK_LIST[idx], audio=_musAudio();
+  if(!audio||!track) return;
+  audio.src=track.url;
+  audio.volume=_musDucked ? MUS_VOL_DUCK : MUS_VOL_NORMAL;
+  audio.loop=true;
+  const t=document.getElementById('mp-title');
+  const s=document.getElementById('mp-sub');
+  const ic=document.getElementById('mp-icon-txt');
+  if(t)  t.textContent  = track.title;
+  if(s)  s.textContent  = track.sub;
+  if(ic) ic.textContent = track.icon || '🎵';
+  // Update track counter
+  const ctr=document.getElementById('mp-counter');
+  if(ctr) ctr.textContent = `${idx+1}/${MUSIK_LIST.length}`;
+  if(autoplay){
+    audio.play().then(()=>{_musPlaying=true;_musUpdateUI(true);})
+               .catch(()=>{_musPlaying=false;_musUpdateUI(false);});
+  }
+}
+
+function _musUpdateUI(playing){
+  const btn=document.getElementById('mp-play-btn');
+  const eq=document.getElementById('mp-eq');
+  if(btn){btn.textContent=playing?'⏸':'▶';btn.title=playing?'Pause':'Play';}
+  if(eq){playing?eq.classList.remove('paused'):eq.classList.add('paused');}
+}
+
+function musicShow(show){
+  const player=_musPlayer();
+  if(!player) return;
+  if(show){player.style.display='flex';player.classList.remove('hide');}
+  else{
+    player.classList.add('hide');
+    setTimeout(()=>{if(player.classList.contains('hide'))player.style.display='none';},350);
+  }
+}
+
+function musicStart(){
+  const audio=_musAudio();
+  if(!audio) return;
+  if(!_musInited){
+    _musInited=true;
+    _musLoad(_musIdx, true);
+  } else if(!_musPlaying){
+    audio.play().then(()=>{_musPlaying=true;_musUpdateUI(true);}).catch(()=>{});
+  }
+  musicShow(true);
+}
+
+function musicPause(){
+  const audio=_musAudio();
+  if(!audio) return;
+  audio.pause(); _musPlaying=false; _musUpdateUI(false); musicShow(false);
+}
+
+function musicToggle(){
+  const audio=_musAudio();
+  if(!audio) return;
+  if(_musPlaying){audio.pause();_musPlaying=false;_musUpdateUI(false);}
+  else{audio.play().then(()=>{_musPlaying=true;_musUpdateUI(true);}).catch(()=>{});}
+}
+
+function musicNext(){
+  _musIdx=(_musIdx+1)%MUSIK_LIST.length;
+  _musLoad(_musIdx, _musPlaying);
+}
+
+function musicPrev(){
+  _musIdx=(_musIdx-1+MUSIK_LIST.length)%MUSIK_LIST.length;
+  _musLoad(_musIdx, _musPlaying);
+}
+
+function musicVolume(val){
+  _musVolume=parseInt(val)/100;
+  const audio=_musAudio();
+  // Hanya update volume jika tidak sedang ducked
+  if(audio && !_musDucked) audio.volume=_musVolume;
+}
+
+// Kecilkan musik saat Elina bicara (TTS ducking)
+function musicDuck(){
+  const audio=_musAudio();
+  if(!audio || !_musPlaying) return;
+  _musDucked=true;
+  // Visual: EQ jadi abu
+  const eq=document.getElementById('mp-eq');
+  if(eq) eq.classList.add('ducked');
+  // Fade down halus
+  const step=0.02, target=MUS_VOL_DUCK;
+  const fade=setInterval(()=>{
+    if(audio.volume > target + step){ audio.volume=Math.max(audio.volume-step, target); }
+    else{ audio.volume=target; clearInterval(fade); }
+  }, 40);
+}
+
+// Kembalikan volume normal setelah Elina selesai bicara
+function musicUnduck(){
+  const audio=_musAudio();
+  if(!audio || !_musPlaying) return;
+  _musDucked=false;
+  // Visual: EQ kembali normal
+  const eq2=document.getElementById('mp-eq');
+  if(eq2) eq2.classList.remove('ducked');
+  // Fade up halus
+  const step=0.018, target=_musVolume;
+  const fade=setInterval(()=>{
+    if(audio.volume < target - step){ audio.volume=Math.min(audio.volume+step, target); }
+    else{ audio.volume=target; clearInterval(fade); }
+  }, 40);
+}
+
+// Error handler: skip ke track berikutnya jika gagal dimuat
+document.addEventListener('DOMContentLoaded',()=>{
+  const audio=_musAudio();
+  if(audio){
+    audio.addEventListener('error',()=>{
+      console.warn('Track gagal, skip ke berikutnya');
+      setTimeout(()=>musicNext(),600);
+    });
+  }
+});
+
 init();
 </script>
+
+<!-- ══ MUSIK TERAPI — Floating Player ══ -->
+<div id="music-player">
+  <span class="mp-icon" id="mp-icon-txt">🎵</span>
+  <div class="mp-info">
+    <div class="mp-title" id="mp-title">Musik Terapi</div>
+    <div class="mp-sub" id="mp-sub">Alam &amp; Piano</div>
+  </div>
+  <span id="mp-counter" style="font-size:.6rem;color:var(--muted);flex-shrink:0">1/5</span>
+  <div class="mp-eq" id="mp-eq">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <div class="mp-controls">
+    <button class="mp-btn" id="mp-prev-btn" onclick="musicPrev()" title="Track sebelumnya">⏮</button>
+    <button class="mp-btn active" id="mp-play-btn" onclick="musicToggle()" title="Play/Pause">⏸</button>
+    <button class="mp-btn" id="mp-next-btn" onclick="musicNext()" title="Track berikutnya">⏭</button>
+    <input class="mp-vol" id="mp-vol" type="range" min="0" max="100" value="28"
+      oninput="musicVolume(this.value)" title="Volume musik">
+  </div>
+</div>
+<audio id="music-audio" loop></audio>
+
 </body>
 </html>
