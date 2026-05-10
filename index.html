@@ -135,9 +135,10 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:12px}
 
 /* Row pasien: avatar + nama + bubble — di sisi kanan */
-.ch-u-row{display:flex;align-items:flex-end;gap:8px;max-width:88%;align-self:flex-end;flex-direction:row-reverse}
-.ch-u-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:2px}
-.ch-u-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+/* Row pasien: [bubble-wrap] [avatar] — avatar di LUAR kanan */
+.ch-u-row{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-end;max-width:88%}
+.ch-u-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:2px;order:2}
+.ch-u-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;order:1}
 .ch-u-label{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-right:2px;text-align:right}
 .ch-u{background:var(--primary);border-radius:12px 12px 4px 12px;padding:.7rem .95rem;font-size:.85rem;color:#fff;max-width:100%;word-break:break-word;line-height:1.55}
 .chat-iw{position:relative;margin-top:.6rem}
@@ -175,10 +176,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .ringkasan-a{font-size:.86rem;color:var(--text);line-height:1.6}
 
 /* APPRECIATION */
-.ap-card{text-align:center;padding:.75rem .25rem}
-.ap-emo{font-size:2.8rem;margin-bottom:.65rem;display:block;animation:pop .55s ease}
+/* ap-card CSS dihapus */
 @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
-.ap-title{font-family:'Lora',serif;font-size:1.45rem;color:var(--white);margin-bottom:.65rem}
+
 .ap-text{color:var(--muted);line-height:1.8;font-size:.9rem;margin-bottom:1.4rem}
 
 /* COMPARISON */
@@ -292,7 +292,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="about-wrap">
     <div class="sl">Tentang Kami</div>
     <h2>Dibuat dengan Empati, untuk Semua</h2>
-    <p>PsyWellMate menggabungkan psikologi klinis dengan pendekatan Life Review Therapy. Alur terapi kami dirancang bersama psikolog: tes depresi awal → sesi life review bertahap → apresiasi emosional → tes ulang.</p>
+    <p>PsyWellMate menggabungkan psikologi klinis dengan pendekatan Life Review Therapy. Alur terapi kami dirancang bersama psikolog: tes depresi awal → sesi life review bertahap → tes ulang.</p>
     <p>Life Review Therapy adalah pendekatan terapeutik yang terbukti efektif, terutama untuk membantu seseorang menemukan makna dan nilai positif dari perjalanan hidupnya.</p>
     <p>Kami percaya bahwa kata-kata punya kekuatan menyembuhkan. Bercerita bukan tanda kelemahan — itu tanda keberanian.</p>
     <p style="color:var(--primary);font-style:italic;font-size:.88rem">* Aplikasi ini tidak menggantikan konsultasi profesional. Jika skor tinggi, kami sangat menyarankan menemui psikolog atau psikiater.</p>
@@ -463,15 +463,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
     </div>
 
-    <!-- SC: APRESIASI -->
-    <div id="sc-ap" class="card" style="display:none">
-      <div class="ap-card">
-        <span class="ap-emo" id="ap-em">🌟</span>
-        <div class="ap-title" id="ap-ti">Kamu Luar Biasa</div>
-        <p class="ap-text" id="ap-tx"></p>
-        <button class="btn-sm bp" onclick="beginPHQ('post')">Lanjut → Tes Ulang Depresi</button>
-      </div>
-    </div>
+    <!-- SC: APRESIASI dihapus (Revisi 9) -->
 
     <!-- SC: TES PHQ POST -->
     <div id="sc-phq-post" class="card" style="display:none">
@@ -539,7 +531,7 @@ function goPage(id){
 }
 
 function showSc(id){
-  ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-sesi-q','sc-ap','sc-phq-post','sc-final'].forEach(s=>{
+  ['sc-data','sc-tahap','sc-phq-pre','sc-phq-pre-res','sc-sesi-intro','sc-ringkasan','sc-sesi-q','sc-phq-post','sc-final'].forEach(s=>{
     const e=document.getElementById(s);if(e)e.style.display='none';
   });
   document.getElementById(id).style.display='block';
@@ -744,23 +736,28 @@ function getAIResponse(nlp, sesiNum, qIdx){
 /* ══════════════════════════════════════════
    DATA PHQ
 ══════════════════════════════════════════ */
+// PHQ versi 1: Anak (0-11) & Remaja (12-19) — sapaan kamu
+// PHQ versi 2: Dewasa (19-44) & Lansia (45+) — sapaan Bapak/Ibu
 const PHQ = {
-  anak:{label:'Anak & Remaja',range:'≤ 17 tahun',emoji:'🌱',
+  anak:{label:'Anak-Anak',range:'0–11 tahun',emoji:'🌱',
     qs:['Apakah kamu sering merasa sedih, murung, atau ingin menangis?','Apakah kamu tidak tertarik bermain atau melakukan hal yang biasanya kamu suka?','Apakah kamu mudah lelah atau tidak punya tenaga?','Apakah kamu sulit tidur atau tidur terlalu banyak?','Apakah kamu merasa tidak berharga atau selalu disalahkan?','Apakah kamu susah berkonsentrasi di sekolah atau saat belajar?','Apakah kamu pernah berpikir untuk menyakiti dirimu sendiri?']},
-  dewasa:{label:'Dewasa',range:'18–59 tahun',emoji:'🌿',
-    qs:['Apakah Anda merasa kehilangan minat atau kesenangan dalam hal-hal yang biasa Anda sukai?','Apakah Anda merasa sedih, tertekan, atau putus asa?','Apakah Anda mengalami masalah tidur — sulit tidur, sering terbangun, atau tidur berlebihan?','Apakah Anda merasa lelah atau tidak berenergi?','Apakah nafsu makan Anda berubah drastis?','Apakah Anda merasa buruk tentang diri sendiri atau merasa gagal?','Apakah Anda sulit berkonsentrasi saat bekerja atau beraktivitas?','Apakah Anda bergerak/berbicara lebih lambat, atau justru sangat gelisah?','Apakah Anda punya pikiran untuk menyakiti atau mengakhiri hidup Anda?']},
-  lansia:{label:'Lansia',range:'≥ 60 tahun',emoji:'🍂',
-    qs:['Apakah Anda sering merasa sedih, kosong, atau tidak ada harapan?','Apakah Anda sudah tidak menikmati hal-hal yang dulu Anda sukai?','Apakah Anda mudah marah atau mudah terganggu belakangan ini?','Apakah Anda mengalami gangguan tidur?','Apakah Anda merasa sangat lelah sepanjang hari?','Apakah nafsu makan Anda berkurang atau berat badan turun tanpa alasan?','Apakah Anda sulit mengingat hal-hal atau berkonsentrasi?','Apakah Anda merasa tidak berguna atau menjadi beban bagi keluarga?','Apakah Anda pernah berpikir bahwa lebih baik tidak hidup?']}
+  remaja:{label:'Remaja',range:'12–19 tahun',emoji:'🌻',
+    qs:['Apakah kamu sering merasa sedih, murung, atau putus asa?','Apakah kamu kehilangan minat pada hal-hal yang biasanya kamu sukai?','Apakah kamu mudah lelah atau tidak punya semangat belakangan ini?','Apakah kamu sulit tidur, sering terbangun, atau tidur berlebihan?','Apakah kamu merasa tidak berharga atau sering menyalahkan dirimu sendiri?','Apakah kamu sulit berkonsentrasi di sekolah atau saat belajar?','Apakah nafsu makanmu berubah drastis — sangat sedikit atau berlebihan?','Apakah kamu pernah berpikir untuk menyakiti dirimu sendiri?']},
+  dewasa:{label:'Dewasa',range:'19–44 tahun',emoji:'🌿',
+    qs:['Apakah merasa kehilangan minat atau kesenangan dalam hal-hal yang biasa disukai?','Apakah merasa sedih, tertekan, atau putus asa?','Apakah mengalami masalah tidur — sulit tidur, sering terbangun, atau tidur berlebihan?','Apakah merasa lelah atau tidak berenergi?','Apakah nafsu makan berubah drastis?','Apakah merasa buruk tentang diri sendiri atau merasa gagal?','Apakah sulit berkonsentrasi saat bekerja atau beraktivitas?','Apakah bergerak/berbicara lebih lambat, atau justru sangat gelisah?','Apakah ada pikiran untuk menyakiti atau mengakhiri hidup?']},
+  lansia:{label:'Lansia',range:'45 tahun ke atas',emoji:'🍂',
+    qs:['Apakah sering merasa sedih, kosong, atau tidak ada harapan?','Apakah sudah tidak menikmati hal-hal yang dulu disukai?','Apakah mudah marah atau mudah terganggu belakangan ini?','Apakah mengalami gangguan tidur?','Apakah merasa sangat lelah sepanjang hari?','Apakah nafsu makan berkurang atau berat badan turun tanpa alasan?','Apakah sulit mengingat hal-hal atau berkonsentrasi?','Apakah merasa tidak berguna atau menjadi beban bagi keluarga?','Apakah pernah berpikir bahwa lebih baik tidak hidup?']}
 };
 
 const PHQ_OPTS = [{l:'😊 Tidak pernah',v:0},{l:'😐 Beberapa hari',v:1},{l:'😟 Lebih dari separuh hari',v:2},{l:'😰 Hampir setiap hari',v:3}];
 
 function getSev(score, tahap){
   const mx=PHQ[tahap].qs.length*3, p=score/mx;
-  if(p<=0.22) return{l:'Minimal / Tidak Ada Gejala',cls:'sev-none',col:'var(--green)',adv:'Kondisimu saat ini terlihat baik. Pertahankan gaya hidup sehat dan koneksi sosialmu!'};
-  if(p<=0.44) return{l:'Gejala Ringan',cls:'sev-mild',col:'var(--amber)',adv:'Ada beberapa tanda yang perlu diperhatikan. Berbagi dengan orang terpercaya bisa sangat membantu.'};
-  if(p<=0.67) return{l:'Gejala Sedang',cls:'sev-mod',col:'var(--orange)',adv:'Kamu butuh dukungan lebih. Pertimbangkan untuk berbicara dengan konselor atau psikolog.'};
-  return{l:'Gejala Berat',cls:'sev-sev',col:'var(--red)',adv:'Sangat disarankan untuk segera berkonsultasi dengan profesional kesehatan mental.'};
+  const sp=getSapaan();
+  if(p<=0.22) return{l:'Minimal / Tidak Ada Gejala',cls:'sev-none',col:'var(--green)',adv:`Kondisi ${sp} saat ini terlihat baik. Pertahankan gaya hidup sehat dan koneksi sosial ya!`};
+  if(p<=0.44) return{l:'Gejala Ringan',cls:'sev-mild',col:'var(--amber)',adv:`Ada beberapa tanda yang perlu diperhatikan. Berbagi dengan orang terpercaya bisa sangat membantu ${sp}.`};
+  if(p<=0.67) return{l:'Gejala Sedang',cls:'sev-mod',col:'var(--orange)',adv:`${sp.charAt(0).toUpperCase()+sp.slice(1)} butuh dukungan lebih. Pertimbangkan untuk berbicara dengan konselor atau psikolog.`};
+  return{l:'Gejala Berat',cls:'sev-sev',col:'var(--red)',adv:`Sangat disarankan untuk ${sp} segera berkonsultasi dengan profesional kesehatan mental.`};
 }
 
 /* ══════════════════════════════════════════
@@ -902,6 +899,15 @@ const SESI_META = {
       'Pencapaian apa yang paling berkesan Anda raih dalam kehidupan Anda?',
       'Apa hal terbaik yang Anda miliki di usia Anda saat ini?',
       'Apakah Anda puas telah melakukan "life review" ini?'
+    ],
+    qs_lansia:[
+      'Jika semuanya sama, apakah Anda ingin hidup kembali?',
+      'Bagian mana dari hidup Anda yang paling membuat Anda puas dan bahagia? Mengapa?',
+      'Bagian kisah mana yang paling mengecewakan yang Anda lewati?',
+      'Ceritakanlah bagian yang tersulit dalam kehidupan yang telah Anda jalani.',
+      'Pencapaian apa yang paling berkesan Anda raih dalam kehidupan Anda?',
+      'Apa hal terbaik yang Anda miliki di usia Anda saat ini?',
+      'Apakah Anda puas telah melakukan "life review" ini?'
     ]
   }
 };
@@ -909,14 +915,24 @@ const SESI_META = {
 function getSesiQuestions(sesiNum){
   const meta = SESI_META[sesiNum];
   if(!meta) return [];
-  return S.usia <= 17 ? (meta.qs_anak || []) : (meta.qs_dewasa || []);
+  // Anak & Remaja → qs_anak
+  if(S.tahap==='anak' || S.tahap==='remaja') return meta.qs_anak || [];
+  // Lansia di Sesi Penutup (6) → qs_lansia khusus (tanpa pertanyaan 1 & 3)
+  if(S.tahap==='lansia' && sesiNum===6) return meta.qs_lansia || meta.qs_dewasa || [];
+  // Dewasa & Lansia (sesi lain) → qs_dewasa
+  return meta.qs_dewasa || [];
 }
 
 function getSesiList(){
-  // Tentukan sesi yang harus dijalani berdasarkan usia
-  if(S.usia <= 17) return [1,2,3,6];
-  if(S.usia <= 59) return [1,2,3,4,6];
-  return [1,2,3,4,5,6];
+  // Sesi per kelompok usia baru
+  // Sesi 6 = Sesi Penutup
+  switch(S.tahap){
+    case 'anak':   return [1,2,6];           // Anak 0-11: Sesi 1,2 + Penutup
+    case 'remaja': return [1,2,3,6];         // Remaja 12-19: Sesi 1,2,3 + Penutup
+    case 'dewasa': return [1,2,3,4,6];       // Dewasa 19-44: Sesi 1,2,3,4 + Penutup
+    case 'lansia': return [1,2,3,4,5,6];     // Lansia 45+: Sesi 1,2,3,4,5 + Penutup
+    default:       return [1,2,3,6];
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -940,7 +956,7 @@ const S = {
 ══════════════════════════════════════════ */
 function renderSteps(activeIdx){
   // Step: Data Diri, PHQ Pre, Sesi-sesi, Apresiasi, PHQ Post, Hasil
-  const steps = ['Data Diri','PHQ Awal',...S.sesiList.map(n=>'Sesi '+n),'Apresiasi','PHQ Ulang','Hasil'];
+  const steps = ['Data Diri','PHQ Awal',...S.sesiList.map(n=>'Sesi '+n),'PHQ Ulang','Hasil'];
   const el = document.getElementById('step-row');
   let h = '';
   steps.forEach((s,i)=>{
@@ -975,7 +991,7 @@ async function checkAndResumeSession(){
     S.pasangan = ongoingSess.has_partner||'';
     S.jumlahAnak = ongoingSess.children_count||'';
     S.tahap = ongoingSess.stage;
-    S.sesiList = getSesiListByStage(ongoingSess.stage, ongoingSess.age);
+    S.sesiList = getSesiListByStage(ongoingSess.stage||S.tahap, ongoingSess.age||S.usia);
     S.preScore = ongoingSess.pre_score||0;
 
     // Cari progress terakhir
@@ -1022,8 +1038,8 @@ async function checkAndResumeSession(){
         S.currentQIdx = 0;
         showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
       } else {
-        // Semua sesi selesai, lanjut apresiasi
-        showApresiasi();
+        // Semua sesi selesai → langsung PHQ post
+        beginPHQ('post');
       }
     } else {
       // Sesi belum selesai → lanjut dari pertanyaan berikutnya
@@ -1051,9 +1067,14 @@ async function checkAndResumeSession(){
 }
 
 function getSesiListByStage(stage, age){
-  if(age <= 17) return [1,2,3,6];
-  if(age <= 59) return [1,2,3,4,6];
-  return [1,2,3,4,5,6];
+  // Delegasi ke getSesiList menggunakan tahap yang diberikan
+  switch(stage){
+    case 'anak':   return [1,2,6];
+    case 'remaja': return [1,2,3,6];
+    case 'dewasa': return [1,2,3,4,6];
+    case 'lansia': return [1,2,3,4,5,6];
+    default:       return [1,2,3,6];
+  }
 }
 
 function buildTahapFromResume(){
@@ -1100,7 +1121,7 @@ function submitData(){
   const us=parseInt(document.getElementById('d-us').value);
   const jk=document.getElementById('d-jk').value;
   if(!nm||!us||!jk){toast('⚠️ Lengkapi semua data');return;}
-  if(us<5||us>120){toast('⚠️ Usia tidak valid');return;}
+  if(us<1||us>120){toast('⚠️ Usia tidak valid');return;}
   S.nama=nm; S.usia=us; S.jk=jk;
   S.penyakit=document.getElementById('d-pk').value.trim()||'-';
   S.pasangan=document.getElementById('d-ps').value.trim()||'-';
@@ -1113,15 +1134,18 @@ function submitData(){
 ══════════════════════════════════════════ */
 function buildTahap(){
   const u=S.usia;
+  // 4 kelompok usia baru
   let av=[];
-  if(u<=17) av.push('anak');
-  if(u>=18&&u<=59) av.push('dewasa');
-  if(u>=60) av.push('lansia');
-  if((u===17||u===18)){if(!av.includes('anak'))av.push('anak');if(!av.includes('dewasa'))av.push('dewasa');}
-  if((u===59||u===60)){if(!av.includes('dewasa'))av.push('dewasa');if(!av.includes('lansia'))av.push('lansia');}
+  if(u>=0&&u<=11) av.push('anak');
+  if(u>=12&&u<=19) av.push('remaja');
+  if(u>=19&&u<=44) av.push('dewasa');
+  if(u>=45) av.push('lansia');
+  // Batas usia yang overlap
+  if(u===19){if(!av.includes('remaja'))av.push('remaja');if(!av.includes('dewasa'))av.push('dewasa');}
+  if(u===44||u===45){if(!av.includes('dewasa'))av.push('dewasa');if(!av.includes('lansia'))av.push('lansia');}
   S.avail=[...new Set(av)];
   S.tahap=S.avail[0];
-  S.sesiList=getSesiListByStage(S.tahap, S.usia);
+  S.sesiList=getSesiList();
 
   document.getElementById('tahap-sub').textContent=`Halo ${S.nama}! Berdasarkan usia ${u} tahun, berikut tahap yang tersedia:`;
   document.getElementById('tahap-ibox').innerHTML=S.avail.length>1
@@ -1130,7 +1154,7 @@ function buildTahap(){
 
   const tabs=document.getElementById('stabs');
   tabs.innerHTML='';
-  ['anak','dewasa','lansia'].forEach(t=>{
+  ['anak','remaja','dewasa','lansia'].forEach(t=>{
     const ok=S.avail.includes(t);
     const btn=document.createElement('button');
     btn.className='stab'+(S.tahap===t?' active':'')+(ok?'':' disabled');
@@ -1138,7 +1162,7 @@ function buildTahap(){
     btn.title=PHQ[t].range;
     if(ok) btn.onclick=()=>{
       S.tahap=t;
-      S.sesiList=getSesiListByStage(t,S.usia);
+      S.sesiList=getSesiList();
       tabs.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
     };
@@ -1496,30 +1520,19 @@ function goToNextSesiIntro(){
 }
 
 /* ══════════════════════════════════════════
-   APRESIASI
+   APRESIASI — dihapus (Revisi 9)
+   Alur: finishSesi terakhir → langsung beginPHQ('post')
 ══════════════════════════════════════════ */
-const APS=[
-  {e:'🌟',t:'Luar Biasa!',x:'Perjalanan panjang yang telah diceritakan adalah bukti nyata kekuatan dan keberanian. Setiap cerita yang dibagikan memiliki nilai yang sangat berharga.'},
-  {e:'💙',t:'Tidak Sendirian',x:'Semua yang dirasakan itu valid dan nyata. Dengan menjalani proses ini, sudah diambil langkah yang sangat berani untuk diri sendiri.'},
-  {e:'🌿',t:'Langkah Bermakna',x:'Life Review Therapy adalah perjalanan menemukan kembali makna dari setiap pengalaman hidup. Sudah dijalani dengan penuh keberanian.'},
-  {e:'✨',t:'Jiwa yang Kuat',x:'Di balik semua cerita yang dibagikan, ada jiwa yang kuat dan berharga. Layak mendapatkan kedamaian dan kebahagiaan.'}
-];
-
 function showApresiasi(){
-  const apIdx=2+S.sesiList.length;
-  renderSteps(apIdx);
-  const ap=APS[Math.floor(Math.random()*APS.length)];
-  document.getElementById('ap-em').textContent=ap.e;
-  document.getElementById('ap-ti').textContent=ap.t;
-  document.getElementById('ap-tx').textContent=ap.x;
-  showSc('sc-ap');
+  // Langsung ke PHQ post tanpa apresiasi
+  beginPHQ('post');
 }
 
 /* ══════════════════════════════════════════
    HASIL FINAL
 ══════════════════════════════════════════ */
 async function showFinal(){
-  const totalSteps = 2 + S.sesiList.length + 2;
+  const totalSteps = 2 + S.sesiList.length + 1; // +1: PHQ Ulang + Hasil (apresiasi dihapus)
   renderSteps(totalSteps);
   const ps=S.preScore, ss=S.postScore;
   const psev=getSev(ps,S.tahap), ssev=getSev(ss,S.tahap);
