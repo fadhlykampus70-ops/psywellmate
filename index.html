@@ -117,8 +117,20 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .pbar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .4s ease}
 
 /* CHAT / THERAPY — layout seperti chat messenger */
-/* Area chat utama */
-.chat-area{display:flex;flex-direction:column;gap:10px;margin-bottom:.9rem}
+/* Area chat utama — scrollable untuk percakapan panjang */
+.chat-area{display:flex;flex-direction:column;gap:10px;margin-bottom:.9rem;max-height:400px;overflow-y:auto;scroll-behavior:smooth;padding-right:2px}
+.chat-area::-webkit-scrollbar{width:3px}.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* Bar "Sudah cukup bercerita?" — muncul permanen setelah turn pertama */
+.lanjut-bar{display:none;align-items:center;gap:10px;background:rgba(107,143,113,.07);border:1px dashed rgba(107,143,113,.35);border-radius:10px;padding:.6rem .9rem;margin-bottom:.75rem}
+.lanjut-bar.show{display:flex}
+.lanjut-bar-txt{flex:1;font-size:.74rem;color:var(--muted);line-height:1.45}
+.lanjut-bar-btn{padding:6px 14px;border-radius:7px;border:none;background:var(--primary);color:#fff;font-family:'Outfit',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s;flex-shrink:0}
+.lanjut-bar-btn:hover{opacity:.85}
+
+/* Indikator simpan real-time kecil */
+.save-tick{font-size:.65rem;color:var(--green);opacity:0;transition:opacity .4s}
+.save-tick.show{opacity:1}
 
 /* Bubble Elina (kiri) */
 .elina-row{display:flex;align-items:flex-end;gap:8px;max-width:88%}
@@ -610,6 +622,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
           </div>
         </div>
       </div>
+      <!-- Bar "Sudah cukup bercerita?" — muncul permanen setelah turn pertama -->
+      <div class="lanjut-bar" id="sq-lanjut-bar">
+        <span class="lanjut-bar-txt">Sudah merasa cukup bercerita untuk topik ini?</span>
+        <button class="lanjut-bar-btn" id="sq-lanjut-btn">Lanjut →</button>
+      </div>
+      <!-- Sesi selesai (pertanyaan terakhir) -->
+      <div id="sq-done" style="display:none;margin-bottom:.75rem">
+        <div class="brow"><button class="btn-sm bp" id="sq-done-btn" onclick="finishSesi()">Lanjutkan →</button></div>
+      </div>
       <div id="sq-input">
         <div class="tts-speaking-bar" id="tts-speaking-bar">
           <span class="tts-wave"><span></span><span></span><span></span><span></span><span></span></span>
@@ -619,14 +640,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="mic-hint" id="sq-mic-hint">Menyiapkan rekaman…</div>
         <div class="chat-iw">
           <textarea class="chat-ta" id="sq-ta" placeholder="Ceritakan di sini…" rows="3"></textarea>
-          <button class="send-btn" onclick="sendSesiAnswer()">➤</button>
+          <button class="send-btn" id="sq-send-btn" onclick="sendSesiAnswer()">➤</button>
         </div>
-      </div>
-      <div id="sq-next-wrap" style="display:none;margin-top:.75rem">
-        <button class="btn-sm bp" id="sq-next-btn">Pertanyaan Berikutnya →</button>
-      </div>
-      <div id="sq-done" style="display:none">
-        <div class="brow"><button class="btn-sm bp" id="sq-done-btn" onclick="finishSesi()">Lanjutkan →</button></div>
+        <div style="text-align:right;margin-top:4px"><span class="save-tick" id="sq-save-tick">✓ tersimpan</span></div>
       </div>
     </div>
 
@@ -1561,6 +1577,12 @@ let _recSesi=null, _isRecSesi=false, _micSupported=false;
 // Cek dukungan mic saat load
 _micSupported = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
+/* ── Multi-turn chat state (reset setiap pertanyaan baru) ── */
+let _turnCount      = 0;     // sudah berapa turn dalam pertanyaan ini
+let _firstSaved     = false; // sudah simpan ke life_review_progress?
+let _firstNlp       = null;  // NLP jawaban pertama (untuk life_review_progress)
+let _firstTxt       = '';    // teks jawaban pertama
+
 function loadSesiQuestion(){
   const qs=getSesiQuestions(S.currentSesiNum);
   const tot=qs.length;
@@ -1612,7 +1634,332 @@ function _afterElinaQuestion(){
   }
 }
 
-async function sendSesiAnswer(){
+/* ══════════════════════════════════════════════════════════════
+   RULE-BASED MULTI-TURN RESPONSE SYSTEM
+   ─────────────────────────────────────────────────────────────
+   Cara menambahkan template baru:
+   1. Tentukan turn: T1 (validasi+gali), T2 (refleksi+sudut baru),
+      T3 (rangkum+beri ruang), T4P (penguatan tak terbatas)
+   2. Tentukan sentimen: negatif / positif / netral
+   3. Tentukan emosi: sedih / marah / takut / malu / rindu / bangga / senang / default
+   4. Tambahkan string baru di array yang sesuai
+   Contoh: MULTI_TURN_RESP.T1.negatif.sedih.push("Template barumu di sini");
+══════════════════════════════════════════════════════════════ */
+const MULTI_TURN_RESP = {
+
+  /* ─────────────────────────────────────────────────────────
+     T1 — TURN 1: Validasi perasaan + gali lebih dalam
+     Tujuan: user merasa didengar, lalu terbuka lebih jauh
+  ───────────────────────────────────────────────────────── */
+  T1: {
+    negatif: {
+      sedih: [
+        'Yang {sp} rasakan itu nyata, dan wajar sekali jika terasa berat. Boleh ceritakan lebih — kapan pertama kali perasaan sedih ini mulai terasa sangat kuat?',
+        'Terima kasih sudah mau berbagi hal yang tidak mudah ini. Dari semua yang sedang {sp} rasakan, mana yang paling membebani hati hari-hari ini?',
+        'Kesedihan yang {sp} ceritakan itu terdengar sangat dalam. Ada tidak satu momen yang paling membekas — yang ketika diingat, rasanya masih sakit sampai sekarang?',
+        'Aku mendengar {sp}, dan aku di sini. Kesedihan seperti ini tidak selalu bisa dijelaskan dengan kata-kata. Tapi coba ceritakan — seperti apa rasanya ketika perasaan itu datang?',
+        'Tidak semua orang berani menceritakan kesedihannya. {sp} sudah melakukan sesuatu yang berani hari ini. Boleh ceritakan — adakah seseorang yang tahu {sp} sedang merasakan ini?',
+      ],
+      marah: [
+        'Kemarahan itu punya alasannya sendiri, dan alasan {sp} terdengar sangat valid. Boleh ceritakan lebih — sudah berapa lama {sp} menyimpan perasaan ini?',
+        'Wajar sekali merasa marah dengan situasi seperti itu. Yang ingin aku pahami lebih dalam — rasa marah ini lebih ke situasinya, atau ke seseorang tertentu?',
+        'Perasaan marah {sp} itu nyata dan penting untuk diakui. Ketika rasa marah itu datang, biasanya apa yang {sp} lakukan untuk menghadapinya?',
+        'Terima kasih sudah jujur tentang apa yang dirasakan. Rasa marah yang lama disimpan bisa sangat melelahkan. Apakah ada hal yang membuat {sp} merasa tidak bisa mengungkapkannya selama ini?',
+        'Aku dengar {sp}. Kadang marah adalah cara hati kita bilang "ini tidak adil". Apa yang paling terasa tidak adil dari situasi yang {sp} hadapi?',
+      ],
+      takut: [
+        'Rasa takut yang {sp} rasakan itu nyata, dan tidak perlu diremehkan. Boleh ceritakan lebih — ketakutan ini paling kuat muncul di situasi seperti apa?',
+        'Berbagi rasa takut itu membutuhkan keberanian yang nyata. Dari semua yang {sp} ceritakan, apa yang paling sering membuat hati terasa gelisah?',
+        'Aku bisa mendengar betapa beratnya menanggung kekhawatiran itu. Sudah berapa lama {sp} merasa seperti ini, dan adakah orang di sekitar yang tahu?',
+        'Ketakutan itu kadang lebih melelahkan daripada hal yang ditakuti itu sendiri. Apa yang {sp} rasakan ketika rasa takut itu sedang di puncaknya?',
+        'Tidak ada yang salah dengan merasa takut. Yang ingin aku pahami — apakah rasa takut ini lebih ke masa depan yang belum terjadi, atau sesuatu yang sudah pernah dialami?',
+      ],
+      malu: [
+        'Butuh keberanian yang luar biasa untuk menceritakan hal yang membuat kita malu. {sp} sudah melakukan sesuatu yang sangat berani hari ini. Boleh ceritakan — sejak kapan perasaan ini mulai ada?',
+        'Rasa malu sering membuat kita merasa sendirian, padahal kita tidak sendiri. Apakah {sp} pernah menceritakan hal ini kepada siapapun sebelumnya?',
+        'Aku di sini dan tidak menghakimi {sp} sama sekali. Dari apa yang diceritakan — rasa malu itu datang dari dalam diri sendiri, atau lebih karena penilaian orang lain?',
+        'Terima kasih sudah mempercayakan cerita ini. Rasa malu yang kita simpan lama bisa sangat menguras energi. Bagaimana perasaan {sp} setelah mengatakannya barusan?',
+        'Setiap orang punya hal yang disimpan dalam-dalam karena rasa malu. {sp} tidak sendiri. Yang ingin aku tahu — apakah rasa malu ini membuat {sp} menghindari hal tertentu dalam hidup?',
+      ],
+      rindu: [
+        'Rindu itu salah satu perasaan yang paling dalam dan paling sulit diungkapkan. Boleh ceritakan — siapa atau apa yang paling {sp} rindukan saat ini?',
+        'Ada kehangatan sekaligus kepedihan dalam rindu yang {sp} ceritakan. Kenangan seperti apa yang paling sering datang ketika rasa rindu itu muncul?',
+        'Rasa rindu itu tanda bahwa ada sesuatu atau seseorang yang sangat berarti. Ceritakan lebih tentang apa yang paling {sp} rindukan dari hubungan atau masa itu?',
+        'Aku mendengar betapa dalamnya rindu yang {sp} rasakan. Apakah ada cara yang biasa {sp} lakukan untuk menghadapi rasa rindu itu ketika datang?',
+        'Rindu yang kuat sering datang dari cinta yang kuat. Boleh ceritakan — seperti apa rasanya kehidupan {sp} sebelum kehilangan atau perpisahan itu terjadi?',
+      ],
+      default: [
+        'Terima kasih sudah mempercayakan cerita ini. Apa yang {sp} rasakan terdengar sangat nyata dan berat. Boleh ceritakan lebih — sejak kapan perasaan ini mulai begitu kuat?',
+        'Aku mendengar {sp}, dan aku di sini. Dari semua yang dirasakan saat ini, mana yang paling membuat {sp} merasa lelah?',
+        'Yang {sp} ceritakan itu membutuhkan keberanian untuk diungkapkan. Adakah satu hal yang paling ingin {sp} lepaskan dari beban yang sedang dirasakan?',
+        'Terima kasih sudah berbagi. Perasaan seperti ini tidak mudah untuk diceritakan. Boleh {sp} ceritakan lebih — bagaimana kondisi ini memengaruhi kehidupan sehari-hari?',
+        'Aku di sini bersama {sp}. Dari apa yang diceritakan — apakah ada seseorang di sekitar yang tahu apa yang sedang {sp} rasakan?',
+      ],
+    },
+    positif: {
+      senang: [
+        'Senang sekali mendengar ada hal yang membawa kebahagiaan untuk {sp}. Boleh ceritakan lebih — apa yang membuat momen atau hal itu begitu berarti?',
+        'Ada cahaya yang nyata dalam cerita {sp} barusan. Perasaan bahagia seperti ini — sudah berapa lama {sp} merasakannya, dan apa yang pertama kali membawanya?',
+        'Kebahagiaan yang {sp} ceritakan itu terasa tulus. Boleh ceritakan — siapa saja orang yang menjadi bagian dari momen bahagia ini?',
+        'Cerita {sp} barusan membawa kehangatan. Apa yang membuat pengalaman ini berbeda dari yang lain — kenapa ini yang paling {sp} ingat?',
+        'Momen bahagia seperti itu adalah harta yang sesungguhnya. Boleh ceritakan — bagaimana perasaan {sp} ketika mengenang momen itu sekarang?',
+      ],
+      bangga: [
+        'Pencapaian yang {sp} ceritakan itu luar biasa, dan {sp} berhak merasa bangga. Boleh ceritakan — apa yang harus {sp} korbankan atau lalui untuk sampai ke titik itu?',
+        'Rasa bangga itu nyata dan layak dirayakan. Ketika {sp} berhasil meraih ini, siapa orang pertama yang ingin {sp} ceritakan?',
+        'Ada perjalanan panjang di balik setiap pencapaian. Boleh ceritakan — momen paling sulit yang pernah {sp} hadapi sebelum akhirnya berhasil?',
+        'Keberhasilan yang {sp} ceritakan itu bukan kebetulan — itu hasil dari kerja keras yang nyata. Apa yang membuat {sp} tetap bertahan ketika semuanya terasa sulit?',
+        'Luar biasa. Boleh ceritakan lebih — bagaimana perasaan {sp} pada saat pertama kali menyadari bahwa {sp} berhasil?',
+      ],
+      default: [
+        'Cerita {sp} barusan membawa kehangatan yang nyata. Boleh ceritakan lebih — apa yang membuat pengalaman ini begitu berarti bagi {sp}?',
+        'Ada sesuatu yang berharga dalam apa yang {sp} bagikan. Dari semua yang sudah dilalui, momen mana yang paling ingin {sp} kenang selalu?',
+        'Senang mendengar ada hal baik dalam perjalanan {sp}. Boleh ceritakan — siapa orang yang paling berperan dalam momen positif ini?',
+        'Apa yang {sp} ceritakan itu memberi gambaran tentang kekuatan yang dimiliki. Bagaimana perasaan {sp} ketika mengenang hal ini?',
+        'Cerita seperti ini sangat berharga. Boleh {sp} ceritakan lebih dalam — bagaimana pengalaman ini membentuk {sp} menjadi seperti sekarang?',
+      ],
+    },
+    netral: [
+      'Terima kasih sudah berbagi, {sp}. Dari yang baru diceritakan, bagian mana yang paling ingin {sp} gali lebih dalam?',
+      'Cerita {sp} memberikan gambaran yang cukup jelas. Boleh ceritakan lebih — bagaimana perasaan {sp} ketika menjalani semua itu?',
+      'Ada banyak hal yang bisa dieksplorasi dari cerita {sp}. Yang paling ingin aku pahami — bagaimana pengalaman itu memengaruhi {sp} secara personal?',
+      'Aku mendengar {sp}. Dari semua yang sudah diceritakan, adakah satu hal yang terasa belum tuntas untuk disampaikan?',
+      'Boleh ceritakan lebih, {sp}? Terkadang hal yang tampak biasa menyimpan makna yang sangat dalam bila dilihat lebih dekat.',
+    ],
+  },
+
+  /* ─────────────────────────────────────────────────────────
+     T2 — TURN 2: Refleksi dari jawaban + sudut pandang baru
+     Tujuan: membuat user melihat ceritanya dari sisi berbeda
+  ───────────────────────────────────────────────────────── */
+  T2: {
+    negatif: {
+      sedih: [
+        'Apa yang {sp} ceritakan barusan terasa sangat dalam. Aku ingin memahami lebih — apakah ada seseorang di sekitar {sp} yang tahu betapa beratnya yang sedang dirasakan?',
+        'Cerita {sp} membuat aku ingin bertanya — di tengah semua kesedihan ini, adakah satu hal kecil yang masih bisa membuat {sp} merasa sedikit lebih ringan?',
+        'Dari semua yang sudah diceritakan, aku mendengar betapa lelahnya {sp}. Bagaimana biasanya {sp} melewati hari-hari ketika perasaan itu terasa paling berat?',
+        'Terima kasih sudah mau terus bercerita. Yang ingin aku pahami — apakah kesedihan ini terasa seperti sesuatu yang baru, atau sudah lama ada dan baru sekarang bisa diungkapkan?',
+        'Kadang kesedihan yang paling dalam adalah yang paling sulit dijelaskan ke orang lain. Apakah {sp} pernah mencoba menceritakan ini sebelumnya? Bagaimana hasilnya?',
+      ],
+      marah: [
+        'Dari yang {sp} ceritakan, aku bisa mendengar betapa frustrasinya situasi itu. Apakah rasa marah ini sudah pernah diungkapkan langsung kepada orang yang bersangkutan?',
+        'Marah yang lama disimpan bisa berubah menjadi kelelahan yang mendalam. Ketika {sp} memikirkan situasi itu sekarang, apa yang paling terasa — masih marah, atau lebih ke kecewa?',
+        'Dari semua yang sudah diceritakan — apakah ada bagian dari situasi ini yang menurut {sp} masih bisa berubah, atau rasanya sudah terlambat?',
+        'Aku mendengar {sp}. Di balik rasa marah itu, sering ada rasa sakit yang lebih dalam. Apa yang sebetulnya paling menyakitkan dari situasi ini untuk {sp}?',
+        'Terima kasih sudah terus berbagi. Yang membuat aku penasaran — ketika rasa marah itu mereda, perasaan apa yang biasanya menggantikannya?',
+      ],
+      takut: [
+        'Dari yang sudah {sp} ceritakan, aku ingin bertanya lebih dalam — apakah rasa takut ini pernah mempengaruhi keputusan penting yang {sp} buat dalam hidup?',
+        'Ketakutan yang {sp} rasakan itu terdengar sudah ada cukup lama. Adakah seseorang yang selama ini membantu {sp} menghadapi rasa takut itu?',
+        'Aku mendengar {sp}. Terkadang rasa takut justru memberi kita informasi penting tentang apa yang kita butuhkan. Menurut {sp}, apa yang sebetulnya diinginkan di balik ketakutan itu?',
+        'Cerita {sp} membuat aku ingin tahu — ada tidak momen di mana {sp} berhasil menghadapi rasa takut dan merasa bangga dengan diri sendiri setelahnya?',
+        'Dari yang diceritakan, aku bisa membayangkan betapa lelahnya. Bagaimana kondisi tidur dan istirahat {sp} akhir-akhir ini, di tengah semua kekhawatiran ini?',
+      ],
+      malu: [
+        'Aku sangat menghargai kejujuran {sp}. Yang ingin aku pahami lebih — rasa malu itu lebih terasa ketika sendiri, atau justru ketika bersama orang lain?',
+        'Dari yang sudah diceritakan, aku mendengar bahwa {sp} sudah lama menanggung ini sendirian. Bagaimana rasanya sekarang setelah mengatakannya?',
+        'Terkadang rasa malu tumbuh dari standar yang kita buat sendiri untuk diri kita. Apakah menurut {sp}, orang-orang terdekat akan bereaksi seperti yang {sp} bayangkan jika mereka tahu?',
+        'Aku di sini bersama {sp}, dan tidak ada yang perlu disembunyikan. Yang ingin aku tanya — apakah pernah ada momen di mana {sp} bisa memaafkan diri sendiri, meski sebentar?',
+        'Cerita {sp} sangat berarti. Rasa malu sering membuat kita lebih keras pada diri sendiri dari yang seharusnya. Bagaimana {sp} biasanya berbicara kepada diri sendiri ketika perasaan itu datang?',
+      ],
+      rindu: [
+        'Rindu yang {sp} ceritakan itu terasa begitu dalam. Apakah masih ada cara untuk terhubung dengan apa atau siapa yang dirindukan itu, meski hanya sedikit?',
+        'Dari yang sudah diceritakan, aku ingin memahami lebih — kapan rindu itu paling kuat terasa? Di momen-momen seperti apa?',
+        'Cerita {sp} membawa kehangatan sekaligus kesedihan. Apa yang paling {sp} rindukan dari hubungan atau masa itu — bukan hanya orangnya atau tempatnya, tapi perasaannya?',
+        'Rindu yang mendalam sering datang dari pengalaman yang sangat berharga. Apa yang ingin {sp} sampaikan, jika diberi kesempatan berbicara sekali lagi?',
+        'Aku mendengar betapa berartinya itu untuk {sp}. Bagaimana cara {sp} menjaga kenangan itu tetap hidup di tengah kehidupan sehari-hari?',
+      ],
+      default: [
+        'Dari yang sudah {sp} ceritakan, aku ingin memahami lebih — bagaimana perasaan ini memengaruhi hubungan {sp} dengan orang-orang terdekat?',
+        'Terima kasih sudah terus berbagi. Yang ingin aku tahu — adakah seseorang yang paling {sp} percaya untuk diceritakan hal seperti ini?',
+        'Cerita {sp} memberi gambaran yang lebih jelas. Di tengah semua ini, adakah hal kecil yang masih memberi {sp} kekuatan atau ketenangan?',
+        'Aku di sini bersama {sp}. Dari semua yang sudah diceritakan — apa yang paling ingin {sp} ubah dari situasi ini jika memungkinkan?',
+        'Yang {sp} ceritakan membutuhkan kekuatan yang luar biasa untuk dihadapi. Bagaimana biasanya {sp} menemukan ketenangan di tengah situasi seperti ini?',
+      ],
+    },
+    positif: {
+      default: [
+        'Cerita {sp} barusan membuat aku ingin tahu lebih — siapa orang yang paling berpengaruh dalam perjalanan positif ini?',
+        'Ada kekuatan nyata dalam apa yang {sp} ceritakan. Dari semua pengalaman baik itu, mana yang paling {sp} syukuri sampai hari ini?',
+        'Senang mendengar ada kebaikan dalam perjalanan {sp}. Boleh ceritakan — bagaimana pengalaman ini membentuk cara {sp} melihat hidup sekarang?',
+        'Dari yang sudah diceritakan, ada banyak hal berharga yang {sp} miliki. Apakah {sp} sering mengingat kembali momen-momen ini ketika sedang menghadapi hal yang sulit?',
+        'Cerita {sp} penuh makna. Yang ingin aku pahami lebih — apa yang membuat {sp} bisa bersyukur bahkan di tengah kesulitan yang pernah dilalui?',
+      ],
+    },
+    netral: [
+      'Aku mendengar {sp}. Dari semua yang sudah diceritakan, bagian mana yang paling {sp} ingin eksplorasi lebih dalam?',
+      'Cerita {sp} memberi banyak gambaran. Yang menarik perhatianku — bagaimana perasaan {sp} ketika melihat kembali perjalanan itu sekarang?',
+      'Terima kasih sudah terus bercerita. Adakah hal yang belum sempat diceritakan tapi rasanya penting untuk disampaikan?',
+      'Dari yang sudah dibagikan, aku ingin bertanya — apakah ada perbedaan antara bagaimana {sp} menceritakan ini kepada orang lain dan bagaimana {sp} menceritakannya kepada diri sendiri?',
+      'Boleh {sp} ceritakan lebih — bagaimana pengalaman itu terasa ketika sedang dijalani, dibanding bagaimana rasanya sekarang ketika dikenang?',
+    ],
+  },
+
+  /* ─────────────────────────────────────────────────────────
+     T3 — TURN 3: Rangkum perasaan + beri ruang bercerita
+     Tujuan: user merasa dipahami secara menyeluruh
+  ───────────────────────────────────────────────────────── */
+  T3: {
+    negatif: {
+      default: [
+        'Dari semua yang sudah {sp} ceritakan, aku bisa merasakan betapa banyaknya yang ditanggung. Apakah ada hal yang belum sempat dikatakan tapi terasa perlu untuk diungkapkan?',
+        'Aku mendengar {sp} dengan sepenuh hati. Perjalanan yang {sp} ceritakan itu berat, tapi juga penuh dengan ketangguhan. Bagaimana perasaan {sp} sekarang, setelah bercerita sebanyak ini?',
+        'Terima kasih sudah mau terus berbagi hal yang tidak mudah ini. Yang ingin aku tanyakan — dari semua yang sudah diungkapkan, apa yang rasanya masih belum tuntas?',
+        'Dari awal percakapan ini sampai sekarang, aku melihat seseorang yang sangat berani. Apakah {sp} juga bisa melihat kekuatan itu dalam diri sendiri?',
+        'Semua yang {sp} ceritakan sudah aku dengar. Boleh {sp} ceritakan satu hal lagi — apa yang paling {sp} harapkan setelah menjalani sesi ini?',
+      ],
+    },
+    positif: {
+      default: [
+        'Dari semua cerita {sp}, aku melihat perjalanan yang sangat kaya dan bermakna. Adakah satu pelajaran terbesar yang {sp} bawa dari semua pengalaman itu?',
+        'Cerita {sp} dari tadi penuh dengan hal-hal berharga. Ketika {sp} melihat ke belakang sekarang, apa yang paling membuat {sp} bersyukur?',
+        'Perjalanan yang {sp} ceritakan luar biasa. Apa yang ingin {sp} sampaikan kepada diri sendiri di masa lalu, seandainya bisa?',
+        'Dari semua yang sudah dibagikan, aku ingin tahu — bagian mana dari perjalanan {sp} yang paling ingin diingat dan dijaga selalu?',
+        'Ada begitu banyak hal bermakna dalam cerita {sp}. Boleh ceritakan satu hal lagi yang terasa paling penting untuk disampaikan hari ini?',
+      ],
+    },
+    netral: [
+      'Aku sudah mendengar banyak dari {sp} hari ini. Dari semua yang diceritakan, adakah satu hal yang rasanya paling penting untuk disampaikan sebelum kita lanjut?',
+      'Perjalanan yang {sp} ceritakan sangat berharga. Apa perasaan {sp} sekarang, setelah berbagi sebanyak ini?',
+      'Terima kasih sudah mau bercerita sebanyak ini. Boleh {sp} ceritakan — apakah ada sesuatu yang {sp} pelajari tentang diri sendiri dari percakapan ini?',
+      'Dari semua cerita {sp} hari ini, mana yang paling {sp} ingin diingat dari sesi ini?',
+      'Sudah banyak yang diceritakan {sp}, dan semuanya bermakna. Apakah ada satu hal lagi yang terasa belum lengkap untuk disampaikan?',
+    ],
+  },
+
+  /* ─────────────────────────────────────────────────────────
+     T4P — TURN 4 ke atas: Penguatan & eksplorasi lanjut
+     Pool besar, dirotasi acak, tidak terbatas
+     Tujuan: percakapan tetap hangat dan bermakna seberapapun panjangnya
+  ───────────────────────────────────────────────────────── */
+  T4P: [
+    // Penguatan & validasi
+    '{sp_cap} sudah berbagi begitu banyak, dan semuanya aku dengar. Apakah masih ada hal lain yang ingin diceritakan?',
+    'Setiap cerita yang {sp} bagikan menambah gambaran yang lebih utuh. Boleh ceritakan lebih lanjut?',
+    'Aku di sini bersama {sp}, dan tidak ada yang perlu terburu-buru. Apakah ada hal lain yang ingin disampaikan?',
+    'Terima kasih sudah terus mau berbagi. Cerita {sp} sangat berarti. Apakah ada hal lain yang ingin {sp} ungkapkan?',
+    // Gali lebih dalam
+    'Dari yang baru {sp} ceritakan — adakah bagian yang rasanya belum sempurna tersampaikan?',
+    'Aku ingin memahami {sp} lebih baik. Boleh ceritakan lebih tentang apa yang baru disampaikan?',
+    'Yang {sp} ceritakan barusan menarik. Boleh {sp} elaborasi lebih tentang perasaan di baliknya?',
+    'Cerita {sp} membuka banyak hal yang menarik. Dari yang baru disampaikan — apa yang paling ingin {sp} perdalam?',
+    // Refleksi diri
+    'Setelah bercerita sebanyak ini, bagaimana perasaan {sp} sekarang dibanding sebelum kita mulai?',
+    'Adakah sesuatu dari percakapan kita hari ini yang membuat {sp} melihat hal dengan cara yang berbeda?',
+    'Kadang bercerita membuat kita menemukan sesuatu yang tidak kita sadari sebelumnya. Apakah ada hal seperti itu yang {sp} rasakan?',
+    'Dari semua yang sudah diceritakan, apakah ada satu hal yang terasa seperti "ya, ini yang ingin aku sampaikan"?',
+    // Hubungan & orang terdekat
+    'Adakah orang di sekitar {sp} yang ceritanya juga ingin disampaikan hari ini?',
+    'Dari semua yang sudah dibagikan, siapa orang yang paling {sp} ingin ada di sini bersamamu sekarang?',
+    'Hubungan dengan orang-orang terdekat sering menjadi bagian terpenting dari cerita hidup kita. Adakah hal tentang hubungan tersebut yang ingin {sp} ceritakan lebih?',
+    // Masa lalu & kenangan
+    'Adakah kenangan lain yang muncul ketika {sp} bercerita tadi?',
+    'Terkadang satu cerita membuka pintu kenangan yang lain. Apakah ada yang ingin {sp} tambahkan?',
+    'Dari perjalanan panjang yang {sp} sudah jalani — adakah satu momen yang paling ingin dikenang dan dijaga?',
+    // Harapan & ke depan
+    'Di tengah semua yang sudah diceritakan — adakah harapan kecil yang masih {sp} pegang erat?',
+    'Dari semua yang sudah dilalui, apa yang memberi {sp} kekuatan untuk terus melangkah?',
+    'Kalau {sp} bisa mengirim satu pesan kepada diri sendiri lima tahun ke depan, apa yang ingin disampaikan?',
+    // Penutup hangat jika sudah sangat panjang
+    'Aku sangat menghargai keterbukaan {sp} hari ini. Apakah masih ada satu hal lagi yang ingin disampaikan sebelum kita lanjut?',
+    '{sp_cap} sudah sangat terbuka dan berani hari ini. Tidak ada yang perlu terburu-buru — ceritakan apa saja yang terasa perlu.',
+    'Setiap kata yang {sp} bagikan hari ini sangat berharga. Apakah masih ada yang ingin diceritakan?',
+  ],
+
+  /* ─────────────────────────────────────────────────────────
+     TOPIK BOOSTER — tambahan kalimat pembuka berdasarkan topik
+     Digabungkan di depan respons utama jika topik terdeteksi
+  ───────────────────────────────────────────────────────── */
+  TOPIK_BOOST: {
+    keluarga: [
+      'Keluarga tampaknya menjadi bagian yang sangat penting dalam cerita {sp}. ',
+      'Hubungan keluarga yang {sp} ceritakan terasa sangat bermakna. ',
+      'Aku mendengar betapa pentingnya keluarga dalam perjalanan {sp}. ',
+    ],
+    pekerjaan: [
+      'Pengalaman di dunia kerja yang {sp} ceritakan itu nyata dan berat. ',
+      'Pekerjaan bisa menjadi sumber makna sekaligus sumber tekanan. ',
+      'Yang {sp} hadapi di tempat kerja itu terdengar sangat menguras. ',
+    ],
+    kesehatan: [
+      'Kondisi kesehatan memang mempengaruhi hampir semua aspek kehidupan kita. ',
+      'Tantangan kesehatan yang {sp} ceritakan itu tidak mudah untuk dihadapi. ',
+      'Perjalanan melewati tantangan kesehatan itu membutuhkan ketangguhan yang luar biasa. ',
+    ],
+    sosial: [
+      'Hubungan dengan orang-orang di sekitar {sp} terdengar sangat bermakna. ',
+      'Pertemanan dan lingkungan sosial punya peran yang besar dalam hidup kita. ',
+      'Orang-orang dalam cerita {sp} terdengar sangat penting bagi perjalanan hidupnya. ',
+    ],
+    'masa lalu': [
+      'Kenangan masa lalu yang {sp} bawa terasa masih sangat hidup. ',
+      'Ada banyak makna yang tersimpan dalam kenangan yang {sp} ceritakan. ',
+      'Masa lalu yang {sp} ceritakan membentuk banyak hal dalam diri {sp} hari ini. ',
+    ],
+    'masa depan': [
+      'Harapan dan kekhawatiran tentang masa depan terdengar sangat nyata bagi {sp}. ',
+      'Memikirkan masa depan bisa terasa berat dan penuh ketidakpastian. ',
+      'Di balik kekhawatiran tentang masa depan, selalu ada harapan yang masih dipegang. ',
+    ],
+    spiritualitas: [
+      'Dimensi spiritual tampak menjadi pegangan yang sangat penting bagi {sp}. ',
+      'Keyakinan dan spiritualitas sering menjadi sumber kekuatan yang paling dalam. ',
+      'Ada kedamaian dalam cara {sp} menceritakan perjalanan spiritualnya. ',
+    ],
+  },
+};
+
+/* ─── Fungsi utama: ambil respons multi-turn ─── */
+function getMultiTurnResponse(turn, nlp){
+  const sp  = getSapaan();
+  const spC = sapaanCap();
+
+  // Pilih pool berdasarkan turn
+  let pool;
+  if(turn === 1){
+    const sentPool = MULTI_TURN_RESP.T1[nlp.sentiment] || MULTI_TURN_RESP.T1.netral;
+    if(nlp.sentiment === 'negatif'){
+      pool = sentPool[nlp.emotion] || sentPool.default;
+    } else if(nlp.sentiment === 'positif'){
+      pool = sentPool[nlp.emotion] || sentPool.default;
+    } else {
+      pool = Array.isArray(sentPool) ? sentPool : (sentPool.default || MULTI_TURN_RESP.T1.netral);
+    }
+  } else if(turn === 2){
+    const sentPool = MULTI_TURN_RESP.T2[nlp.sentiment] || MULTI_TURN_RESP.T2.netral;
+    if(nlp.sentiment === 'negatif'){
+      pool = sentPool[nlp.emotion] || sentPool.default;
+    } else {
+      pool = sentPool.default || (Array.isArray(sentPool) ? sentPool : MULTI_TURN_RESP.T2.netral);
+    }
+  } else if(turn === 3){
+    const sentPool = MULTI_TURN_RESP.T3[nlp.sentiment] || MULTI_TURN_RESP.T3.netral;
+    pool = sentPool.default || (Array.isArray(sentPool) ? sentPool : MULTI_TURN_RESP.T3.netral);
+  } else {
+    // Turn 4 ke atas — rotasi pool besar
+    pool = MULTI_TURN_RESP.T4P;
+  }
+
+  // Pilih acak dari pool
+  let resp = pool[Math.floor(Math.random() * pool.length)];
+
+  // Topik booster — tambahkan di depan jika ada topik terdeteksi (50% chance agar tidak selalu ada)
+  if(nlp.topics && nlp.topics.length > 0 && Math.random() > 0.5){
+    const topik = nlp.topics[0];
+    const boostPool = MULTI_TURN_RESP.TOPIK_BOOST[topik];
+    if(boostPool){
+      const boost = boostPool[Math.floor(Math.random() * boostPool.length)];
+      resp = boost + resp;
+    }
+  }
+
+  // Isi placeholder sapaan
+  resp = resp
+    .replace(/\{sp\}/g, sp)
+    .replace(/\{sp_cap\}/g, spC);
+
+  return resp;
+}
   const txt=document.getElementById('sq-ta').value.trim();
   if(!txt){toast('⚠️ Ceritakan sesuatu dulu');return;}
 
