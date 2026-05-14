@@ -117,7 +117,18 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .pbar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .4s ease}
 
 /* CHAT / THERAPY — layout seperti chat messenger */
-/* Area chat utama — scrollable untuk percakapan panjang */
+/* Tombol "Lanjut ke Pertanyaan Berikutnya" — warna berbeda dari tombol kirim */
+#sq-next-btn{
+  background:transparent;
+  border:1.5px solid var(--accent);
+  color:var(--accent);
+  font-weight:600;
+  transition:.2s;
+}
+#sq-next-btn:hover{
+  background:var(--accent);
+  color:#fff;
+}
 .chat-area{display:flex;flex-direction:column;gap:10px;margin-bottom:.85rem;max-height:400px;overflow-y:auto;padding-right:3px;scroll-behavior:smooth}
 .chat-area::-webkit-scrollbar{width:3px}.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
@@ -666,6 +677,24 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- MODAL: Resume atau Mulai Baru -->
+<div id="modal-resume" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:1.5rem">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.15)">
+    <div style="font-size:2rem;text-align:center;margin-bottom:.75rem">🌿</div>
+    <h3 style="font-family:'Lora',serif;font-size:1.25rem;color:var(--white);text-align:center;margin-bottom:.5rem">Selamat Datang Kembali</h3>
+    <p style="font-size:.85rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:.4rem">Ditemukan sesi yang belum selesai:</p>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;text-align:center">
+      <div style="font-size:1rem;font-weight:600;color:var(--text)" id="resume-name">—</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem" id="resume-meta">—</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem" id="resume-progress">—</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn-solid" style="width:100%" onclick="doResumeSesi()">▶ Lanjutkan Sesi</button>
+      <button class="btn-ghost" style="width:100%;font-size:.84rem" onclick="doMulaiBaruDariModal()">＋ Mulai Sesi Baru</button>
+    </div>
   </div>
 </div>
 
@@ -1383,118 +1412,159 @@ function getStepIdxForSesi(sesiNum){
 /* ══════════════════════════════════════════
    LAUNCH APP — CEK RESUME
 ══════════════════════════════════════════ */
+
+// Simpan data sesi ongoing sementara untuk modal
+let _ongoingSessData = null;
+
 async function checkAndResumeSession(){
   if(!_cu){goPage('login');return;}
+
   // Cek apakah ada sesi ongoing
   const {data:ongoingSess} = await sb.from('therapy_sessions')
     .select('*').eq('user_id',_cu.id).eq('status','ongoing')
     .order('created_at',{ascending:false}).limit(1).maybeSingle();
 
   if(ongoingSess){
-    // Ada sesi yang belum selesai
-    S.sessionId = ongoingSess.id;
-    S.nama = ongoingSess.nickname;
-    S.usia = ongoingSess.age;
-    S.jk = ongoingSess.gender;
-    S.penyakit = ongoingSess.chronic_disease||'';
-    S.pasangan = ongoingSess.has_partner||'';
-    S.jumlahAnak = ongoingSess.children_count||'';
-    S.tahap = ongoingSess.stage;
-    S.sesiList = getSesiListByStage(ongoingSess.stage||S.tahap, ongoingSess.age||S.usia);
-    S.preScore = ongoingSess.pre_score||0;
+    // Ada sesi ongoing — simpan sementara lalu tampilkan dialog pilihan
+    _ongoingSessData = ongoingSess;
 
-    // Cari progress terakhir
+    // Hitung progress untuk info di modal
     const {data:progress} = await sb.from('life_review_progress')
-      .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id)
-      .order('session_number',{ascending:true}).order('question_index',{ascending:true});
+      .select('session_number,question_index')
+      .eq('user_id',_cu.id).eq('session_id',ongoingSess.id)
+      .order('session_number',{ascending:false}).order('question_index',{ascending:false})
+      .limit(1).maybeSingle();
 
-    // Cek PHQ pre sudah selesai?
-    const {data:phqPre} = await sb.from('phq_assessments')
-      .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id).eq('phase','pre').maybeSingle();
-
-    goPage('app');
-    renderSteps(0);
-
-    if(!phqPre){
-      // Belum PHQ pre, mulai dari tahap
-      buildTahapFromResume();
-      return;
-    }
-
-    S.preScore = phqPre.score;
-
-    if(!progress || progress.length === 0){
-      // PHQ pre selesai tapi belum mulai sesi sama sekali
-      startLifeReview();
-      return;
-    }
-
-    // Hitung sesi dan pertanyaan terakhir yang sudah dijawab
-    const lastEntry = progress[progress.length-1];
-    const lastSesiNum = lastEntry.session_number;
-    const lastQIdx = lastEntry.question_index;
-    const totalQInLastSesi = getSesiQuestions(lastSesiNum).length;
-
-    // Cek apakah sesi terakhir sudah selesai semua pertanyaannya
-    const answeredInLastSesi = progress.filter(p=>p.session_number===lastSesiNum).length;
-
-    if(answeredInLastSesi >= totalQInLastSesi){
-      // Sesi terakhir sudah selesai penuh
-      const nextSesiIdx = S.sesiList.indexOf(lastSesiNum) + 1;
-      if(nextSesiIdx < S.sesiList.length){
-        S.currentSesiIdx = nextSesiIdx;
-        S.currentSesiNum = S.sesiList[nextSesiIdx];
-        S.currentQIdx = 0;
-
-        if(perluJeda(lastSesiNum)){
-          // Cek checkpoint di Supabase
-          const ck = await getLastCheckpoint();
-          if(ck){
-            const unlockedAt = new Date(ck.unlocked_at);
-            const sudahBisa  = hitungSisaWaktu(unlockedAt).selesai;
-            if(!sudahBisa){
-              // Masih dalam jeda — tampilkan sc-jeda langsung (sambutan kembali)
-              showJedaScreen(lastSesiNum, unlockedAt);
-              return;
-            }
-          }
-          // Jeda sudah lewat atau tidak ada → tampilkan kesimpulan
-          showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
-        } else {
-          // Sesi 1 selesai → langsung kesimpulan (tidak ada jeda)
-          showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
-        }
-      } else {
-        // Semua sesi selesai → langsung PHQ post
-        beginPHQ('post');
-      }
+    // Isi info modal
+    document.getElementById('resume-name').textContent = ongoingSess.nickname || '—';
+    const tgl = new Date(ongoingSess.created_at);
+    document.getElementById('resume-meta').textContent =
+      `${ongoingSess.age} tahun · ${ongoingSess.gender} · ${tgl.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}`;
+    if(progress){
+      document.getElementById('resume-progress').textContent =
+        `Terakhir di: Sesi ${progress.session_number}, Pertanyaan ${progress.question_index+1}`;
     } else {
-      // Sesi belum selesai → lanjut dari pertanyaan berikutnya
-      S.currentSesiIdx = S.sesiList.indexOf(lastSesiNum);
-      S.currentSesiNum = lastSesiNum;
-      S.currentQIdx = answeredInLastSesi; // lanjut dari jawaban berikutnya
-      renderSteps(getStepIdxForSesi(S.currentSesiNum));
-      showSc('sc-sesi-q');
-      loadSesiQuestion();
+      document.getElementById('resume-progress').textContent = 'Baru memulai tes awal';
     }
+
+    // Tampilkan modal
+    const modal = document.getElementById('modal-resume');
+    modal.style.display = 'flex';
   } else {
-    // Tidak ada sesi ongoing yang sudah melewati PHQ
-    // Langsung mulai baru dari Data Diri — tidak ada resume Data Diri/PHQ
-    Object.assign(S,{
-      nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',
-      tahap:'',avail:[],preScore:0,postScore:0,
-      sessionId:null,sesiList:[],currentSesiIdx:0,currentSesiNum:1,
-      currentQIdx:0,phqPhase:'',phqQIdx:0,phqScores:[],
-      _retryTotal:null,_retrySev:null
-    });
-    goPage('app');
-    renderSteps(0);
-    showSc('sc-data');
+    // Tidak ada sesi ongoing — langsung mulai baru
+    _mulaiSesiBaru();
   }
 }
 
+// Dipanggil saat user klik "Lanjutkan Sesi" di modal
+async function doResumeSesi(){
+  document.getElementById('modal-resume').style.display = 'none';
+  const ongoingSess = _ongoingSessData;
+  if(!ongoingSess){_mulaiSesiBaru();return;}
+
+  // Isi state dari sesi yang ada
+  S.sessionId   = ongoingSess.id;
+  S.nama        = ongoingSess.nickname;
+  S.usia        = ongoingSess.age;
+  S.jk          = ongoingSess.gender;
+  S.penyakit    = ongoingSess.chronic_disease||'';
+  S.pasangan    = ongoingSess.has_partner||'';
+  S.jumlahAnak  = ongoingSess.children_count||'';
+  S.tahap       = ongoingSess.stage;
+  S.sesiList    = getSesiListByStage(ongoingSess.stage, ongoingSess.age);
+  S.preScore    = ongoingSess.pre_score||0;
+
+  // Cari progress
+  const {data:progress} = await sb.from('life_review_progress')
+    .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id)
+    .order('session_number',{ascending:true}).order('question_index',{ascending:true});
+
+  // Cek PHQ pre
+  const {data:phqPre} = await sb.from('phq_assessments')
+    .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id).eq('phase','pre').maybeSingle();
+
+  goPage('app');
+  renderSteps(0);
+
+  if(!phqPre){
+    buildTahapFromResume();
+    return;
+  }
+
+  S.preScore = phqPre.score;
+
+  if(!progress || progress.length === 0){
+    startLifeReview();
+    return;
+  }
+
+  const lastEntry          = progress[progress.length-1];
+  const lastSesiNum        = lastEntry.session_number;
+  const totalQInLastSesi   = getSesiQuestions(lastSesiNum).length;
+  const answeredInLastSesi = progress.filter(p=>p.session_number===lastSesiNum).length;
+
+  if(answeredInLastSesi >= totalQInLastSesi){
+    const nextSesiIdx = S.sesiList.indexOf(lastSesiNum) + 1;
+    if(nextSesiIdx < S.sesiList.length){
+      S.currentSesiIdx = nextSesiIdx;
+      S.currentSesiNum = S.sesiList[nextSesiIdx];
+      S.currentQIdx    = 0;
+      if(perluJeda(lastSesiNum)){
+        const ck = await getLastCheckpoint();
+        if(ck){
+          const unlockedAt = new Date(ck.unlocked_at);
+          if(!hitungSisaWaktu(unlockedAt).selesai){
+            showJedaScreen(lastSesiNum, unlockedAt);
+            return;
+          }
+        }
+      }
+      showRingkasanSesi(lastSesiNum, progress.filter(p=>p.session_number===lastSesiNum));
+    } else {
+      beginPHQ('post');
+    }
+  } else {
+    S.currentSesiIdx = S.sesiList.indexOf(lastSesiNum);
+    S.currentSesiNum = lastSesiNum;
+    S.currentQIdx    = answeredInLastSesi;
+    renderSteps(getStepIdxForSesi(S.currentSesiNum));
+    showSc('sc-sesi-q');
+    loadSesiQuestion();
+  }
+}
+
+// Dipanggil saat user klik "Mulai Sesi Baru" di modal
+async function doMulaiBaruDariModal(){
+  document.getElementById('modal-resume').style.display = 'none';
+  // Tandai sesi lama sebagai abandoned
+  if(_ongoingSessData){
+    try{
+      await sb.from('therapy_sessions')
+        .update({status:'abandoned', completed_at:new Date().toISOString()})
+        .eq('id', _ongoingSessData.id);
+    }catch(e){ console.warn('Gagal abandon sesi lama:', e); }
+  }
+  _ongoingSessData = null;
+  _mulaiSesiBaru();
+}
+
+// Reset state dan mulai dari Data Diri
+function _mulaiSesiBaru(){
+  Object.assign(S,{
+    nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',
+    tahap:'',avail:[],preScore:0,postScore:0,
+    sessionId:null,sesiList:[],currentSesiIdx:0,currentSesiNum:1,
+    currentQIdx:0,phqPhase:'',phqQIdx:0,phqScores:[],
+    _retryTotal:null,_retrySev:null
+  });
+  // Reset multi-turn state
+  _mtTurn=0; _mtFirstSaved=false; _mtNlpFirst=null;
+  goPage('app');
+  renderSteps(0);
+  showSc('sc-data');
+}
+
 function getSesiListByStage(stage, age){
-  // Delegasi ke getSesiList menggunakan tahap yang diberikan
   switch(stage){
     case 'anak':   return [1,2,6];
     case 'remaja': return [1,2,3,6];
@@ -1510,34 +1580,33 @@ function buildTahapFromResume(){
   buildTahap();
 }
 
+// launchApp dari tombol "Mulai Sesi Baru" di riwayat — sama dengan modal baru
 async function launchApp(){
   if(!_cu){toast('⚠️ Silakan login terlebih dahulu');goPage('login');return;}
+  // Cek apakah ada sesi ongoing dulu
+  const {data:ongoingSess} = await sb.from('therapy_sessions')
+    .select('id,nickname,age,gender,created_at,stage,chronic_disease,has_partner,children_count,pre_score')
+    .eq('user_id',_cu.id).eq('status','ongoing')
+    .order('created_at',{ascending:false}).limit(1).maybeSingle();
 
-  // Tutup semua sesi ongoing yang sudah punya sessionId (sudah lewati PHQ)
-  // menjadi 'abandoned' sebelum mulai sesi baru
-  try{
-    await sb.from('therapy_sessions')
-      .update({status:'abandoned', completed_at:new Date().toISOString()})
-      .eq('user_id',_cu.id)
-      .eq('status','ongoing');
-  }catch(e){
-    // Jika gagal update, tetap lanjut — tidak blokir user
-    console.warn('Gagal update sesi lama:', e);
+  if(ongoingSess){
+    // Ada sesi ongoing — tawari dialog yang sama
+    _ongoingSessData = ongoingSess;
+    const tgl = new Date(ongoingSess.created_at);
+    document.getElementById('resume-name').textContent = ongoingSess.nickname||'—';
+    document.getElementById('resume-meta').textContent =
+      `${ongoingSess.age} tahun · ${ongoingSess.gender} · ${tgl.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}`;
+    const {data:prog} = await sb.from('life_review_progress')
+      .select('session_number,question_index').eq('user_id',_cu.id).eq('session_id',ongoingSess.id)
+      .order('session_number',{ascending:false}).order('question_index',{ascending:false})
+      .limit(1).maybeSingle();
+    document.getElementById('resume-progress').textContent = prog
+      ? `Terakhir di: Sesi ${prog.session_number}, Pertanyaan ${prog.question_index+1}`
+      : 'Baru memulai tes awal';
+    document.getElementById('modal-resume').style.display = 'flex';
+  } else {
+    _mulaiSesiBaru();
   }
-
-  // Reset semua state
-  Object.assign(S,{
-    nama:'',usia:0,jk:'',penyakit:'',pasangan:'',jumlahAnak:'',
-    tahap:'',avail:[],preScore:0,postScore:0,
-    sessionId:null,  // Belum ada sessionId — baru dibuat setelah PHQ selesai
-    sesiList:[],currentSesiIdx:0,currentSesiNum:1,currentQIdx:0,
-    phqPhase:'',phqQIdx:0,phqScores:[],
-    _retryTotal:null,_retrySev:null
-  });
-
-  goPage('app');
-  renderSteps(0);
-  showSc('sc-data');
 }
 
 /* ══════════════════════════════════════════
@@ -1776,6 +1845,10 @@ function beginSesiQuestions(){
 }
 
 let _recSesi=null, _isRecSesi=false, _micSupported=false;
+// Multi-turn chat state — reset setiap pertanyaan baru
+let _mtTurn = 0;           // turn ke-berapa dalam 1 pertanyaan (mulai dari 1)
+let _mtFirstSaved = false; // sudah simpan ke life_review_progress?
+let _mtNlpFirst = null;    // NLP jawaban pertama
 // Cek dukungan mic saat load
 _micSupported = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
@@ -1796,8 +1869,12 @@ function loadSesiQuestion(){
   document.getElementById('sq-prog').textContent=`Pertanyaan ${n+1} dari ${tot}`;
   document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
-  // Reset tampilan untuk pertanyaan baru
-  document.getElementById('sq-elina-resp-row').style.display='none';
+  // Reset multi-turn state untuk pertanyaan baru
+  _mtTurn = 0;
+  _mtFirstSaved = false;
+  _mtNlpFirst = null;
+
+  // Reset tampilan chat
   document.getElementById('sq-hist').innerHTML='';
   document.getElementById('sq-done').style.display='none';
   document.getElementById('sq-next-wrap').style.display='none';
@@ -1810,12 +1887,9 @@ function loadSesiQuestion(){
   bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
   setTimeout(()=>{
     bt.textContent=qs[n];
-    // TTS: Elina membacakan pertanyaan (profil 'pertanyaan' — pelan & hangat)
-    // Input dinonaktifkan saat Elina bicara, aktif kembali setelah selesai
     if(_ttsUnlocked){
       elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
     } else {
-      // Jika belum unlock (iOS), langsung fokus & mic
       document.getElementById('sq-ta').focus();
       if(_micSupported) setTimeout(()=>startMicSesi(), 400);
     }
@@ -1836,83 +1910,156 @@ async function sendSesiAnswer(){
 
   _killMicSesi();
 
-  // NLP Analysis
-  const nlp=analyzeNLP(txt);
-  const aiResp=getAIResponse(nlp, S.currentSesiNum, S.currentQIdx);
+  // Nonaktifkan tombol kirim sementara
+  const sendBtn = document.getElementById('sq-send-btn');
+  const ta = document.getElementById('sq-ta');
+  sendBtn.disabled = true;
+  ta.disabled = true;
 
-  // Tampilkan jawaban user di kanan (bubble user)
-  const hist=document.getElementById('sq-hist');
+  // Tambah turn counter
+  _mtTurn++;
+  const thisTurn = _mtTurn;
 
-  // Buat row pasien (mirror Elina tapi di kanan)
-  const row=document.createElement('div');row.className='ch-u-row';
+  // Tampilkan bubble user
+  _appendUserBubble(txt);
+  ta.value = '';
 
-  // Avatar ikon pasien
-  const avatarDiv=document.createElement('div');avatarDiv.className='ch-u-avatar';
-  avatarDiv.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
+  // Analisis NLP
+  const nlp = analyzeNLP(txt);
 
-  // Wrap nama + bubble
-  const wrap=document.createElement('div');wrap.className='ch-u-wrap';
-  const lbl=document.createElement('div');lbl.className='ch-u-label';
-  lbl.textContent=S.nama||getSapaan();
-  const bubble=document.createElement('div');bubble.className='ch-u';
-  bubble.textContent=txt;
-  wrap.appendChild(lbl);
-  wrap.appendChild(bubble);
-
-  row.appendChild(wrap);
-  row.appendChild(avatarDiv);
-  hist.appendChild(row);
-
-  // Tampilkan respons Elina di kiri
-  const respEl=document.getElementById('sq-ai-response');
-  respEl.textContent=aiResp;
-  document.getElementById('sq-elina-resp-row').style.display='flex';
-
-  // TTS: Elina membacakan respons dengan intonasi sesuai konten
-  // Input sudah disembunyikan setelah kirim, TTS selesai → input tetap tersembunyi
-  // (tombol Pertanyaan Berikutnya yang jadi trigger berikutnya)
-  if(_ttsUnlocked){
-    const jenisResp = deteksiJenisRespons(aiResp);
-    // Override disable input: saat respons selesai jangan re-enable
-    // karena input memang sudah disembunyikan — override onend
-    elinaBicaraRespons(aiResp, jenisResp);
+  // Simpan jawaban pertama ke life_review_progress (hanya sekali per pertanyaan)
+  if(!_mtFirstSaved){
+    _mtFirstSaved = true;
+    _mtNlpFirst = nlp;
+    if(S.sessionId){
+      const qTeks = getSesiQuestions(S.currentSesiNum)[S.currentQIdx]||'';
+      await sb.from('life_review_progress').upsert({
+        user_id:_cu.id, session_id:S.sessionId,
+        session_number:S.currentSesiNum, question_index:S.currentQIdx,
+        question_text:qTeks, answer_text:txt,
+        nlp_sentiment:nlp.sentiment, nlp_emotion:nlp.emotion, nlp_topics:nlp.topics,
+        ai_response:'', answered_at:new Date().toISOString()
+      },{onConflict:'user_id,session_id,session_number,question_index'});
+    }
+    // Tampilkan tombol lanjut permanen setelah jawaban pertama
+    _showNextBtn();
   }
 
-  // Simpan ke Supabase
+  // Simpan pesan user ke question_chat_logs (real-time)
   if(S.sessionId){
-    await sb.from('life_review_progress').upsert({
+    await sb.from('question_chat_logs').insert({
       user_id:_cu.id, session_id:S.sessionId,
       session_number:S.currentSesiNum, question_index:S.currentQIdx,
-      question_text:getSesiQuestions(S.currentSesiNum)[S.currentQIdx],
-      answer_text:txt, nlp_sentiment:nlp.sentiment,
-      nlp_emotion:nlp.emotion, nlp_topics:nlp.topics,
-      ai_response:aiResp, answered_at:new Date().toISOString()
-    },{onConflict:'user_id,session_id,session_number,question_index'});
+      turn:thisTurn, role:'user', text:txt,
+      nlp_sentiment:nlp.sentiment, nlp_emotion:nlp.emotion, nlp_topics:nlp.topics
+    });
   }
 
-  S.currentQIdx++;
-  const qs=getSesiQuestions(S.currentSesiNum);
+  // Typing indicator Elina
+  _appendElinaTyping();
+  document.getElementById('sq-chat-area').scrollTop = 9999;
 
-  // Sembunyikan input, tampilkan tombol next di bawah respons Elina
-  document.getElementById('sq-input').style.display='none';
+  // Ambil respons rule-based
+  await new Promise(r=>setTimeout(r, 700 + Math.random()*500));
+  const aiResp = getMultiTurnResponse(thisTurn, nlp);
+  _removeElinaTyping();
 
-  if(S.currentQIdx<qs.length){
-    // Ada pertanyaan berikutnya — tampilkan tombol "Pertanyaan Berikutnya"
-    document.getElementById('sq-next-wrap').style.display='block';
-    document.getElementById('sq-next-btn').textContent='Pertanyaan Berikutnya →';
-    document.getElementById('sq-next-btn').onclick=()=>{
-      document.getElementById('sq-next-wrap').style.display='none';
-      document.getElementById('sq-elina-resp-row').style.display='none';
-      document.getElementById('sq-hist').innerHTML='';
+  // Tampilkan bubble Elina
+  _appendElinaBubble(aiResp);
+
+  // Simpan respons Elina ke question_chat_logs (real-time)
+  if(S.sessionId){
+    await sb.from('question_chat_logs').insert({
+      user_id:_cu.id, session_id:S.sessionId,
+      session_number:S.currentSesiNum, question_index:S.currentQIdx,
+      turn:thisTurn, role:'elina', text:aiResp
+    });
+  }
+
+  // TTS respons Elina — disable input saat bicara, aktifkan kembali setelah selesai
+  if(_ttsUnlocked){
+    const jenis = deteksiJenisRespons(aiResp);
+    elinaBicaraRespons(aiResp, jenis, ()=>{
+      sendBtn.disabled = false;
+      ta.disabled = false;
+      ta.focus();
+    });
+  } else {
+    sendBtn.disabled = false;
+    ta.disabled = false;
+    ta.focus();
+  }
+
+  document.getElementById('sq-chat-area').scrollTop = 9999;
+}
+
+/* ── Tambahkan bubble user ke sq-hist ── */
+function _appendUserBubble(txt){
+  const hist = document.getElementById('sq-hist');
+  const row = document.createElement('div'); row.className='ch-u-row';
+  const av = document.createElement('div'); av.className='ch-u-avatar';
+  av.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const wrap = document.createElement('div'); wrap.className='ch-u-wrap';
+  const lbl = document.createElement('div'); lbl.className='ch-u-label'; lbl.textContent=S.nama||getSapaan();
+  const bub = document.createElement('div'); bub.className='ch-u'; bub.textContent=txt;
+  wrap.appendChild(lbl); wrap.appendChild(bub);
+  row.appendChild(wrap); row.appendChild(av);
+  hist.appendChild(row);
+  hist.scrollTop=hist.scrollHeight;
+}
+
+/* ── Tambahkan bubble Elina ke sq-hist ── */
+function _appendElinaBubble(txt){
+  const hist = document.getElementById('sq-hist');
+  const row = document.createElement('div'); row.className='elina-row';
+  row.innerHTML=`
+    <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div class="elina-bubble-wrap">
+      <div class="elina-name">✦ Elina</div>
+      <div class="ai-response">${txt.replace(/\n/g,'<br>')}</div>
+    </div>`;
+  hist.appendChild(row);
+  hist.scrollTop=hist.scrollHeight;
+}
+
+/* ── Typing indicator Elina ── */
+function _appendElinaTyping(){
+  const hist = document.getElementById('sq-hist');
+  const row = document.createElement('div'); row.className='elina-row'; row.id='elina-typing';
+  row.innerHTML=`
+    <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div class="elina-bubble-wrap">
+      <div class="elina-name">✦ Elina</div>
+      <div class="ai-response" style="min-width:56px"><span class="tdots"><span></span><span></span><span></span></span></div>
+    </div>`;
+  hist.appendChild(row);
+  hist.scrollTop=hist.scrollHeight;
+}
+function _removeElinaTyping(){ const el=document.getElementById('elina-typing');if(el)el.remove(); }
+
+/* ── Tampilkan tombol Lanjut permanen setelah turn pertama ── */
+function _showNextBtn(){
+  const qs = getSesiQuestions(S.currentSesiNum);
+  const isLast = (S.currentQIdx >= qs.length - 1);
+  if(isLast){
+    // Pertanyaan terakhir sesi — tampilkan tombol selesai sesi
+    const doneWrap = document.getElementById('sq-done');
+    doneWrap.style.display = 'block';
+    const doneBtn = document.getElementById('sq-done-btn');
+    doneBtn.textContent = 'Sesi Selesai — Lanjutkan →';
+    doneBtn.onclick = ()=>{ S.currentQIdx++; finishSesi(); };
+  } else {
+    // Ada pertanyaan berikutnya
+    const nextWrap = document.getElementById('sq-next-wrap');
+    nextWrap.style.display = 'block';
+    const nextBtn = document.getElementById('sq-next-btn');
+    nextBtn.textContent = 'Pertanyaan Berikutnya →';
+    nextBtn.onclick = ()=>{
+      S.currentQIdx++;
+      nextWrap.style.display = 'none';
+      document.getElementById('sq-done').style.display = 'none';
       loadSesiQuestion();
     };
-  } else {
-    // Sesi selesai — tampilkan tombol lanjutkan
-    document.getElementById('pb-sesi').style.width='100%';
-    document.getElementById('sq-next-wrap').style.display='none';
-    const doneBtn=document.getElementById('sq-done-btn');
-    doneBtn.textContent='Sesi Selesai — Lanjutkan →';
-    document.getElementById('sq-done').style.display='block';
   }
 }
 
@@ -2611,12 +2758,10 @@ function elinaBicara(teks, jenisOverride, waveId){
 }
 
 // Versi TTS khusus untuk respons Elina setelah jawaban user
-// Berbeda dari elinaBicara: tidak perlu disable/enable input
-// karena input sudah disembunyikan oleh sendSesiAnswer
-function elinaBicaraRespons(teks, jenisOverride){
-  if(!_ttsEnabled) return;
-  if(!window.speechSynthesis) return;
-  // Stop jika masih ada TTS berjalan
+// Menerima callback onDone untuk mengaktifkan kembali input setelah TTS selesai
+function elinaBicaraRespons(teks, jenisOverride, onDone){
+  if(!_ttsEnabled){ if(onDone) onDone(); return; }
+  if(!window.speechSynthesis){ if(onDone) onDone(); return; }
   window.speechSynthesis.cancel();
 
   const jenis  = jenisOverride || deteksiJenisRespons(teks);
@@ -2634,17 +2779,19 @@ function elinaBicaraRespons(teks, jenisOverride){
     utt.onstart = () => {
       _ttsAktif = true;
       _ttsWaveOn('tts-wave-resp');
-      musicDuck();    // kecilkan musik saat Elina bicara respons
+      musicDuck();
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
-      musicUnduck();  // kembalikan volume musik
+      musicUnduck();
+      if(onDone) onDone();
     };
     utt.onerror = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
       musicUnduck();
+      if(onDone) onDone();
     };
     window.speechSynthesis.speak(utt);
   };
