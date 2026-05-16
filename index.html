@@ -133,7 +133,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .chat-area::-webkit-scrollbar{width:3px}.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
 /* Bubble Elina (kiri) */
-.elina-row{display:flex;align-items:flex-end;gap:8px;max-width:88%;align-self:flex-start;width:fit-content}
+.elina-row{display:flex;align-items:flex-end;gap:8px;max-width:88%}
 .elina-avatar{width:28px;height:28px;border-radius:50%;background:#6a9e7f;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;margin-bottom:2px}
 .elina-bubble-wrap{display:flex;flex-direction:column;gap:2px}
 .elina-name{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-left:2px}
@@ -144,13 +144,11 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .ai-response{background:rgba(107,143,113,.1);border:1px solid rgba(107,143,113,.22);border-radius:4px 12px 12px 12px;padding:.65rem .95rem;font-size:.82rem;color:var(--primary);line-height:1.6;font-style:italic;max-width:100%}
 
 /* Bubble user (kanan) — simetris dengan Elina */
-.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:0;align-items:flex-start;width:100%}
+.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:12px}
 
 /* Row pasien: avatar + nama + bubble — di sisi kanan */
 /* Row pasien: [bubble-wrap] [avatar] — avatar di LUAR kanan */
-.ch-u-row{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-end;max-width:88%;width:fit-content;margin-left:auto;margin-bottom:5px}
-.elina-row.switch-sender{margin-top:14px}
-.ch-u-row.switch-sender{margin-top:14px}
+.ch-u-row{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-end;max-width:88%}
 .ch-u-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:2px;order:2}
 .ch-u-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;order:1}
 .ch-u-label{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-right:2px;text-align:right}
@@ -740,14 +738,11 @@ function showSc(id){
   if(document.getElementById('tts-speaking-bar'))
     document.getElementById('tts-speaking-bar').classList.remove('show');
 
-  // Musik: play saat masuk sesi-q, pause saat keluar
+  // Musik: pause saat keluar dari sesi-q (start dikelola oleh TTS flow)
   const wasSesiQ = document.getElementById('sc-sesi-q') &&
                    document.getElementById('sc-sesi-q').style.display !== 'none';
-  if(id === 'sc-sesi-q'){
-    // Masuk ke sesi — start musik
-    setTimeout(()=>musicStart(), 300);
-  } else if(wasSesiQ && id !== 'sc-sesi-q'){
-    // Keluar dari sesi — pause musik (tapi jangan stop total)
+  if(wasSesiQ && id !== 'sc-sesi-q'){
+    // Keluar dari sesi — pause musik
     musicPause();
   }
 
@@ -1842,8 +1837,31 @@ function showSesiIntro(sesiNum){
 function beginSesiQuestions(){
   S.currentQIdx=0;
   showSc('sc-sesi-q');
-  ttsInit();       // Inisialisasi TTS — tampilkan tombol unlock jika iOS
-  loadSesiQuestion();
+  ttsInit();
+  // Warmup TTS via gesture dari tombol "Mulai Sesi Ini" — unlock speechSynthesis
+  // lalu load pertanyaan pertama setelah TTS siap
+  _ttsWarmup(()=>{ loadSesiQuestion(); });
+}
+
+// Warmup TTS dengan utterance kosong untuk unlock gesture browser
+// Dipanggil SETELAH ada user gesture (klik tombol), sehingga speechSynthesis terbuka
+function _ttsWarmup(onReady){
+  if(!window.speechSynthesis || !_ttsEnabled){ _ttsUnlocked=true; onReady(); return; }
+  // Pastikan voices tersedia dulu
+  const doWarmup = () => {
+    const utt = new SpeechSynthesisUtterance('');
+    utt.volume = 0;
+    utt.rate   = 1;
+    utt.onend  = ()=>{ _ttsUnlocked=true; onReady(); };
+    utt.onerror= ()=>{ _ttsUnlocked=true; onReady(); }; // tetap lanjut meski gagal
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utt);
+  };
+  if(window.speechSynthesis.getVoices().length === 0){
+    window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.onvoiceschanged=null; doWarmup(); };
+  } else {
+    doWarmup();
+  }
 }
 
 let _recSesi=null, _isRecSesi=false, _micSupported=false;
@@ -1889,9 +1907,13 @@ function loadSesiQuestion(){
   bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
   setTimeout(()=>{
     bt.textContent=qs[n];
-    if(_ttsUnlocked){
+    if(_ttsUnlocked && _ttsEnabled){
+      // Musik OFF dulu — Elina bicara pertanyaan, musik & mic start SETELAH Elina selesai
+      musicForceStop();
       elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
     } else {
+      // TTS tidak aktif: langsung tampilkan musik + mic
+      musicEnsureStarted();
       document.getElementById('sq-ta').focus();
       if(_micSupported) setTimeout(()=>startMicSesi(), 400);
     }
@@ -1911,6 +1933,7 @@ async function sendSesiAnswer(){
   if(!txt){toast('⚠️ Ceritakan sesuatu dulu');return;}
 
   _killMicSesi();
+  musicForceStop(); // musik OFF saat user kirim — Elina akan menjawab
 
   // Nonaktifkan tombol kirim sementara
   const sendBtn = document.getElementById('sq-send-btn');
@@ -1999,8 +2022,6 @@ async function sendSesiAnswer(){
 function _appendUserBubble(txt){
   const hist = document.getElementById('sq-hist');
   const row = document.createElement('div'); row.className='ch-u-row';
-  const lastEl = hist.lastElementChild;
-  if(lastEl && !lastEl.classList.contains('ch-u-row')) row.classList.add('switch-sender');
   const av = document.createElement('div'); av.className='ch-u-avatar';
   av.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
   const wrap = document.createElement('div'); wrap.className='ch-u-wrap';
@@ -2016,8 +2037,6 @@ function _appendUserBubble(txt){
 function _appendElinaBubble(txt){
   const hist = document.getElementById('sq-hist');
   const row = document.createElement('div'); row.className='elina-row';
-  const lastEl = hist.lastElementChild;
-  if(lastEl && !lastEl.classList.contains('elina-row')) row.classList.add('switch-sender');
   row.innerHTML=`
     <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
     <div class="elina-bubble-wrap">
@@ -2032,8 +2051,6 @@ function _appendElinaBubble(txt){
 function _appendElinaTyping(){
   const hist = document.getElementById('sq-hist');
   const row = document.createElement('div'); row.className='elina-row'; row.id='elina-typing';
-  const lastEl = hist.lastElementChild;
-  if(lastEl && !lastEl.classList.contains('elina-row')) row.classList.add('switch-sender');
   row.innerHTML=`
     <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
     <div class="elina-bubble-wrap">
@@ -2738,23 +2755,28 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsAktif = true;
       _ttsWaveOn(waveEl);
       _ttsDisableInput(true);
-      musicDuck();    // kecilkan musik saat Elina bicara
+      // Musik sudah dimatikan sebelum TTS — tidak perlu duck lagi
+      // musicDuck() tidak dipanggil di sini karena musik sudah off
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
-      musicUnduck();  // kembalikan volume musik
-      // Jika ini adalah pembacaan pertanyaan → auto mulai mic
+      // Setelah Elina selesai pertanyaan → musik ON + mic AUTO START
       if(waveEl === 'tts-wave-q' && jenisOverride === 'pertanyaan'){
-        _afterElinaQuestion();
+        musicEnsureStarted();   // musik fade in
+        _afterElinaQuestion();  // mic auto start
+      } else {
+        musicUnduck(); // untuk kasus lain (jika dipanggil tanpa konteks pertanyaan)
       }
     };
     utt.onerror = () => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
-      musicUnduck();  // pastikan volume kembali normal jika error
+      // Error TTS → tetap nyalakan musik + mic supaya user bisa lanjut
+      musicEnsureStarted();
+      if(_micSupported) setTimeout(()=>startMicSesi(), 400);
     };
 
     _ttsUtterance = utt;
@@ -2787,19 +2809,23 @@ function elinaBicaraRespons(teks, jenisOverride, onDone){
     utt.onstart = () => {
       _ttsAktif = true;
       _ttsWaveOn('tts-wave-resp');
-      musicDuck();
+      // Musik sudah di-stop saat user kirim — tidak perlu duck lagi
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
-      musicUnduck();
-      if(onDone) onDone();
+      if(onDone) onDone();           // enable input kembali
+      // Setelah Elina selesai menjawab → musik ON + mic AUTO START
+      musicEnsureStarted();
+      if(_micSupported) setTimeout(()=>startMicSesi(), 450);
     };
     utt.onerror = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
-      musicUnduck();
       if(onDone) onDone();
+      // Error → tetap nyalakan musik + mic supaya user bisa lanjut
+      musicEnsureStarted();
+      if(_micSupported) setTimeout(()=>startMicSesi(), 450);
     };
     window.speechSynthesis.speak(utt);
   };
@@ -3043,46 +3069,34 @@ sb.auth.onAuthStateChange(async(event,session)=>{
 // Saran jangka panjang: upload ke Supabase Storage sendiri untuk keandalan penuh
 const MUSIK_LIST = [
   {
-    title: 'Burung Pagi',
-    sub:   'Alam pagi · Ambient',
-    icon:  '🐦',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/morning_birds.mp3'
-  },
-  {
-    title: 'Suara Alam',
-    sub:   'Alam · Hewan · Ambient',
-    icon:  '🌿',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/nature_animal'
-  },
-  {
-    title: 'Piano Meditasi',
-    sub:   'Instrumental · Tenang',
-    icon:  '🎹',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi.mp3'
-  },
-  {
-    title: 'Piano Meditasi 2',
-    sub:   'Instrumental · Lembut',
-    icon:  '🎵',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi_2'
-  },
-  {
-    title: 'Piano Meditasi 3',
-    sub:   'Instrumental · Damai',
-    icon:  '🎶',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi_3.mp3'
-  },
-  {
-    title: 'Hujan Tenang',
-    sub:   'Alam · Hujan · Relaksasi',
+    title: 'Hujan & Piano',
+    sub:   'Alam · Piano · 3 mnt',
     icon:  '🌧️',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/sleepy_rain.mp3'
+    url:   'https://cdn.pixabay.com/audio/2024/03/07/audio_b62b3e1e0f.mp3'
   },
   {
     title: 'Sungai Hutan',
-    sub:   'Alam · Air mengalir',
-    icon:  '🌊',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/sungai_hutan.mp3'
+    sub:   'Alam · Air mengalir · 4 mnt',
+    icon:  '🌿',
+    url:   'https://cdn.pixabay.com/audio/2023/10/22/audio_946bc4d8fb.mp3'
+  },
+  {
+    title: 'Piano Meditasi',
+    sub:   'Instrumental · Tenang · 5 mnt',
+    icon:  '🎹',
+    url:   'https://cdn.pixabay.com/audio/2024/01/15/audio_2dde668d05.mp3'
+  },
+  {
+    title: 'Burung & Embun',
+    sub:   'Alam pagi · Ambient · 3 mnt',
+    icon:  '🐦',
+    url:   'https://cdn.pixabay.com/audio/2023/06/18/audio_740a42614d.mp3'
+  },
+  {
+    title: 'Angin & Dedaunan',
+    sub:   'Alam · Piano lembut · 4 mnt',
+    icon:  '🍃',
+    url:   'https://cdn.pixabay.com/audio/2022/12/05/audio_1e30a3882f.mp3'
   }
 ];
 
@@ -3151,6 +3165,61 @@ function musicPause(){
   audio.pause(); _musPlaying=false; _musUpdateUI(false); musicShow(false);
 }
 
+// ── Stop musik sepenuhnya saat Elina akan bicara (tanpa hide player) ──
+// Player tetap terlihat tapi tidak berbunyi
+function musicForceStop(){
+  const audio = _musAudio();
+  if(!audio) return;
+  // Batalkan fade yang sedang berjalan
+  if(_musFadeTimer){ clearInterval(_musFadeTimer); _musFadeTimer=null; }
+  if(_musPlaying || !audio.paused){
+    audio.pause();
+    audio.volume = 0;
+    _musPlaying = false;
+    _musPausedForTTS = true; // tandai agar musicEnsureStarted tahu perlu resume
+    _musDucked = false;
+    _musUpdateUI(false);
+    const eq = document.getElementById('mp-eq');
+    if(eq) eq.classList.add('paused');
+  }
+}
+
+// ── Start atau resume musik dengan fade in — dipanggil setelah Elina selesai ──
+function musicEnsureStarted(){
+  const audio = _musAudio();
+  if(!audio) return;
+  if(_musFadeTimer){ clearInterval(_musFadeTimer); _musFadeTimer=null; }
+  // Pastikan player terlihat
+  musicShow(true);
+  // Jika belum pernah diinit → init dulu (load track)
+  if(!_musInited){
+    _musInited = true;
+    _musLoad(_musIdx, false); // load tanpa autoplay, kita play manual di bawah
+  }
+  // Reset state duck
+  _musDucked = false;
+  _musPausedForTTS = false;
+  const eq = document.getElementById('mp-eq');
+  if(eq){ eq.classList.remove('paused'); eq.classList.remove('ducked'); }
+  // Fade in dari 0 ke volume normal
+  const target = _musVolume;
+  audio.volume = 0;
+  audio.play().then(()=>{
+    _musPlaying = true;
+    _musUpdateUI(true);
+    const steps = 20, stepVal = target / steps;
+    let count = 0;
+    _musFadeTimer = setInterval(()=>{
+      count++;
+      audio.volume = Math.min(target, stepVal * count);
+      if(count >= steps){
+        clearInterval(_musFadeTimer); _musFadeTimer = null;
+        audio.volume = target;
+      }
+    }, 25); // 20 steps x 25ms = 500ms fade in
+  }).catch(()=>{ _musPlaying=false; _musUpdateUI(false); });
+}
+
 function musicToggle(){
   const audio=_musAudio();
   if(!audio) return;
@@ -3175,61 +3244,36 @@ function musicVolume(val){
   if(audio && !_musDucked) audio.volume=_musVolume;
 }
 
-// ── Smooth Pause/Resume untuk TTS Elina ──
-// Fade out musik (~350ms) → pause → TTS bicara → resume → fade in (~500ms)
-let _musFadeTimer = null;
-let _musPausedForTTS = false;
-
+// Kecilkan musik saat Elina bicara (TTS ducking)
 function musicDuck(){
-  const audio = _musAudio();
-  if(!audio) return;
-  if(_musFadeTimer){ clearInterval(_musFadeTimer); _musFadeTimer=null; }
-  if(_musPlaying && !audio.paused){
-    _musDucked = true;
-    _musPausedForTTS = true;
-    const eq = document.getElementById('mp-eq');
-    if(eq) eq.classList.add('ducked');
-    const startVol = audio.volume;
-    const steps = 14, stepVal = startVol / steps;
-    let count = 0;
-    _musFadeTimer = setInterval(()=>{
-      count++;
-      audio.volume = Math.max(0, startVol - stepVal * count);
-      if(count >= steps){
-        clearInterval(_musFadeTimer); _musFadeTimer = null;
-        audio.pause();
-        audio.volume = 0;
-      }
-    }, 25);
-  }
+  const audio=_musAudio();
+  if(!audio || !_musPlaying) return;
+  _musDucked=true;
+  // Visual: EQ jadi abu
+  const eq=document.getElementById('mp-eq');
+  if(eq) eq.classList.add('ducked');
+  // Fade down halus
+  const step=0.02, target=MUS_VOL_DUCK;
+  const fade=setInterval(()=>{
+    if(audio.volume > target + step){ audio.volume=Math.max(audio.volume-step, target); }
+    else{ audio.volume=target; clearInterval(fade); }
+  }, 40);
 }
 
+// Kembalikan volume normal setelah Elina selesai bicara
 function musicUnduck(){
-  const audio = _musAudio();
-  if(!audio) return;
-  if(_musFadeTimer){ clearInterval(_musFadeTimer); _musFadeTimer=null; }
-  if(_musPausedForTTS){
-    _musDucked = false;
-    _musPausedForTTS = false;
-    const eq = document.getElementById('mp-eq');
-    if(eq) eq.classList.remove('ducked');
-    const target = _musVolume;
-    audio.volume = 0;
-    audio.play().then(()=>{
-      _musPlaying = true;
-      _musUpdateUI(true);
-      const steps = 20, stepVal = target / steps;
-      let count = 0;
-      _musFadeTimer = setInterval(()=>{
-        count++;
-        audio.volume = Math.min(target, stepVal * count);
-        if(count >= steps){
-          clearInterval(_musFadeTimer); _musFadeTimer = null;
-          audio.volume = target;
-        }
-      }, 25);
-    }).catch(()=>{ _musPlaying=false; _musUpdateUI(false); });
-  }
+  const audio=_musAudio();
+  if(!audio || !_musPlaying) return;
+  _musDucked=false;
+  // Visual: EQ kembali normal
+  const eq2=document.getElementById('mp-eq');
+  if(eq2) eq2.classList.remove('ducked');
+  // Fade up halus
+  const step=0.018, target=_musVolume;
+  const fade=setInterval(()=>{
+    if(audio.volume < target - step){ audio.volume=Math.min(audio.volume+step, target); }
+    else{ audio.volume=target; clearInterval(fade); }
+  }, 40);
 }
 
 // Error handler: skip ke track berikutnya jika gagal dimuat
@@ -3253,7 +3297,7 @@ init();
     <div class="mp-title" id="mp-title">Musik Terapi</div>
     <div class="mp-sub" id="mp-sub">Alam &amp; Piano</div>
   </div>
-  <span id="mp-counter" style="font-size:.6rem;color:var(--muted);flex-shrink:0">1/5</span>
+  <span id="mp-counter" style="font-size:.6rem;color:var(--muted);flex-shrink:0">1/7</span>
   <div class="mp-eq" id="mp-eq">
     <span></span><span></span><span></span><span></span>
   </div>
