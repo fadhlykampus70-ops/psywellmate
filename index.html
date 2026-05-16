@@ -144,7 +144,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .ai-response{background:rgba(107,143,113,.1);border:1px solid rgba(107,143,113,.22);border-radius:4px 12px 12px 12px;padding:.65rem .95rem;font-size:.82rem;color:var(--primary);line-height:1.6;font-style:italic;max-width:100%}
 
 /* Bubble user (kanan) — simetris dengan Elina */
-.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:12px}
+.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:0}
+/* Jarak antar bubble sesama pengirim */
+.elina-row{margin-bottom:5px}
+.ch-u-row{margin-bottom:5px}
+/* Jarak lebih besar saat berganti pengirim — seperti WhatsApp */
+.elina-row.switch-sender{margin-top:14px}
+.ch-u-row.switch-sender{margin-top:14px}
 
 /* Row pasien: avatar + nama + bubble — di sisi kanan */
 /* Row pasien: [bubble-wrap] [avatar] — avatar di LUAR kanan */
@@ -1997,6 +2003,9 @@ async function sendSesiAnswer(){
 function _appendUserBubble(txt){
   const hist = document.getElementById('sq-hist');
   const row = document.createElement('div'); row.className='ch-u-row';
+  // Tambah class switch-sender jika elemen terakhir bukan dari user
+  const lastEl = hist.lastElementChild;
+  if(lastEl && !lastEl.classList.contains('ch-u-row')) row.classList.add('switch-sender');
   const av = document.createElement('div'); av.className='ch-u-avatar';
   av.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
   const wrap = document.createElement('div'); wrap.className='ch-u-wrap';
@@ -2012,6 +2021,9 @@ function _appendUserBubble(txt){
 function _appendElinaBubble(txt){
   const hist = document.getElementById('sq-hist');
   const row = document.createElement('div'); row.className='elina-row';
+  // Tambah class switch-sender jika elemen terakhir bukan dari Elina
+  const lastEl = hist.lastElementChild;
+  if(lastEl && !lastEl.classList.contains('elina-row')) row.classList.add('switch-sender');
   row.innerHTML=`
     <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
     <div class="elina-bubble-wrap">
@@ -2026,6 +2038,9 @@ function _appendElinaBubble(txt){
 function _appendElinaTyping(){
   const hist = document.getElementById('sq-hist');
   const row = document.createElement('div'); row.className='elina-row'; row.id='elina-typing';
+  // Tambah class switch-sender jika elemen terakhir bukan dari Elina
+  const lastEl = hist.lastElementChild;
+  if(lastEl && !lastEl.classList.contains('elina-row')) row.classList.add('switch-sender');
   row.innerHTML=`
     <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
     <div class="elina-bubble-wrap">
@@ -3035,34 +3050,46 @@ sb.auth.onAuthStateChange(async(event,session)=>{
 // Saran jangka panjang: upload ke Supabase Storage sendiri untuk keandalan penuh
 const MUSIK_LIST = [
   {
-    title: 'Hujan & Piano',
-    sub:   'Alam · Piano · 3 mnt',
-    icon:  '🌧️',
-    url:   'https://cdn.pixabay.com/audio/2024/03/07/audio_b62b3e1e0f.mp3'
+    title: 'Burung Pagi',
+    sub:   'Alam pagi · Ambient',
+    icon:  '🐦',
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/morning_birds.mp3'
   },
   {
-    title: 'Sungai Hutan',
-    sub:   'Alam · Air mengalir · 4 mnt',
+    title: 'Suara Alam',
+    sub:   'Alam · Hewan · Ambient',
     icon:  '🌿',
-    url:   'https://cdn.pixabay.com/audio/2023/10/22/audio_946bc4d8fb.mp3'
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/nature_animal'
   },
   {
     title: 'Piano Meditasi',
-    sub:   'Instrumental · Tenang · 5 mnt',
+    sub:   'Instrumental · Tenang',
     icon:  '🎹',
-    url:   'https://cdn.pixabay.com/audio/2024/01/15/audio_2dde668d05.mp3'
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi.mp3'
   },
   {
-    title: 'Burung & Embun',
-    sub:   'Alam pagi · Ambient · 3 mnt',
-    icon:  '🐦',
-    url:   'https://cdn.pixabay.com/audio/2023/06/18/audio_740a42614d.mp3'
+    title: 'Piano Meditasi 2',
+    sub:   'Instrumental · Lembut',
+    icon:  '🎵',
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi_2'
   },
   {
-    title: 'Angin & Dedaunan',
-    sub:   'Alam · Piano lembut · 4 mnt',
-    icon:  '🍃',
-    url:   'https://cdn.pixabay.com/audio/2022/12/05/audio_1e30a3882f.mp3'
+    title: 'Piano Meditasi 3',
+    sub:   'Instrumental · Damai',
+    icon:  '🎶',
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi_3.mp3'
+  },
+  {
+    title: 'Hujan Tenang',
+    sub:   'Alam · Hujan · Relaksasi',
+    icon:  '🌧️',
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/sleepy_rain.mp3'
+  },
+  {
+    title: 'Sungai Hutan',
+    sub:   'Alam · Air mengalir',
+    icon:  '🌊',
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/sungai_hutan.mp3'
   }
 ];
 
