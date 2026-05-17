@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --bg:#f5f0eb;--surface:#ffffff;--surface2:#fdf8f4;--border:#e2d9d0;
+  --bg:#f5f0eb;--surface:#ffffff;--surface2:#fdf8f4;--border:#e2d9d0;--border2:#e2d9d0;
   --primary:#6a9e7f;--primary-soft:#d6e8d8;--accent:#c4845a;
   --green:#3a9e6f;--amber:#d49a2a;--orange:#d4722a;--red:#c95c5c;
   --text:#3d3530;--muted:#8c7e76;--white:#2a1f1a;
@@ -608,7 +608,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="elina-row" id="sq-elina-q-row">
           <div class="elina-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="7" r="4" fill="#fff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
           <div class="elina-bubble-wrap">
-            <div class="elina-name">✦ Elina <span class="tts-wave" id="tts-wave-q" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></div>
+            <div class="elina-name">✦ Elina <span class="tts-wave" id="tts-wave-q" style="display:none"><span></span><span></span><span></span><span></span><span></span></span><span class="tts-wave" id="tts-wave-resp" style="display:none"><span></span><span></span><span></span><span></span><span></span></span></div>
             <div class="tbubble" id="sq-bubble"></div>
           </div>
         </div>
@@ -3104,7 +3104,7 @@ const MUSIK_LIST = [
 const MUS_VOL_NORMAL = 0.28;
 const MUS_VOL_DUCK   = 0.07;  // kecil saat Elina bicara
 
-let _musIdx=0, _musPlaying=false, _musInited=false, _musVolume=MUS_VOL_NORMAL, _musDucked=false;
+let _musIdx=0, _musPlaying=false, _musInited=false, _musVolume=MUS_VOL_NORMAL, _musDucked=false, _musFadeTimer=null, _musPausedForTTS=false;
 
 function _musAudio(){ return document.getElementById('music-audio'); }
 function _musPlayer(){ return document.getElementById('music-player'); }
@@ -3297,7 +3297,7 @@ init();
     <div class="mp-title" id="mp-title">Musik Terapi</div>
     <div class="mp-sub" id="mp-sub">Alam &amp; Piano</div>
   </div>
-  <span id="mp-counter" style="font-size:.6rem;color:var(--muted);flex-shrink:0">1/7</span>
+  <span id="mp-counter" style="font-size:.6rem;color:var(--muted);flex-shrink:0">1/5</span>
   <div class="mp-eq" id="mp-eq">
     <span></span><span></span><span></span><span></span>
   </div>
