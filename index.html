@@ -133,26 +133,26 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .chat-area::-webkit-scrollbar{width:3px}.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
 /* Bubble Elina (kiri) */
-.elina-row{display:flex;align-items:flex-end;gap:8px;max-width:88%}
+.elina-row{display:flex;align-items:flex-end;gap:8px;max-width:82%;margin-bottom:4px}
 .elina-avatar{width:28px;height:28px;border-radius:50%;background:#6a9e7f;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;margin-bottom:2px}
 .elina-bubble-wrap{display:flex;flex-direction:column;gap:2px}
-.elina-name{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-left:2px}
-.tbubble{background:var(--surface2);border:1px solid var(--border);border-radius:4px 12px 12px 12px;padding:.75rem 1rem;line-height:1.7;font-size:.88rem;max-width:100%}
+.elina-name{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--primary);margin-bottom:3px;padding-left:4px;opacity:.7}
+.tbubble{background:#ffffff;border:1px solid var(--border);border-radius:6px 18px 18px 18px;padding:.75rem 1rem;line-height:1.7;font-size:.88rem;max-width:100%;box-shadow:0 1px 3px rgba(0,0,0,.07)}
 .tq-label{display:none} /* Nama sudah di elina-name */
 
 /* Bubble respons Elina setelah jawaban user */
-.ai-response{background:rgba(107,143,113,.1);border:1px solid rgba(107,143,113,.22);border-radius:4px 12px 12px 12px;padding:.65rem .95rem;font-size:.82rem;color:var(--primary);line-height:1.6;font-style:italic;max-width:100%}
+.ai-response{background:#eaf3ec;border:none;border-radius:6px 18px 18px 18px;padding:.7rem 1rem;font-size:.85rem;color:#3a6b4f;line-height:1.65;font-style:normal;max-width:100%;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 
 /* Bubble user (kanan) — simetris dengan Elina */
-.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:12px}
+.chat-hist{margin-bottom:0;max-height:none;overflow-y:visible;display:flex;flex-direction:column;gap:10px;padding:4px 0}
 
 /* Row pasien: avatar + nama + bubble — di sisi kanan */
 /* Row pasien: [bubble-wrap] [avatar] — avatar di LUAR kanan */
-.ch-u-row{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-end;max-width:88%}
+.ch-u-row{display:flex;flex-direction:row;align-items:flex-end;gap:8px;align-self:flex-end;max-width:82%;margin-bottom:4px}
 .ch-u-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:2px;order:2}
 .ch-u-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;order:1}
-.ch-u-label{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;padding-right:2px;text-align:right}
-.ch-u{background:var(--primary);border-radius:12px 12px 4px 12px;padding:.7rem .95rem;font-size:.85rem;color:#fff;max-width:100%;word-break:break-word;line-height:1.55}
+.ch-u-label{display:none}
+.ch-u{background:var(--primary);border-radius:18px 18px 6px 18px;padding:.75rem 1rem;font-size:.85rem;color:#fff;max-width:100%;word-break:break-word;line-height:1.6;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .chat-iw{position:relative;margin-top:.6rem}
 .chat-ta{width:100%;padding:11px 46px 11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:80px;transition:.2s;line-height:1.5}
 .chat-ta:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,143,113,.12)}
@@ -613,7 +613,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
           </div>
         </div>
         <!-- Riwayat chat multi-turn (user + Elina bergantian) -->
-        <div id="sq-hist"></div>
+        <div id="sq-hist" class="chat-hist"></div>
       </div>
 
       <!-- Tombol lanjut — muncul permanen setelah turn pertama, di atas input -->
@@ -1859,6 +1859,7 @@ function _ttsWarmup(onReady){
   };
   if(window.speechSynthesis.getVoices().length === 0){
     window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.onvoiceschanged=null; doWarmup(); };
+    setTimeout(()=>{ if(!_ttsUnlocked){ window.speechSynthesis.onvoiceschanged=null; doWarmup(); } }, 2000);
   } else {
     doWarmup();
   }
@@ -2814,10 +2815,9 @@ function elinaBicaraRespons(teks, jenisOverride, onDone){
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
+      musicEnsureStarted();          // musik fade in
       if(onDone) onDone();           // enable input kembali
-      // Setelah Elina selesai menjawab → musik ON + mic AUTO START
-      musicEnsureStarted();
-      if(_micSupported) setTimeout(()=>startMicSesi(), 450);
+      if(_micSupported) setTimeout(()=>startMicSesi(), 500);
     };
     utt.onerror = () => {
       _ttsAktif = false;
@@ -3262,8 +3262,10 @@ function musicDuck(){
 
 // Kembalikan volume normal setelah Elina selesai bicara
 function musicUnduck(){
+  if(!_musInited){ _musInited=true; _musLoad(_musIdx, false); }
   const audio=_musAudio();
-  if(!audio || !_musPlaying) return;
+  if(!audio) return;
+  if(!_musPlaying){ audio.play().then(()=>{_musPlaying=true;_musUpdateUI(true);}).catch(()=>{}); }
   _musDucked=false;
   // Visual: EQ kembali normal
   const eq2=document.getElementById('mp-eq');
