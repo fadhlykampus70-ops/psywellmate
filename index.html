@@ -1911,6 +1911,7 @@ function loadSesiQuestion(){
     if(_ttsUnlocked && _ttsEnabled){
       // Musik OFF dulu — Elina bicara pertanyaan, musik & mic start SETELAH Elina selesai
       musicForceStop();
+      musicShow(true);
       elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
     } else {
       // TTS tidak aktif: langsung tampilkan musik + mic
@@ -2756,19 +2757,15 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsAktif = true;
       _ttsWaveOn(waveEl);
       _ttsDisableInput(true);
-      // Musik sudah dimatikan sebelum TTS — tidak perlu duck lagi
-      // musicDuck() tidak dipanggil di sini karena musik sudah off
+      musicDuck();
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
-      // Setelah Elina selesai pertanyaan → musik ON + mic AUTO START
-      if(waveEl === 'tts-wave-q' && jenisOverride === 'pertanyaan'){
-        musicEnsureStarted();   // musik fade in
-        _afterElinaQuestion();  // mic auto start
-      } else {
-        musicUnduck(); // untuk kasus lain (jika dipanggil tanpa konteks pertanyaan)
+      musicUnduck();
+      if(waveEl === 'tts-wave-q'){
+        _afterElinaQuestion();
       }
     };
     utt.onerror = () => {
