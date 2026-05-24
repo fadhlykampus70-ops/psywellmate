@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsyWellMate — Panel Perawat</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- SISIPKAN BLOK 3 CSS DI SINI -->
+<style>
+:root{
+  --bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--surface3:#252d40;
+  --border:#2a3347;--border2:#334060;
+  --primary:#4f8ef7;--primary-soft:rgba(79,142,247,.12);
+  --accent:#f7a14f;--accent-soft:rgba(247,161,79,.12);
+  --green:#3ecf8e;--green-soft:rgba(62,207,142,.12);
+  --amber:#f5c842;--amber-soft:rgba(245,200,66,.12);
+  --red:#f56565;--red-soft:rgba(245,101,101,.12);
+  --text:#e2e8f8;--muted:#6b7a99;--white:#f0f4ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── LOADING ── */
+#pg-loader{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9999;flex-direction:column;gap:10px
+}
+#pg-loader.hide{display:none}
+.lo-spin{
+  width:28px;height:28px;
+  border:2px solid var(--border2);
+  border-top-color:var(--primary);
+  border-radius:50%;
+  animation:sp .7s linear infinite
+}
+.lo-txt{font-size:.78rem;color:var(--muted)}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── LOGIN ── */
+#login-page{
+  min-height:100vh;display:flex;
+  align-items:center;justify-content:center;
+  background:var(--bg);position:relative;overflow:hidden
+}
+#login-page::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 30% 50%,rgba(62,207,142,.07) 0%,transparent 60%),
+    radial-gradient(ellipse at 70% 20%,rgba(247,161,79,.05) 0%,transparent 50%)
+}
+.login-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:2.5rem;width:100%;max-width:400px;
+  position:relative;z-index:1;
+  box-shadow:0 24px 64px rgba(0,0,0,.4)
+}
+.login-logo{
+  font-family:'DM Serif Display',serif;font-size:1.4rem;
+  color:var(--primary);margin-bottom:.3rem;text-align:center
+}
+.login-logo span{color:var(--accent)}
+.login-badge{text-align:center;margin-bottom:1.8rem}
+.login-badge .lb{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--green-soft);
+  border:1px solid rgba(62,207,142,.2);
+  color:var(--green);font-size:.68rem;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:5px 12px;border-radius:20px
+}
+.lfield{margin-bottom:.9rem}
+.lfield label{
+  display:block;font-size:.72rem;font-weight:600;
+  color:var(--muted);margin-bottom:5px;
+  letter-spacing:.3px;text-transform:uppercase
+}
+.lfield input{
+  width:100%;padding:11px 14px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.88rem;font-family:'DM Sans',sans-serif;
+  background:var(--surface2);color:var(--text);
+  outline:none;transition:.2s
+}
+.lfield input:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(62,207,142,.1)
+}
+.err-box{
+  background:var(--red-soft);border:1px solid rgba(245,101,101,.25);
+  border-radius:7px;padding:.65rem .9rem;
+  font-size:.78rem;color:var(--red);
+  margin-bottom:.9rem;display:none
+}
+.lock-box{
+  background:var(--amber-soft);border:1px solid rgba(245,200,66,.25);
+  border-radius:7px;padding:.65rem .9rem;
+  font-size:.78rem;color:var(--amber);
+  margin-bottom:.9rem;display:none
+}
+.lbtn{
+  width:100%;padding:11px;
+  background:var(--green);color:#0e1117;
+  border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;
+  font-size:.9rem;font-weight:600;
+  cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px
+}
+.lbtn:hover{opacity:.87}
+.lbtn:disabled{opacity:.4;cursor:not-allowed}
+.attempt-info{
+  text-align:center;margin-top:.85rem;
+  font-size:.73rem;color:var(--muted)
+}
+.spin{
+  display:inline-block;width:13px;height:13px;
+  border:2px solid rgba(0,0,0,.25);
+  border-top-color:#0e1117;
+  border-radius:50%;animation:sp .6s linear infinite
+}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none;min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:56px;background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.5rem;position:sticky;top:0;z-index:100
+}
+.tb-logo{
+  font-family:'DM Serif Display',serif;
+  font-size:1.05rem;color:var(--primary)
+}
+.tb-logo span{color:var(--accent)}
+.tb-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--green-soft);
+  border:1px solid rgba(62,207,142,.2);
+  color:var(--green);font-size:.65rem;font-weight:700;
+  letter-spacing:1.2px;text-transform:uppercase;
+  padding:4px 10px;border-radius:12px
+}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-user{font-size:.78rem;color:var(--muted)}
+.tb-logout{
+  padding:6px 14px;background:transparent;
+  border:1px solid var(--border);border-radius:6px;
+  color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:.75rem;cursor:pointer;transition:.2s
+}
+.tb-logout:hover{border-color:var(--red);color:var(--red)}
+.timeout-bar{
+  height:2px;background:var(--green);
+  transition:width 1s linear;
+  position:fixed;top:56px;left:0;z-index:99
+}
+
+/* ── TAB NAVIGASI ── */
+.tab-nav{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;padding:0 1.5rem;gap:4px;
+  position:sticky;top:56px;z-index:99
+}
+.tab-btn{
+  padding:12px 18px;background:transparent;
+  border:none;border-bottom:2px solid transparent;
+  color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:.82rem;font-weight:500;
+  cursor:pointer;transition:.2s;
+  display:flex;align-items:center;gap:7px;
+  position:relative
+}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.act{
+  color:var(--green);
+  border-bottom-color:var(--green)
+}
+.tab-badge{
+  background:var(--accent);color:#0e1117;
+  font-size:.6rem;font-weight:700;
+  padding:2px 6px;border-radius:10px;
+  display:inline-flex;align-items:center;
+  justify-content:center;min-width:18px
+}
+
+/* ── MAIN ── */
+.main{
+  max-width:1200px;margin:0 auto;
+  padding:1.5rem;
+}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;animation:fup .3s ease both}
+.tab-panel.active{display:block}
+@keyframes fup{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ── SECTION HEADER ── */
+.sec-hd{margin-bottom:1.2rem}
+.sec-hd h2{
+  font-family:'DM Serif Display',serif;
+  font-size:1.5rem;color:var(--white);margin-bottom:.2rem
+}
+.sec-hd p{font-size:.8rem;color:var(--muted)}
+
+/* ── STATS GRID ── */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px;margin-bottom:1.5rem
+}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1.1rem;transition:.2s
+}
+.stat-card:hover{border-color:var(--border2)}
+.stat-val{
+  font-family:'DM Serif Display',serif;
+  font-size:2rem;color:var(--white);line-height:1
+}
+.stat-lbl{
+  font-size:.72rem;color:var(--muted);
+  margin-top:.3rem;text-transform:uppercase;letter-spacing:.5px
+}
+.stat-sub{font-size:.75rem;margin-top:.4rem}
+
+/* ── TABLE ── */
+.tbl-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin-bottom:1rem
+}
+.tbl-head{
+  padding:1rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:8px
+}
+.tbl-title{font-size:.9rem;font-weight:600;color:var(--white)}
+.tbl-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tbl-empty{
+  text-align:center;padding:2.5rem;
+  color:var(--muted);font-size:.82rem
+}
+table{width:100%;border-collapse:collapse}
+th{
+  padding:9px 14px;font-size:.68rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px;
+  color:var(--muted);background:var(--surface2);
+  text-align:left;white-space:nowrap
+}
+td{
+  padding:10px 14px;font-size:.8rem;
+  border-top:1px solid var(--border);
+  vertical-align:middle
+}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+/* ── SEARCH & FILTER ── */
+.search-inp{
+  padding:7px 12px;border:1px solid var(--border);
+  border-radius:7px;background:var(--surface2);
+  color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:.78rem;outline:none;width:200px;transition:.2s
+}
+.search-inp:focus{border-color:var(--green)}
+.filter-sel{
+  padding:7px 10px;border:1px solid var(--border);
+  border-radius:7px;background:var(--surface2);
+  color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:.78rem;outline:none;cursor:pointer;transition:.2s
+}
+.filter-sel:focus{border-color:var(--green)}
+.filter-sel option{background:var(--surface2)}
+
+/* ── FLAG FILTER BUTTONS ── */
+.flag-filter-btn{
+  padding:7px 16px;border-radius:20px;
+  border:1.5px solid var(--border);
+  background:transparent;color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:.78rem;
+  cursor:pointer;transition:.2s
+}
+.flag-filter-btn:hover{border-color:var(--green);color:var(--green)}
+.flag-filter-btn.act{
+  background:var(--green-soft);
+  border-color:rgba(62,207,142,.3);
+  color:var(--green);font-weight:600
+}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-block;padding:3px 9px;
+  border-radius:10px;font-size:.68rem;font-weight:600
+}
+.b-green{background:var(--green-soft);color:var(--green)}
+.b-amber{background:var(--amber-soft);color:var(--amber)}
+.b-red{background:var(--red-soft);color:var(--red)}
+.b-blue{background:var(--primary-soft);color:var(--primary)}
+.b-orange{background:var(--accent-soft);color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:7px 14px;border-radius:7px;border:none;
+  font-family:'DM Sans',sans-serif;font-size:.75rem;
+  font-weight:500;cursor:pointer;transition:.2s;
+  display:inline-flex;align-items:center;gap:5px
+}
+.btn-p{background:var(--primary);color:#fff}
+.btn-p:hover{opacity:.85}
+.btn-o{
+  background:transparent;
+  border:1px solid var(--border);color:var(--muted)
+}
+.btn-o:hover{border-color:var(--primary);color:var(--primary)}
+.btn-g{
+  background:var(--green-soft);color:var(--green);
+  border:1px solid rgba(62,207,142,.2)
+}
+.btn-g:hover{opacity:.85}
+.btn-a{
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid rgba(247,161,79,.2)
+}
+.btn-a:hover{opacity:.85}
+.btn-r{
+  background:var(--red-soft);color:var(--red);
+  border:1px solid rgba(245,101,101,.2)
+}
+.btn-r:hover{opacity:.85}
+.btn-sm{padding:5px 10px;font-size:.7rem}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:500;display:none;
+  align-items:center;justify-content:center;padding:1rem
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;width:100%;max-width:680px;
+  max-height:88vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  animation:fup .25s ease
+}
+.modal-head{
+  padding:1.1rem 1.4rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0
+}
+.modal-title{font-size:.92rem;font-weight:600;color:var(--white)}
+.modal-close{
+  background:none;border:none;color:var(--muted);
+  font-size:1.3rem;cursor:pointer;line-height:1;
+  padding:2px 6px;border-radius:4px;transition:.2s
+}
+.modal-close:hover{background:var(--surface2);color:var(--text)}
+.modal-body{padding:1.2rem 1.4rem;overflow-y:auto;flex:1}
+.modal-foot{
+  padding:.9rem 1.4rem;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-end;flex-shrink:0
+}
+
+/* ── DETAIL CARDS ── */
+.detail-item{
+  background:var(--surface2);
+  border-radius:8px;padding:.75rem .9rem
+}
+.detail-lbl{
+  font-size:.65rem;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);margin-bottom:.25rem
+}
+.detail-val{font-size:.88rem;color:var(--text);font-weight:500}
+
+/* ── INFO BOX ── */
+.ibox{
+  background:var(--green-soft);
+  border:1px solid rgba(62,207,142,.2);
+  border-radius:8px;padding:.75rem 1rem;
+  font-size:.78rem;color:var(--muted);
+  line-height:1.6;margin-bottom:1rem
+}
+.ibox strong{color:var(--green)}
+
+/* ── PAGINASI ── */
+.pagi{
+  display:flex;align-items:center;gap:6px;
+  margin-top:1rem;justify-content:flex-end;
+  padding:0 1rem 1rem
+}
+.pagi-btn{
+  width:28px;height:28px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:.75rem;cursor:pointer;
+  transition:.2s;display:flex;align-items:center;justify-content:center
+}
+.pagi-btn:hover{border-color:var(--green);color:var(--green)}
+.pagi-btn.act{
+  background:var(--green);
+  border-color:var(--green);color:#0e1117
+}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:9px 18px;border-radius:8px;
+  font-size:.8rem;opacity:0;transition:.3s;
+  pointer-events:none;z-index:999;
+  transform:translateY(10px)
+}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .tab-btn{padding:10px 12px;font-size:.75rem}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  table{font-size:.72rem}
+  th,td{padding:7px 10px}
+  .search-inp{width:130px}
+  .main{padding:1rem}
+  .modal{max-height:95vh}
+  .tab-nav{padding:0 .75rem}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .tbl-actions{flex-direction:column;align-items:flex-start}
+  .search-inp{width:100%}
+  .filter-sel{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="pg-loader">
+  <div class="lo-spin"></div>
+  <div class="lo-txt">Memuat panel perawat…</div>
+</div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">Psy<span>Well</span>Mate</div>
+    <div class="login-badge"><span class="lb">🩹 Portal Perawat</span></div>
+    <div class="err-box" id="lg-err"></div>
+    <div class="lock-box" id="lg-lock"></div>
+    <div class="lfield">
+      <label>Email</label>
+      <input type="email" id="lg-e" placeholder="email@psywellmate.com"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="lfield">
+      <label>Password</label>
+      <input type="password" id="lg-p" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="lbtn" id="lg-btn" onclick="doLogin()">Masuk ke Portal Perawat</button>
+    <div class="attempt-info" id="attempt-info"></div>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashboard">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="tb-logo">Psy<span>Well</span>Mate</div>
+      <div class="tb-badge">🩹 Perawat</div>
+    </div>
+    <div class="tb-right">
+      <div class="timeout-bar" id="timeout-bar" style="width:100%"></div>
+      <span class="tb-user" id="tb-user"></span>
+      <button class="tb-logout" onclick="doLogout()">Keluar</button>
+    </div>
+  </div>
+
+  <!-- TAB NAVIGASI -->
+  <div class="tab-nav">
+    <button class="tab-btn act" onclick="showTab('dashboard')" id="tab-dashboard">
+      📊 Dashboard
+    </button>
+    <button class="tab-btn" onclick="showTab('monitoring')" id="tab-monitoring">
+      👥 Monitoring Pasien
+    </button>
+    <button class="tab-btn" onclick="showTab('followup')" id="tab-followup">
+      🚩 Follow-up
+      <span class="tab-badge" id="badge-followup" style="display:none">0</span>
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- ── TAB: DASHBOARD ── -->
+    <div class="tab-panel active" id="panel-dashboard">
+      <div class="sec-hd">
+        <h2>Dashboard</h2>
+        <p>Ringkasan kondisi monitoring pasien hari ini</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="st-total">—</div>
+          <div class="stat-lbl">Total Pasien Aktif</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="st-berat" style="color:var(--red)">—</div>
+          <div class="stat-lbl">Skor Berat 🔴</div>
+          <div class="stat-sub" style="font-size:.72rem;color:var(--muted)">Butuh perhatian</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="st-nonaktif" style="color:var(--amber)">—</div>
+          <div class="stat-lbl">Tidak Aktif &gt;7 Hari</div>
+          <div class="stat-sub" style="font-size:.72rem;color:var(--muted)">Perlu follow-up</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="st-flag" style="color:var(--accent)">—</div>
+          <div class="stat-lbl">Flag Belum Selesai</div>
+        </div>
+      </div>
+
+      <!-- Tabel Prioritas: Skor Berat -->
+      <div class="tbl-wrap" style="margin-bottom:1rem">
+        <div class="tbl-head">
+          <div class="tbl-title">⚠️ Prioritas — Skor Berat</div>
+          <div class="tbl-actions">
+            <span style="font-size:.72rem;color:var(--muted)">
+              Pasien dengan gejala berat yang perlu diperhatikan
+            </span>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th><th>Usia</th><th>Tahap</th>
+              <th>Skor PHQ</th><th>Kategori</th>
+              <th>Status Sesi</th><th>Psikolog</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="berat-tbody">
+            <tr><td colspan="8" class="tbl-empty">Memuat data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabel Tidak Aktif -->
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">⏰ Tidak Aktif &gt;7 Hari</div>
+          <div class="tbl-actions">
+            <span style="font-size:.72rem;color:var(--muted)">
+              Pasien yang belum melanjutkan sesi
+            </span>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th><th>Usia</th><th>Tahap</th>
+              <th>Skor PHQ</th><th>Kategori</th>
+              <th>Terakhir Aktif</th><th>Status Sesi</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="nonaktif-tbody">
+            <tr><td colspan="8" class="tbl-empty">Memuat data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: MONITORING ── -->
+    <div class="tab-panel" id="panel-monitoring">
+      <div class="sec-hd">
+        <h2>Monitoring Pasien</h2>
+        <p>Pantau kondisi dan progress seluruh pasien</p>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">Daftar Pasien
+            <span class="badge b-blue" id="monitoring-count">0</span>
+          </div>
+          <div class="tbl-actions">
+            <select class="filter-sel" id="filter-monitoring" onchange="renderMonitoring()">
+              <option value="all">Semua Pasien</option>
+              <option value="berat">Skor Berat</option>
+              <option value="nonaktif">Tidak Aktif &gt;7 Hari</option>
+              <option value="ongoing">Sesi Berlangsung</option>
+              <option value="completed">Sesi Selesai</option>
+              <option value="flagged">Ada Flag</option>
+            </select>
+            <input class="search-inp" type="text" id="search-monitoring"
+              placeholder="Cari nama pasien…" oninput="renderMonitoring()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Nama</th><th>Usia</th><th>Tahap</th>
+              <th>Skor PHQ</th><th>Kategori</th>
+              <th>Status Sesi</th><th>Terakhir Aktif</th>
+              <th>Psikolog</th><th>Flag</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="monitoring-tbody">
+            <tr><td colspan="11" class="tbl-empty">Memuat data…</td></tr>
+          </tbody>
+        </table>
+        <div class="pagi" id="monitoring-pagi"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: FOLLOW-UP ── -->
+    <div class="tab-panel" id="panel-followup">
+      <div class="sec-hd">
+        <h2>Follow-up</h2>
+        <p>Kelola catatan follow-up pasien yang perlu tindak lanjut</p>
+      </div>
+
+      <!-- Filter flag -->
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="flag-filter-btn act" onclick="filterFlag('all',this)">Semua</button>
+        <button class="flag-filter-btn" onclick="filterFlag('open',this)">🚩 Belum Selesai</button>
+        <button class="flag-filter-btn" onclick="filterFlag('resolved',this)">✅ Sudah Selesai</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">Daftar Flag Follow-up
+            <span class="badge b-blue" id="flag-count">0</span>
+          </div>
+          <div class="tbl-actions">
+            <input class="search-inp" type="text" id="search-flag"
+              placeholder="Cari nama pasien…" oninput="renderFollowup()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Nama Pasien</th><th>Usia</th>
+              <th>Skor PHQ</th><th>Catatan Follow-up</th>
+              <th>Dibuat</th><th>Status</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="flag-tbody">
+            <tr><td colspan="8" class="tbl-empty">Belum ada flag follow-up.</td></tr>
+          </tbody>
+        </table>
+        <div class="pagi" id="flag-pagi"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<!-- ══ MODAL: DETAIL PASIEN (Ringkas) ══ -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-head">
+      <div class="modal-title" id="md-title">Detail Pasien</div>
+      <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="md-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-detail')">Tutup</button>
+      <button class="btn btn-a" id="md-flag-btn"
+        onclick="bukaModalFlag()">🚩 Tambah Flag</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: TAMBAH FLAG FOLLOW-UP ══ -->
+<div class="modal-overlay" id="modal-flag">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <div class="modal-title">🚩 Tambah Flag Follow-up</div>
+      <button class="modal-close" onclick="closeModal('modal-flag')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:.85rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);
+          text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">
+          Pasien
+        </div>
+        <div style="font-size:.9rem;font-weight:600;color:var(--white)"
+          id="flag-pasien-nama">—</div>
+      </div>
+      <div style="margin-bottom:.85rem">
+        <label style="display:block;font-size:.72rem;font-weight:600;
+          color:var(--muted);text-transform:uppercase;
+          letter-spacing:.3px;margin-bottom:6px">
+          Catatan Follow-up
+        </label>
+        <textarea id="flag-note" rows="4"
+          placeholder="Contoh: Pasien tidak merespons selama 5 hari, skor PHQ tinggi, perlu dihubungi segera…"
+          style="width:100%;padding:10px 13px;border:1.5px solid var(--border);
+          border-radius:8px;background:var(--surface2);color:var(--text);
+          font-family:'DM Sans',sans-serif;font-size:.85rem;
+          outline:none;resize:vertical;min-height:100px;transition:.2s"
+          onfocus="this.style.borderColor='var(--primary)'"
+          onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+      <div class="ibox">
+        <strong>Catatan:</strong> Flag ini hanya terlihat oleh perawat dan admin.
+        Psikolog yang assigned akan dapat melihat ringkasan flag pasiennya.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-flag')">Batal</button>
+      <button class="btn btn-a" onclick="simpanFlag()">🚩 Simpan Flag</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: KONFIRMASI SELESAI ══ -->
+<div class="modal-overlay" id="modal-resolve">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-body" style="padding:1.8rem;text-align:center">
+      <div style="font-size:2rem;margin-bottom:.6rem">✅</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;
+        color:var(--white);margin-bottom:.5rem">
+        Tandai Selesai?
+      </div>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.65"
+        id="resolve-text">
+        Flag follow-up ini akan ditandai sebagai sudah ditangani.
+      </p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-resolve')">Batal</button>
+      <button class="btn btn-g" id="resolve-ok-btn">✅ Ya, Tandai Selesai</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- SISIPKAN BLOK 2 JS DI SINI -->
+<script>
+/* ════════════════════════════════════
+   SUPABASE
+════════════════════════════════════ */
+const SUPABASE_URL = 'https://xxcxygdssveddjonwxat.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4Y3h5Z2Rzc3ZlZGRqb253eGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MjcxMTYsImV4cCI6MjA5MjMwMzExNn0.u1QqZpj2n5v8lhCGaqxZCKmVbGtWxukXZ-yJmAASDbI';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ════════════════════════════════════
+   RATE LIMITING
+════════════════════════════════════ */
+const MAX_ATTEMPTS  = 5;
+const LOCK_DURATION = 15 * 60 * 1000;
+
+function getAttempts(){ return JSON.parse(localStorage.getItem('nrs_attempts')||'{"count":0,"lockedAt":null}'); }
+function saveAttempts(o){ localStorage.setItem('nrs_attempts', JSON.stringify(o)); }
+function isLocked(){
+  const a = getAttempts();
+  if(a.lockedAt){
+    const elapsed = Date.now() - a.lockedAt;
+    if(elapsed < LOCK_DURATION) return Math.ceil((LOCK_DURATION - elapsed)/60000);
+    saveAttempts({count:0, lockedAt:null});
+  }
+  return false;
+}
+function recordFail(){
+  const a = getAttempts(); a.count++;
+  if(a.count >= MAX_ATTEMPTS) a.lockedAt = Date.now();
+  saveAttempts(a); return a.count;
+}
+function resetAttempts(){ saveAttempts({count:0, lockedAt:null}); }
+function updateAttemptUI(){
+  const locked = isLocked(), a = getAttempts();
+  const info    = document.getElementById('attempt-info');
+  const lockBox = document.getElementById('lg-lock');
+  const btn     = document.getElementById('lg-btn');
+  if(locked){
+    lockBox.textContent  = `⏳ Terlalu banyak percobaan. Coba lagi dalam ${locked} menit.`;
+    lockBox.style.display = 'block';
+    btn.disabled = true;
+  } else {
+    lockBox.style.display = 'none';
+    btn.disabled = false;
+    info.textContent = a.count > 0 ? `Percobaan gagal: ${a.count}/${MAX_ATTEMPTS}` : '';
+  }
+}
+
+/* ════════════════════════════════════
+   SESSION TIMEOUT (60 menit)
+════════════════════════════════════ */
+const TIMEOUT_MS = 60 * 60 * 1000;
+let _timeoutTimer = null, _timeoutStart = null;
+
+function startSessionTimeout(){
+  clearTimeout(_timeoutTimer);
+  _timeoutStart = Date.now();
+  updateTimeoutBar();
+  _timeoutTimer = setTimeout(()=>{
+    toast('⏰ Sesi berakhir. Silakan login kembali.');
+    setTimeout(()=>doLogout(), 1500);
+  }, TIMEOUT_MS);
+}
+function resetSessionTimeout(){ if(_cu) startSessionTimeout(); }
+function updateTimeoutBar(){
+  if(!_timeoutStart) return;
+  const bar     = document.getElementById('timeout-bar');
+  const elapsed = Date.now() - _timeoutStart;
+  const pct     = Math.max(0, 100 - (elapsed/TIMEOUT_MS)*100);
+  bar.style.width      = pct + '%';
+  bar.style.background = pct > 50 ? 'var(--primary)' : pct > 20 ? 'var(--amber)' : 'var(--red)';
+  if(elapsed < TIMEOUT_MS) requestAnimationFrame(updateTimeoutBar);
+}
+['click','keydown','mousemove','scroll'].forEach(e=>{
+  document.addEventListener(e, ()=>{ if(_cu) resetSessionTimeout(); }, {passive:true});
+});
+
+/* ════════════════════════════════════
+   UTILS
+════════════════════════════════════ */
+function toast(m, d=3000){
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), d);
+}
+function showErr(id, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 5000);
+}
+function fmtDate(d){
+  if(!d) return '—';
+  return new Date(d).toLocaleDateString('id-ID',{
+    day:'numeric',month:'short',year:'numeric',
+    hour:'2-digit',minute:'2-digit'
+  });
+}
+function fmtDateShort(d){
+  if(!d) return '—';
+  return new Date(d).toLocaleDateString('id-ID',{
+    day:'numeric',month:'short',year:'numeric'
+  });
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+/* ── Badge helpers ── */
+function sevBadge(sev){
+  if(!sev) return '—';
+  const cls = sev.includes('Minimal') ? 'b-green'
+    : sev.includes('Ringan')  ? 'b-blue'
+    : sev.includes('Sedang')  ? 'b-orange'
+    : 'b-red';
+  return `<span class="badge ${cls}">${sev}</span>`;
+}
+function stageBadge(s){
+  const map = {anak:'🌱 Anak',remaja:'🌻 Remaja',dewasa:'🌿 Dewasa',lansia:'🍂 Lansia'};
+  return `<span class="badge b-blue">${map[s]||s}</span>`;
+}
+function statusBadge(s){
+  return s==='completed'
+    ? '<span class="badge b-green">✓ Selesai</span>'
+    : s==='ongoing'
+    ? '<span class="badge b-amber">⏳ Berlangsung</span>'
+    : '<span class="badge" style="background:rgba(107,122,153,.12);color:var(--muted)">Ditinggalkan</span>';
+}
+function getSevLabel(score, tahap){
+  const qLen = {anak:7,remaja:8,dewasa:9,lansia:9};
+  const mx   = (qLen[tahap]||9)*3;
+  const p    = score/mx;
+  if(p<=0.22) return 'Minimal / Tidak Ada Gejala';
+  if(p<=0.44) return 'Gejala Ringan';
+  if(p<=0.67) return 'Gejala Sedang';
+  return 'Gejala Berat';
+}
+
+/* ── Hitung hari tidak aktif ── */
+function hariTidakAktif(sess){
+  const tgl = sess.completed_at || sess.created_at;
+  if(!tgl) return 999;
+  const diff = Date.now() - new Date(tgl).getTime();
+  return Math.floor(diff / (1000*60*60*24));
+}
+
+/* ════════════════════════════════════
+   STATE
+════════════════════════════════════ */
+let _cu = null, _cuName = '', _cuId = null;
+let _allSessions    = [];
+let _allAssignments = [];
+let _allProfiles    = [];
+let _allFlags       = [];
+let _currentPatient = null;
+let _flagFilter     = 'all';
+const PAGE_SIZE = 15;
+let _monitoringPage = 1, _flagPage = 1;
+
+/* ════════════════════════════════════
+   LOGIN
+════════════════════════════════════ */
+async function doLogin(){
+  const locked = isLocked();
+  if(locked){ toast('⏳ Akun terkunci '+locked+' menit.'); return; }
+
+  const e = document.getElementById('lg-e').value.trim();
+  const p = document.getElementById('lg-p').value;
+  if(!e||!p){ showErr('lg-err','⚠️ Isi email dan password'); return; }
+
+  const btn = document.getElementById('lg-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Memverifikasi…';
+
+  try{
+    const {data, error} = await sb.auth.signInWithPassword({email:e, password:p});
+    if(error) throw error;
+
+    const {data:prof, error:profErr} = await sb.from('profiles')
+      .select('*').eq('id', data.user.id).single();
+    if(profErr || !prof || prof.role !== 'nurse'){
+      await sb.auth.signOut();
+      throw new Error('Akun ini tidak memiliki akses perawat.');
+    }
+
+    resetAttempts();
+    _cu     = data.user;
+    _cuId   = data.user.id;
+    _cuName = prof.full_name || e;
+    document.getElementById('tb-user').textContent       = _cuName;
+    document.getElementById('login-page').style.display  = 'none';
+    document.getElementById('dashboard').style.display   = 'block';
+    startSessionTimeout();
+    loadAllData();
+
+  } catch(err){
+    const cnt = recordFail();
+    updateAttemptUI();
+    btn.disabled  = false;
+    btn.innerHTML = 'Masuk ke Portal Perawat';
+    showErr('lg-err', `❌ ${err.message} (${cnt}/${MAX_ATTEMPTS})`);
+  }
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  document.getElementById('dashboard').style.display  = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  _cu = null; _cuId = null;
+  toast('Sampai jumpa 👋');
+}
+
+/* ════════════════════════════════════
+   LOAD DATA
+════════════════════════════════════ */
+async function loadAllData(){
+  document.getElementById('pg-loader').classList.remove('hide');
+  try{
+    // 1. Semua therapy_sessions
+    const {data:sess} = await sb.from('therapy_sessions')
+      .select('*').order('created_at',{ascending:false});
+    _allSessions = sess || [];
+
+    // 2. Semua assignments (untuk tahu psikolog assigned)
+    const {data:asgn} = await sb.from('patient_assignments')
+      .select('*').eq('is_active', true);
+    _allAssignments = asgn || [];
+
+    // 3. Semua profiles (untuk nama psikolog)
+    const {data:prof} = await sb.from('profiles')
+      .select('id, full_name, role');
+    _allProfiles = prof || [];
+
+    // 4. Semua flag follow-up yang dibuat perawat ini
+    const {data:flags} = await sb.from('follow_up_flags')
+      .select('*')
+      .eq('nurse_user_id', _cuId)
+      .order('flagged_at',{ascending:false});
+    _allFlags = flags || [];
+
+    renderDashboard();
+    renderMonitoring();
+    renderFollowup();
+    updateFlagBadge();
+
+  } catch(err){
+    toast('❌ Gagal memuat data: ' + err.message);
+  } finally {
+    document.getElementById('pg-loader').classList.add('hide');
+  }
+}
+
+/* ════════════════════════════════════
+   TAB NAVIGASI
+════════════════════════════════════ */
+function showTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('act'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('act');
+}
+
+function updateFlagBadge(){
+  const open = _allFlags.filter(f => !f.is_resolved).length;
+  const badge = document.getElementById('badge-followup');
+  document.getElementById('st-flag').textContent = open;
+  if(open > 0){
+    badge.textContent     = open;
+    badge.style.display   = 'inline-flex';
+  } else {
+    badge.style.display   = 'none';
+  }
+}
+
+/* ════════════════════════════════════
+   HELPER
+════════════════════════════════════ */
+function getAssignedPsikologName(patientUserId){
+  const asgn = _allAssignments.find(
+    a => a.patient_user_id === patientUserId && a.is_active
+  );
+  if(!asgn) return null;
+  const prof = _allProfiles.find(p => p.id === asgn.psikolog_user_id);
+  return prof ? prof.full_name : '—';
+}
+
+function hasFlag(patientUserId){
+  return _allFlags.some(
+    f => f.patient_user_id === patientUserId && !f.is_resolved
+  );
+}
+
+/* ════════════════════════════════════
+   RENDER: DASHBOARD
+════════════════════════════════════ */
+function renderDashboard(){
+  const total    = _allSessions.length;
+  const berat    = _allSessions.filter(s =>
+    getSevLabel(s.pre_score||0, s.stage) === 'Gejala Berat'
+  ).length;
+  const nonaktif = _allSessions.filter(s =>
+    s.status === 'ongoing' && hariTidakAktif(s) > 7
+  ).length;
+  const flagOpen = _allFlags.filter(f => !f.is_resolved).length;
+
+  document.getElementById('st-total').textContent    = total;
+  document.getElementById('st-berat').textContent    = berat;
+  document.getElementById('st-nonaktif').textContent = nonaktif;
+  document.getElementById('st-flag').textContent     = flagOpen;
+
+  /* ── Tabel Prioritas Berat ── */
+  const beratList = _allSessions.filter(s =>
+    getSevLabel(s.pre_score||0, s.stage) === 'Gejala Berat'
+  );
+  const beratTbody = document.getElementById('berat-tbody');
+  if(beratList.length === 0){
+    beratTbody.innerHTML =
+      `<tr><td colspan="8" class="tbl-empty">✅ Tidak ada pasien dengan skor berat.</td></tr>`;
+  } else {
+    beratTbody.innerHTML = beratList.map(s => {
+      const sev      = getSevLabel(s.pre_score||0, s.stage);
+      const asgnName = getAssignedPsikologName(s.user_id);
+      return `<tr>
+        <td><strong>${s.nickname||'—'}</strong></td>
+        <td>${s.age||'—'}</td>
+        <td>${stageBadge(s.stage)}</td>
+        <td><span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span></td>
+        <td>${sevBadge(sev)}</td>
+        <td>${statusBadge(s.status)}</td>
+        <td style="font-size:.72rem">${asgnName
+          ? `<span style="color:var(--green)">🔗 ${asgnName}</span>`
+          : `<span style="color:var(--muted)">—</span>`}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-p btn-sm" onclick="openDetail('${s.id}')">Lihat</button>
+          <button class="btn btn-a btn-sm" onclick="bukaModalFlagDari('${s.id}','${s.user_id}','${s.nickname||''}')">🚩 Flag</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ── Tabel Tidak Aktif ── */
+  const nonaktifList = _allSessions.filter(s =>
+    s.status === 'ongoing' && hariTidakAktif(s) > 7
+  );
+  const nonaktifTbody = document.getElementById('nonaktif-tbody');
+  if(nonaktifList.length === 0){
+    nonaktifTbody.innerHTML =
+      `<tr><td colspan="8" class="tbl-empty">✅ Semua pasien masih aktif.</td></tr>`;
+  } else {
+    nonaktifTbody.innerHTML = nonaktifList.map(s => {
+      const sev  = getSevLabel(s.pre_score||0, s.stage);
+      const hari = hariTidakAktif(s);
+      return `<tr>
+        <td><strong>${s.nickname||'—'}</strong></td>
+        <td>${s.age||'—'}</td>
+        <td>${stageBadge(s.stage)}</td>
+        <td>${s.pre_score??'—'}</td>
+        <td>${sevBadge(sev)}</td>
+        <td>
+          <span style="color:var(--amber);font-size:.78rem;font-weight:600">
+            ${hari} hari lalu
+          </span>
+        </td>
+        <td>${statusBadge(s.status)}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-p btn-sm" onclick="openDetail('${s.id}')">Lihat</button>
+          <button class="btn btn-a btn-sm" onclick="bukaModalFlagDari('${s.id}','${s.user_id}','${s.nickname||''}')">🚩 Flag</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+/* ════════════════════════════════════
+   RENDER: MONITORING
+════════════════════════════════════ */
+function renderMonitoring(){
+  const filter = document.getElementById('filter-monitoring').value;
+  const search = (document.getElementById('search-monitoring').value||'').toLowerCase();
+
+  let data = [..._allSessions];
+
+  if(filter === 'berat'){
+    data = data.filter(s => getSevLabel(s.pre_score||0,s.stage) === 'Gejala Berat');
+  } else if(filter === 'nonaktif'){
+    data = data.filter(s => s.status==='ongoing' && hariTidakAktif(s) > 7);
+  } else if(filter === 'ongoing'){
+    data = data.filter(s => s.status === 'ongoing');
+  } else if(filter === 'completed'){
+    data = data.filter(s => s.status === 'completed');
+  } else if(filter === 'flagged'){
+    data = data.filter(s => hasFlag(s.user_id));
+  }
+
+  if(search) data = data.filter(s => (s.nickname||'').toLowerCase().includes(search));
+
+  document.getElementById('monitoring-count').textContent = data.length;
+
+  const total     = data.length;
+  const totalPage = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if(_monitoringPage > totalPage) _monitoringPage = 1;
+  const slice = data.slice((_monitoringPage-1)*PAGE_SIZE, _monitoringPage*PAGE_SIZE);
+
+  const tbody = document.getElementById('monitoring-tbody');
+  if(slice.length === 0){
+    tbody.innerHTML = `<tr><td colspan="11" class="tbl-empty">Tidak ada data.</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map((s,i) => {
+      const sev      = getSevLabel(s.pre_score||0, s.stage);
+      const asgnName = getAssignedPsikologName(s.user_id);
+      const hari     = hariTidakAktif(s);
+      const flagAda  = hasFlag(s.user_id);
+      return `<tr>
+        <td>${(_monitoringPage-1)*PAGE_SIZE+i+1}</td>
+        <td><strong>${s.nickname||'—'}</strong></td>
+        <td>${s.age||'—'}</td>
+        <td>${stageBadge(s.stage)}</td>
+        <td><strong>${s.pre_score??'—'}</strong></td>
+        <td>${sevBadge(sev)}</td>
+        <td>${statusBadge(s.status)}</td>
+        <td style="font-size:.72rem">
+          <span style="color:${hari>7?'var(--amber)':'var(--muted)'}">
+            ${hari} hari lalu
+          </span>
+        </td>
+        <td style="font-size:.72rem">${asgnName
+          ? `<span style="color:var(--green)">🔗 ${asgnName}</span>`
+          : `<span style="color:var(--muted)">—</span>`}</td>
+        <td>
+          ${flagAda
+            ? `<span class="badge b-orange">🚩 Ada</span>`
+            : `<span style="color:var(--muted);font-size:.72rem">—</span>`}
+        </td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-p btn-sm" onclick="openDetail('${s.id}')">Lihat</button>
+          <button class="btn btn-a btn-sm"
+            onclick="bukaModalFlagDari('${s.id}','${s.user_id}','${s.nickname||''}')">
+            🚩 Flag
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  renderPagi(
+    'monitoring-pagi', _monitoringPage, totalPage,
+    p=>{ _monitoringPage=p; renderMonitoring(); }
+  );
+}
+
+/* ════════════════════════════════════
+   RENDER: FOLLOW-UP FLAGS
+════════════════════════════════════ */
+function filterFlag(val, btn){
+  _flagFilter = val;
+  document.querySelectorAll('.flag-filter-btn').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  _flagPage = 1;
+  renderFollowup();
+}
+
+function renderFollowup(){
+  const search = (document.getElementById('search-flag').value||'').toLowerCase();
+
+  let data = [..._allFlags];
+  if(_flagFilter === 'open')     data = data.filter(f => !f.is_resolved);
+  if(_flagFilter === 'resolved') data = data.filter(f =>  f.is_resolved);
+
+  // Filter by nama pasien
+  if(search){
+    data = data.filter(f => {
+      const sess = _allSessions.find(s => s.user_id === f.patient_user_id);
+      return (sess?.nickname||'').toLowerCase().includes(search);
+    });
+  }
+
+  document.getElementById('flag-count').textContent = data.length;
+
+  const total     = data.length;
+  const totalPage = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if(_flagPage > totalPage) _flagPage = 1;
+  const slice = data.slice((_flagPage-1)*PAGE_SIZE, _flagPage*PAGE_SIZE);
+
+  const tbody = document.getElementById('flag-tbody');
+  if(slice.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" class="tbl-empty">Tidak ada flag follow-up.</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map((f,i) => {
+      const sess = _allSessions.find(s => s.user_id === f.patient_user_id);
+      const nama = sess?.nickname || '—';
+      const age  = sess?.age || '—';
+      const skor = sess?.pre_score ?? '—';
+      return `<tr>
+        <td>${(_flagPage-1)*PAGE_SIZE+i+1}</td>
+        <td><strong>${nama}</strong></td>
+        <td>${age}</td>
+        <td>${skor}</td>
+        <td style="font-size:.8rem;max-width:220px;line-height:1.5">
+          ${f.note || '<span style="color:var(--muted);font-style:italic">Tidak ada catatan</span>'}
+        </td>
+        <td style="font-size:.72rem">${fmtDateShort(f.flagged_at)}</td>
+        <td>
+          ${f.is_resolved
+            ? `<span class="badge b-green">✅ Selesai</span>
+               <div style="font-size:.65rem;color:var(--muted);margin-top:3px">
+                 ${fmtDateShort(f.resolved_at)}
+               </div>`
+            : `<span class="badge b-orange">🚩 Terbuka</span>`}
+        </td>
+        <td style="white-space:nowrap">
+          ${!f.is_resolved
+            ? `<button class="btn btn-g btn-sm"
+                onclick="konfirmasiResolve('${f.id}','${nama}')">
+                ✅ Selesai
+              </button>`
+            : `<span style="color:var(--muted);font-size:.72rem">—</span>`}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  renderPagi(
+    'flag-pagi', _flagPage, totalPage,
+    p=>{ _flagPage=p; renderFollowup(); }
+  );
+}
+
+/* ════════════════════════════════════
+   PAGINASI
+════════════════════════════════════ */
+function renderPagi(elId, current, total, onPage){
+  const el = document.getElementById(elId);
+  if(total <= 1){ el.innerHTML=''; return; }
+  let h = '';
+  if(current > 1)
+    h += `<button class="pagi-btn" onclick="(${onPage})(${current-1})">‹</button>`;
+  for(let i=1; i<=total; i++){
+    if(i===1||i===total||Math.abs(i-current)<=1){
+      h += `<button class="pagi-btn ${i===current?'act':''}"
+              onclick="(${onPage})(${i})">${i}</button>`;
+    } else if(Math.abs(i-current)===2){
+      h += `<span style="color:var(--muted);font-size:.72rem">…</span>`;
+    }
+  }
+  if(current < total)
+    h += `<button class="pagi-btn" onclick="(${onPage})(${current+1})">›</button>`;
+  el.innerHTML = h;
+}
+
+/* ════════════════════════════════════
+   MODAL: DETAIL PASIEN (Ringkas)
+════════════════════════════════════ */
+async function openDetail(sessionId){
+  _currentPatient = _allSessions.find(s => s.id === sessionId);
+  if(!_currentPatient) return;
+
+  const s        = _currentPatient;
+  const sev      = getSevLabel(s.pre_score||0, s.stage);
+  const sevPost  = s.status==='completed'
+    ? getSevLabel(s.post_score||0, s.stage) : null;
+  const delta    = s.status==='completed'
+    ? (s.pre_score||0)-(s.post_score||0) : null;
+  const asgnName = getAssignedPsikologName(s.user_id);
+
+  // Ambil progress sesi (hanya nomor sesi — tanpa isi)
+  const {data:progress} = await sb.from('life_review_progress')
+    .select('session_number')
+    .eq('session_id', sessionId)
+    .order('session_number',{ascending:true});
+  const sesiDone = [...new Set((progress||[]).map(p=>p.session_number))];
+
+  // Ambil flag pasien ini yang dibuat oleh perawat ini
+  const flagPasien = _allFlags.filter(
+    f => f.patient_user_id === s.user_id
+  ).slice(0,3); // tampilkan max 3 flag terbaru
+
+  document.getElementById('md-title').textContent = `Detail — ${s.nickname||'Pasien'}`;
+  document.getElementById('md-body').innerHTML = `
+
+    <!-- Data Diri -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem">
+      <div class="detail-item">
+        <div class="detail-lbl">Nama Panggilan</div>
+        <div class="detail-val">${s.nickname||'—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Usia & JK</div>
+        <div class="detail-val">${s.age||'—'} tahun · ${s.gender||'—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Tahap</div>
+        <div class="detail-val">${stageBadge(s.stage)}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Status Sesi</div>
+        <div class="detail-val">${statusBadge(s.status)}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Penyakit Kronis</div>
+        <div class="detail-val">${s.chronic_disease||'—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Pasangan / Anak</div>
+        <div class="detail-val">${s.has_partner||'—'} / ${s.children_count||'—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Tanggal Mulai</div>
+        <div class="detail-val">${fmtDateShort(s.created_at)}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Psikolog Assigned</div>
+        <div class="detail-val">
+          ${asgnName
+            ? `<span style="color:var(--green)">🔗 ${asgnName}</span>`
+            : `<span style="color:var(--muted)">Belum assigned</span>`}
+        </div>
+      </div>
+    </div>
+
+    <!-- Skor PHQ -->
+    <div style="background:var(--surface2);border:1px solid var(--border);
+      border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;
+        letter-spacing:1px;color:var(--accent);margin-bottom:.75rem">
+        Skor PHQ
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:2rem;font-weight:600;font-family:'DM Serif Display',serif;
+            color:${sev.includes('Berat')?'var(--red)':sev.includes('Sedang')?'var(--accent)':sev.includes('Ringan')?'var(--amber)':'var(--green)'}">
+            ${s.pre_score??'—'}
+          </div>
+          <div style="font-size:.68rem;color:var(--muted)">Sebelum Terapi</div>
+          <div style="margin-top:.3rem">${sevBadge(sev)}</div>
+        </div>
+        ${s.status==='completed' ? `
+          <div style="font-size:1.4rem;color:var(--muted)">→</div>
+          <div style="text-align:center">
+            <div style="font-size:2rem;font-weight:600;font-family:'DM Serif Display',serif;
+              color:${sevPost.includes('Berat')?'var(--red)':sevPost.includes('Sedang')?'var(--accent)':sevPost.includes('Ringan')?'var(--amber)':'var(--green)'}">
+              ${s.post_score??'—'}
+            </div>
+            <div style="font-size:.68rem;color:var(--muted)">Sesudah Terapi</div>
+            <div style="margin-top:.3rem">${sevBadge(sevPost)}</div>
+          </div>
+          <div style="text-align:center;padding:.6rem .9rem;
+            background:var(--surface3);border-radius:8px">
+            <div style="font-size:1.2rem;font-weight:600">
+              ${delta>0
+                ? `<span style="color:var(--green)">↓ ${delta}</span>`
+                : delta<0
+                ? `<span style="color:var(--red)">↑ ${Math.abs(delta)}</span>`
+                : `<span style="color:var(--amber)">= 0</span>`}
+            </div>
+            <div style="font-size:.65rem;color:var(--muted)">
+              ${delta>0?'Membaik':delta<0?'Meningkat':'Tetap'}
+            </div>
+          </div>` : `
+          <div style="font-size:.82rem;color:var(--muted);font-style:italic">
+            Sesi masih berlangsung.
+          </div>`}
+      </div>
+    </div>
+
+    <!-- Progress Sesi (status saja, tanpa isi) -->
+    <div style="background:var(--surface2);border:1px solid var(--border);
+      border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;
+        letter-spacing:1px;color:var(--accent);margin-bottom:.75rem">
+        Progress Sesi
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${[1,2,3,4,5,6].map(n => {
+          const done = sesiDone.includes(n);
+          return `<div style="width:36px;height:36px;border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            font-size:.72rem;font-weight:700;
+            background:${done?'var(--green)':'var(--surface3)'};
+            color:${done?'#fff':'var(--muted)'};
+            border:2px solid ${done?'var(--green)':'var(--border)'}">
+            ${done?'✓':n}
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.6rem">
+        🔒 Isi sesi tidak dapat diakses oleh perawat.
+      </div>
+    </div>
+
+    <!-- Riwayat Flag Pasien Ini -->
+    <div style="background:var(--surface2);border:1px solid var(--border);
+      border-radius:10px;padding:1rem">
+      <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;
+        letter-spacing:1px;color:var(--accent);margin-bottom:.65rem">
+        Riwayat Flag Follow-up
+      </div>
+      ${flagPasien.length === 0
+        ? `<div style="font-size:.8rem;color:var(--muted);font-style:italic">
+             Belum ada flag untuk pasien ini.
+           </div>`
+        : flagPasien.map(f => `
+          <div style="background:var(--surface3);border-radius:7px;
+            padding:.6rem .85rem;margin-bottom:.45rem;
+            border-left:3px solid ${f.is_resolved?'var(--green)':'var(--accent)'}">
+            <div style="font-size:.78rem;color:var(--text);line-height:1.5">
+              ${f.note||'(tidak ada catatan)'}
+            </div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem;
+              display:flex;align-items:center;gap:8px">
+              <span>${fmtDateShort(f.flagged_at)}</span>
+              ${f.is_resolved
+                ? `<span style="color:var(--green)">✅ Selesai</span>`
+                : `<span style="color:var(--accent)">🚩 Terbuka</span>`}
+            </div>
+          </div>`).join('')}
+    </div>
+  `;
+
+  // Simpan referensi untuk tombol flag di footer
+  document.getElementById('md-flag-btn').onclick =
+    ()=> bukaModalFlagDari(s.id, s.user_id, s.nickname||'');
+
+  openModal('modal-detail');
+}
+
+/* ════════════════════════════════════
+   FLAG FOLLOW-UP
+════════════════════════════════════ */
+let _flagTargetUserId   = null;
+let _flagTargetNama     = '';
+
+function bukaModalFlag(){
+  // Dipanggil dari tombol di footer modal-detail
+  closeModal('modal-detail');
+  openModal('modal-flag');
+}
+
+function bukaModalFlagDari(sessionId, patientUserId, nama){
+  // Dipanggil langsung dari tabel
+  _flagTargetUserId = patientUserId;
+  _flagTargetNama   = nama;
+  document.getElementById('flag-pasien-nama').textContent = nama || '—';
+  document.getElementById('flag-note').value = '';
+  openModal('modal-flag');
+}
+
+// Override tombol flag di modal-detail agar set state dulu
+function bukaModalFlagDari(sessionId, patientUserId, nama){
+  _flagTargetUserId = patientUserId;
+  _flagTargetNama   = nama;
+  document.getElementById('flag-pasien-nama').textContent = nama || '—';
+  document.getElementById('flag-note').value = '';
+  closeModal('modal-detail');
+  openModal('modal-flag');
+}
+
+async function simpanFlag(){
+  if(!_flagTargetUserId){
+    toast('⚠️ Pasien tidak ditemukan.'); return;
+  }
+  const note = document.getElementById('flag-note').value.trim();
+  if(!note){ toast('⚠️ Catatan follow-up tidak boleh kosong.'); return; }
+
+  try{
+    await sb.from('follow_up_flags').insert({
+      patient_user_id: _flagTargetUserId,
+      nurse_user_id:   _cuId,
+      note:            note,
+      flagged_at:      new Date().toISOString(),
+      is_resolved:     false
+    });
+    toast('✅ Flag follow-up berhasil disimpan!');
+    closeModal('modal-flag');
+    await loadAllData();
+  } catch(err){
+    toast('❌ Gagal menyimpan flag: ' + err.message);
+  }
+}
+
+/* ════════════════════════════════════
+   RESOLVE FLAG
+════════════════════════════════════ */
+function konfirmasiResolve(flagId, namaPasien){
+  document.getElementById('resolve-text').textContent =
+    `Flag follow-up untuk pasien "${namaPasien}" akan ditandai sebagai sudah ditangani.`;
+  document.getElementById('resolve-ok-btn').onclick = ()=>{
+    closeModal('modal-resolve');
+    doResolveFlag(flagId);
+  };
+  openModal('modal-resolve');
+}
+
+async function doResolveFlag(flagId){
+  try{
+    await sb.from('follow_up_flags').update({
+      is_resolved:  true,
+      resolved_at:  new Date().toISOString()
+    }).eq('id', flagId);
+    toast('✅ Flag berhasil ditandai selesai.');
+    await loadAllData();
+  } catch(err){
+    toast('❌ Gagal update flag: ' + err.message);
+  }
+}
+
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+async function init(){
+  updateAttemptUI();
+  try{
+    const {data:{session}} = await sb.auth.getSession();
+    if(session?.user){
+      const {data:prof} = await sb.from('profiles')
+        .select('*').eq('id', session.user.id).single();
+      if(prof?.role === 'nurse'){
+        _cu     = session.user;
+        _cuId   = session.user.id;
+        _cuName = prof.full_name || session.user.email;
+        document.getElementById('tb-user').textContent       = _cuName;
+        document.getElementById('login-page').style.display  = 'none';
+        document.getElementById('dashboard').style.display   = 'block';
+        startSessionTimeout();
+        loadAllData();
+      } else {
+        await sb.auth.signOut();
+      }
+    }
+  } catch(e){ console.error(e); }
+  finally{
+    document.getElementById('pg-loader').classList.add('hide');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
