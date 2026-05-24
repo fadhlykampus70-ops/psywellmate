@@ -202,6 +202,23 @@ tr:hover td{background:rgba(255,255,255,.015)}
   table{font-size:.72rem}
   th,td{padding:7px 10px}
 }
+  /* Tambahan untuk panel assign */
+.pagi{
+  display:flex;align-items:center;gap:6px;
+  margin-top:1rem;justify-content:flex-end;
+  padding:0 1rem 1rem
+}
+.pagi-btn{
+  width:28px;height:28px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:.75rem;cursor:pointer;
+  transition:.2s;display:flex;align-items:center;justify-content:center
+}
+.pagi-btn:hover{border-color:var(--primary);color:var(--primary)}
+.pagi-btn.act{
+  background:var(--primary);
+  border-color:var(--primary);color:#fff
+}
 </style>
 </head>
 <body>
@@ -247,6 +264,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="sn" onclick="showPanel('sessions')" id="sn-sessions"><span class="sn-icon">🗂️</span> Sesi Terapi</div>
       <div class="sn" onclick="showPanel('phq')" id="sn-phq"><span class="sn-icon">🧪</span> Skor PHQ</div>
       <div class="sn-sep"></div>
+      <div class="sn" onclick="showPanel('assign')" id="sn-assign"><span class="sn-icon">🔗</span> Manajemen Assign</div>
       <div class="sn" onclick="showPanel('export')" id="sn-export"><span class="sn-icon">📥</span> Export Data</div>
       <div class="sn" onclick="showPanel('logs')" id="sn-logs"><span class="sn-icon">🔍</span> Log Aktivitas</div>
     </div>
@@ -407,6 +425,79 @@ tr:hover td{background:rgba(255,255,255,.015)}
       </div>
 
       <!-- EXPORT -->
+      <!-- MANAJEMEN ASSIGN -->
+      <div class="panel" id="panel-assign">
+        <div class="sec-hd">
+          <h2>Manajemen Assign</h2>
+          <p>Kelola penugasan pasien ke psikolog</p>
+        </div>
+      
+        <!-- Stat Cards -->
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);max-width:600px;margin-bottom:1.5rem">
+          <div class="stat-card">
+            <div class="stat-val" id="asgn-total">—</div>
+            <div class="stat-lbl">Total Assigned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="asgn-unassigned" style="color:var(--amber)">—</div>
+            <div class="stat-lbl">Belum Assigned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="asgn-psikolog">—</div>
+            <div class="stat-lbl">Psikolog Aktif</div>
+          </div>
+        </div>
+      
+        <!-- Tabel Assign Pasien -->
+        <div class="tbl-wrap" style="margin-bottom:1rem">
+          <div class="tbl-head">
+            <div class="tbl-title">Status Assign Pasien
+              <span class="badge b-blue" id="asgn-count">0</span>
+            </div>
+            <div class="tbl-actions">
+              <select class="search-inp" id="filter-assign"
+                onchange="renderAssignTable()" style="width:160px">
+                <option value="all">Semua</option>
+                <option value="assigned">Sudah Assigned</option>
+                <option value="unassigned">Belum Assigned</option>
+              </select>
+              <input class="search-inp" type="text" id="search-assign"
+                placeholder="Cari nama pasien…" oninput="renderAssignTable()">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Nama Pasien</th><th>Usia</th><th>Tahap</th>
+                <th>Skor PHQ</th><th>Psikolog Assigned</th>
+                <th>Metode</th><th>Tgl Assign</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="assign-tbody">
+              <tr><td colspan="9" class="tbl-empty">Memuat data…</td></tr>
+            </tbody>
+          </table>
+          <div class="pagi" id="assign-pagi"></div>
+        </div>
+      
+        <!-- Tabel Daftar Psikolog -->
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Daftar Psikolog & Beban Pasien</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Nama Psikolog</th><th>Email</th>
+                <th>Jumlah Pasien</th><th>Bergabung</th>
+              </tr>
+            </thead>
+            <tbody id="psikolog-tbody">
+              <tr><td colspan="5" class="tbl-empty">Memuat data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <div class="panel" id="panel-export">
         <div class="sec-hd"><h2>Export Data</h2><p>Unduh data terapi dalam format yang dibutuhkan</p></div>
         <div class="ibox"><strong>Panduan:</strong> CSV cocok untuk analisis data di Excel/Google Sheets. PDF cocok untuk laporan atau arsip klinis formal.</div>
@@ -454,6 +545,119 @@ tr:hover td{background:rgba(255,255,255,.015)}
 </div><!-- /dashboard -->
 
 <!-- MODAL: DETAIL USER -->
+<!-- MODAL: UBAH ROLE -->
+<div class="modal-overlay" id="modal-role">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <div class="modal-title">⚙️ Atur Role User</div>
+      <button class="modal-close" onclick="closeModal('modal-role')">✕</button>
+    <button class="btn btn-a btn-sm"
+  onclick="bukaModalRole('${u.id}','${u.full_name||u.email}','${u.email}','${u.role||'user'}')">
+  ⚙️ Role
+</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);
+          text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">
+          User
+        </div>
+        <div style="font-size:.9rem;font-weight:600;color:var(--white)"
+          id="role-user-nama">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px"
+          id="role-user-email">—</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);
+          text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">
+          Role Saat Ini
+        </div>
+        <div id="role-saat-ini">—</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.72rem;font-weight:600;
+          color:var(--muted);text-transform:uppercase;
+          letter-spacing:.3px;margin-bottom:6px">
+          Ubah ke Role
+        </label>
+        <select id="role-select"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);
+          border-radius:8px;background:var(--surface2);color:var(--text);
+          font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none">
+          <option value="user">👤 User (Pasien)</option>
+          <option value="nurse">🩹 Perawat</option>
+          <option value="psychologist">🩺 Psikolog</option>
+          <option value="admin">🛡️ Admin</option>
+        </select>
+      </div>
+      <div style="background:var(--amber-soft);border:1px solid rgba(245,200,66,.2);
+        border-radius:8px;padding:.7rem .9rem;margin-top:1rem;
+        font-size:.76rem;color:var(--amber);line-height:1.55">
+        ⚠️ Perubahan role akan langsung berlaku. Pastikan data sudah benar
+        sebelum menyimpan.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-role')">Batal</button>
+      <button class="btn btn-p" onclick="simpanRole()">Simpan Role</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ASSIGN PASIEN KE PSIKOLOG -->
+<div class="modal-overlay" id="modal-assign-form">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title" id="massign-title">🔗 Assign Pasien</div>
+      <button class="modal-close" onclick="closeModal('modal-assign-form')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);
+          text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">
+          Pasien
+        </div>
+        <div style="font-size:.9rem;font-weight:600;color:var(--white)"
+          id="massign-pasien">—</div>
+      </div>
+      <div style="margin-bottom:.5rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);
+          text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">
+          Assigned Saat Ini
+        </div>
+        <div id="massign-current">—</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="display:block;font-size:.72rem;font-weight:600;
+          color:var(--muted);text-transform:uppercase;
+          letter-spacing:.3px;margin-bottom:6px">
+          Pilih Psikolog
+        </label>
+        <select id="massign-select"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);
+          border-radius:8px;background:var(--surface2);color:var(--text);
+          font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none">
+        </select>
+      </div>
+      <div style="background:var(--primary-soft);border:1px solid rgba(79,142,247,.2);
+        border-radius:8px;padding:.7rem .9rem;
+        font-size:.76rem;color:var(--muted);line-height:1.55">
+        💡 Assign oleh admin akan menggantikan assign sebelumnya
+        (termasuk self-assign oleh psikolog).
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-assign-form')">Batal</button>
+      <button class="btn btn-r" id="massign-lepas-btn"
+        onclick="adminLepasAssign()" style="display:none">
+        Lepas Assign
+      </button>
+      <button class="btn btn-p" onclick="adminSimpanAssign()">
+        Simpan Assign
+      </button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-user">
   <div class="modal">
     <div class="modal-head">
@@ -1274,6 +1478,390 @@ async function exportTranscriptPDF(){
   toast('✅ PDF transkrip berhasil diunduh');
 }
 
+/* ════════════════════════════════════
+   STATE TAMBAHAN
+════════════════════════════════════ */
+let _allAssignments = [];
+let _allPsikolog    = [];
+let _assignPage     = 1;
+const ASSIGN_PAGE_SIZE = 15;
+let _roleTargetUser  = null;
+let _assignTargetSess= null;
+
+/* ════════════════════════════════════
+   LOAD DATA ASSIGN
+   Dipanggil dari loadAllData() yang sudah ada
+════════════════════════════════════ */
+async function loadAssignData(){
+  // Ambil semua assignments aktif
+  const {data:asgn} = await sb.from('patient_assignments')
+    .select('*').eq('is_active', true);
+  _allAssignments = asgn || [];
+
+  // Ambil semua psikolog dari profiles
+  const {data:psi} = await sb.from('profiles')
+    .select('id, full_name, email, created_at')
+    .eq('role','psychologist');
+  _allPsikolog = psi || [];
+
+  renderAssignStats();
+  renderAssignTable();
+  renderPsikologTable();
+}
+
+/* ════════════════════════════════════
+   RENDER: ASSIGN STATS
+════════════════════════════════════ */
+function renderAssignStats(){
+  const totalSess    = (_allSessions||[]).length;
+  const assigned     = _allAssignments.length;
+  const unassigned   = Math.max(0, totalSess - assigned);
+  const psiCount     = _allPsikolog.length;
+
+  const elTotal = document.getElementById('asgn-total');
+  const elUnasgn= document.getElementById('asgn-unassigned');
+  const elPsi   = document.getElementById('asgn-psikolog');
+  if(elTotal)  elTotal.textContent  = assigned;
+  if(elUnasgn) elUnasgn.textContent = unassigned;
+  if(elPsi)    elPsi.textContent    = psiCount;
+}
+
+/* ════════════════════════════════════
+   RENDER: TABEL ASSIGN PASIEN
+════════════════════════════════════ */
+function renderAssignTable(){
+  const filter = (document.getElementById('filter-assign')||{}).value || 'all';
+  const search = ((document.getElementById('search-assign')||{}).value||'').toLowerCase();
+
+  let data = [...(_allSessions||[])];
+
+  // Filter
+  if(filter === 'assigned'){
+    data = data.filter(s => _allAssignments.some(a => a.patient_user_id === s.user_id));
+  } else if(filter === 'unassigned'){
+    data = data.filter(s => !_allAssignments.some(a => a.patient_user_id === s.user_id));
+  }
+
+  // Search
+  if(search) data = data.filter(s => (s.nickname||'').toLowerCase().includes(search));
+
+  const el = document.getElementById('asgn-count');
+  if(el) el.textContent = data.length;
+
+  const total     = data.length;
+  const totalPage = Math.max(1, Math.ceil(total/ASSIGN_PAGE_SIZE));
+  if(_assignPage > totalPage) _assignPage = 1;
+  const slice = data.slice((_assignPage-1)*ASSIGN_PAGE_SIZE, _assignPage*ASSIGN_PAGE_SIZE);
+
+  const tbody = document.getElementById('assign-tbody');
+  if(!tbody) return;
+
+  if(slice.length === 0){
+    tbody.innerHTML = `<tr><td colspan="9" class="tbl-empty">Tidak ada data.</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map((s,i) => {
+      // Cari assignment untuk pasien ini
+      const asgn    = _allAssignments.find(a => a.patient_user_id === s.user_id);
+      const psiProf = asgn ? _allPsikolog.find(p => p.id === asgn.psikolog_user_id) : null;
+      const psiNama = psiProf ? psiProf.full_name : null;
+      const metode  = asgn?.assigned_by === 'self'
+        ? '<span class="badge b-blue">Self-assign</span>'
+        : asgn?.assigned_by === 'admin'
+        ? '<span class="badge b-orange">Admin</span>'
+        : '—';
+      const tglAsgn = asgn ? fmtDateShort(asgn.assigned_at) : '—';
+
+      // Skor
+      const sevLabel = s.pre_score != null
+        ? getSevLabelAdmin(s.pre_score, s.stage) : '—';
+      const sevCls = sevLabel.includes('Berat') ? 'b-red'
+        : sevLabel.includes('Sedang') ? 'b-orange'
+        : sevLabel.includes('Ringan') ? 'b-blue' : 'b-green';
+
+      return `<tr>
+        <td>${(_assignPage-1)*ASSIGN_PAGE_SIZE+i+1}</td>
+        <td><strong>${s.nickname||'—'}</strong></td>
+        <td>${s.age||'—'}</td>
+        <td><span class="badge b-blue">${s.stage||'—'}</span></td>
+        <td>
+          <strong>${s.pre_score??'—'}</strong>
+          ${sevLabel !== '—'
+            ? `<span class="badge ${sevCls}" style="margin-left:4px;font-size:.6rem">
+               ${sevLabel.replace('Gejala ','').replace('Minimal / Tidak Ada Gejala','Minimal')}
+               </span>`
+            : ''}
+        </td>
+        <td>
+          ${psiNama
+            ? `<span style="color:var(--green);font-size:.78rem">🔗 ${psiNama}</span>`
+            : `<span style="color:var(--amber);font-size:.78rem">Belum assigned</span>`}
+        </td>
+        <td>${metode}</td>
+        <td style="font-size:.72rem;color:var(--muted)">${tglAsgn}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-p btn-sm"
+            onclick="bukaModalAssign('${s.id}','${s.user_id}','${s.nickname||''}')">
+            ${psiNama ? '🔄 Ubah' : '+ Assign'}
+          </button>
+          ${psiNama
+            ? `<button class="btn btn-r btn-sm"
+                onclick="konfirmasiLepasAssign('${s.user_id}','${s.nickname||''}')">
+                Lepas
+              </button>`
+            : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Paginasi
+  renderAssignPagi(totalPage);
+}
+
+function renderAssignPagi(totalPage){
+  const el = document.getElementById('assign-pagi');
+  if(!el) return;
+  if(totalPage <= 1){ el.innerHTML=''; return; }
+  let h = '';
+  if(_assignPage > 1)
+    h += `<button class="pagi-btn" onclick="_assignPage--;renderAssignTable()">‹</button>`;
+  for(let i=1;i<=totalPage;i++){
+    if(i===1||i===totalPage||Math.abs(i-_assignPage)<=1){
+      h += `<button class="pagi-btn ${i===_assignPage?'act':''}"
+              onclick="_assignPage=${i};renderAssignTable()">${i}</button>`;
+    } else if(Math.abs(i-_assignPage)===2){
+      h += `<span style="color:var(--muted);font-size:.72rem">…</span>`;
+    }
+  }
+  if(_assignPage < totalPage)
+    h += `<button class="pagi-btn" onclick="_assignPage++;renderAssignTable()">›</button>`;
+  el.innerHTML = h;
+}
+
+/* ════════════════════════════════════
+   RENDER: TABEL PSIKOLOG
+════════════════════════════════════ */
+function renderPsikologTable(){
+  const tbody = document.getElementById('psikolog-tbody');
+  if(!tbody) return;
+
+  if(_allPsikolog.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" class="tbl-empty">
+      Belum ada akun psikolog terdaftar.
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = _allPsikolog.map((p,i) => {
+    // Hitung jumlah pasien yang di-assign ke psikolog ini
+    const jumlah = _allAssignments.filter(
+      a => a.psikolog_user_id === p.id && a.is_active
+    ).length;
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${p.full_name||'—'}</strong></td>
+      <td style="font-size:.75rem;color:var(--muted)">${p.email||'—'}</td>
+      <td>
+        <span style="font-size:.9rem;font-weight:600;color:var(--white)">
+          ${jumlah}
+        </span>
+        <span style="font-size:.72rem;color:var(--muted)"> pasien</span>
+      </td>
+      <td style="font-size:.72rem;color:var(--muted)">
+        ${fmtDateShort(p.created_at)}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   HELPER SEVERITY (khusus admin panel)
+════════════════════════════════════ */
+function getSevLabelAdmin(score, tahap){
+  const qLen = {anak:7,remaja:8,dewasa:9,lansia:9};
+  const mx   = (qLen[tahap]||9)*3;
+  const p    = score/mx;
+  if(p<=0.22) return 'Minimal / Tidak Ada Gejala';
+  if(p<=0.44) return 'Gejala Ringan';
+  if(p<=0.67) return 'Gejala Sedang';
+  return 'Gejala Berat';
+}
+
+/* ════════════════════════════════════
+   UBAH ROLE USER
+════════════════════════════════════ */
+function bukaModalRole(userId, nama, email, roleSaatIni){
+  _roleTargetUser = {id: userId, nama, email, role: roleSaatIni};
+
+  document.getElementById('role-user-nama').textContent  = nama;
+  document.getElementById('role-user-email').textContent = email;
+
+  // Badge role saat ini
+  const roleMap = {
+    user:          {label:'👤 User',       cls:'b-blue'},
+    nurse:         {label:'🩹 Perawat',    cls:'b-green'},
+    psychologist:  {label:'🩺 Psikolog',   cls:'b-orange'},
+    admin:         {label:'🛡️ Admin',      cls:'b-red'}
+  };
+  const info = roleMap[roleSaatIni] || {label:roleSaatIni, cls:'b-blue'};
+  document.getElementById('role-saat-ini').innerHTML =
+    `<span class="badge ${info.cls}">${info.label}</span>`;
+
+  // Set dropdown ke role saat ini
+  document.getElementById('role-select').value = roleSaatIni;
+
+  openModal('modal-role');
+}
+
+async function simpanRole(){
+  if(!_roleTargetUser) return;
+  const rolesBaru = document.getElementById('role-select').value;
+
+  if(rolesBaru === _roleTargetUser.role){
+    toast('⚠️ Role tidak berubah.');
+    closeModal('modal-role');
+    return;
+  }
+
+  // Konfirmasi via toast (langsung simpan)
+  try{
+    const {error} = await sb.from('profiles')
+      .update({role: rolesBaru})
+      .eq('id', _roleTargetUser.id);
+    if(error) throw error;
+
+    // Log aktivitas
+    await logActivity(
+      'role_change',
+      _roleTargetUser.id,
+      `Ubah role ${_roleTargetUser.nama} dari ${_roleTargetUser.role} → ${rolesBaru}`
+    );
+
+    toast(`✅ Role ${_roleTargetUser.nama} diubah ke ${rolesBaru}`);
+    closeModal('modal-role');
+
+    // Reload data
+    await loadAllData();
+    if(typeof loadAssignData === 'function') await loadAssignData();
+
+  } catch(err){
+    toast('❌ Gagal ubah role: ' + err.message);
+  }
+}
+
+/* ════════════════════════════════════
+   ASSIGN PASIEN KE PSIKOLOG (ADMIN)
+════════════════════════════════════ */
+function bukaModalAssign(sessionId, patientUserId, nama){
+  _assignTargetSess = {sessionId, patientUserId, nama};
+
+  document.getElementById('massign-pasien').textContent = nama || '—';
+
+  // Tampilkan assigned saat ini
+  const asgn    = _allAssignments.find(a => a.patient_user_id === patientUserId);
+  const psiProf = asgn ? _allPsikolog.find(p => p.id === asgn.psikolog_user_id) : null;
+
+  document.getElementById('massign-current').innerHTML = psiProf
+    ? `<span style="color:var(--green)">🔗 ${psiProf.full_name}</span>
+       <span style="font-size:.7rem;color:var(--muted);margin-left:6px">
+         (${asgn.assigned_by === 'self' ? 'Self-assign' : 'Admin'})
+       </span>`
+    : `<span style="color:var(--muted)">Belum assigned</span>`;
+
+  // Isi dropdown psikolog
+  const sel = document.getElementById('massign-select');
+  sel.innerHTML = _allPsikolog.length === 0
+    ? `<option value="">— Belum ada psikolog terdaftar —</option>`
+    : _allPsikolog.map(p => {
+        const jumlah = _allAssignments.filter(
+          a => a.psikolog_user_id === p.id && a.is_active
+        ).length;
+        const selected = asgn && asgn.psikolog_user_id === p.id ? 'selected' : '';
+        return `<option value="${p.id}" ${selected}>
+          ${p.full_name} (${jumlah} pasien)
+        </option>`;
+      }).join('');
+
+  // Tampilkan tombol lepas hanya jika sudah ada assign
+  const lepsBtn = document.getElementById('massign-lepas-btn');
+  lepsBtn.style.display = asgn ? 'inline-flex' : 'none';
+
+  // Update judul modal
+  document.getElementById('massign-title').textContent =
+    asgn ? '🔄 Ubah Assign Pasien' : '🔗 Assign Pasien ke Psikolog';
+
+  openModal('modal-assign-form');
+}
+
+async function adminSimpanAssign(){
+  if(!_assignTargetSess) return;
+  const psikologId = document.getElementById('massign-select').value;
+  if(!psikologId){
+    toast('⚠️ Pilih psikolog terlebih dahulu.'); return;
+  }
+
+  try{
+    // Nonaktifkan assign lama
+    await sb.from('patient_assignments')
+      .update({is_active: false})
+      .eq('patient_user_id', _assignTargetSess.patientUserId)
+      .eq('is_active', true);
+
+    // Insert assign baru
+    await sb.from('patient_assignments').insert({
+      patient_user_id:  _assignTargetSess.patientUserId,
+      psikolog_user_id: psikologId,
+      assigned_by:      'admin',
+      assigned_at:      new Date().toISOString(),
+      is_active:        true
+    });
+
+    // Nama psikolog untuk log
+    const psiProf = _allPsikolog.find(p => p.id === psikologId);
+    await logActivity(
+      'assign',
+      _assignTargetSess.patientUserId,
+      `Assign pasien ${_assignTargetSess.nama} ke psikolog ${psiProf?.full_name||psikologId}`
+    );
+
+    toast('✅ Pasien berhasil di-assign!');
+    closeModal('modal-assign-form');
+    await loadAssignData();
+
+  } catch(err){
+    toast('❌ Gagal assign: ' + err.message);
+  }
+}
+
+async function adminLepasAssign(){
+  if(!_assignTargetSess) return;
+  try{
+    await sb.from('patient_assignments')
+      .update({is_active: false})
+      .eq('patient_user_id', _assignTargetSess.patientUserId)
+      .eq('is_active', true);
+
+    await logActivity(
+      'assign',
+      _assignTargetSess.patientUserId,
+      `Lepas assign pasien ${_assignTargetSess.nama}`
+    );
+
+    toast('✅ Assign berhasil dilepas.');
+    closeModal('modal-assign-form');
+    await loadAssignData();
+
+  } catch(err){
+    toast('❌ Gagal lepas assign: ' + err.message);
+  }
+}
+
+function konfirmasiLepasAssign(patientUserId, nama){
+  _assignTargetSess = {patientUserId, nama};
+  if(confirm(`Lepas assign pasien "${nama}"?`)){
+    adminLepasAssign();
+  }
+}
 /* ════════════════════════════════════
    PANEL NAVIGATION
 ════════════════════════════════════ */
