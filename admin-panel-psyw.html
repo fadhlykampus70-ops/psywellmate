@@ -945,7 +945,7 @@ async function loadAllData(){
       sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(200)
     ]);
 
-    _allUsers = usersRes.data?.filter(u=>u.role!=='admin') || [];
+    _allUsers = usersRes.data || [];
     _allSessions = sessRes.data || [];
     _allPHQ = phqRes.data || [];
     _allLogs = logsRes.data || [];
@@ -955,6 +955,8 @@ async function loadAllData(){
     renderSessions();
     renderPHQ();
     renderLogs();
+    // Muat data assign
+    try{ await loadAssignData(); }catch(e){ console.warn('loadAssignData:',e); }
 
   } catch(err){
     toast('⚠️ Gagal memuat data: '+err.message);
@@ -1100,7 +1102,13 @@ function renderUsers(filter=''){
     <td style="color:var(--muted);font-size:.75rem">${u.email||'—'}</td>
     <td><span class="badge ${u.role==='admin'?'b-orange':'b-blue'}">${u.role||'user'}</span></td>
     <td style="color:var(--muted);font-size:.75rem">${fmtDateShort(u.created_at)}</td>
-    <td><button class="btn btn-p btn-sm vu-btn" data-id="${u.id}">Detail</button></td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-p btn-sm vu-btn" data-id="${u.id}">Detail</button>
+      <button class="btn btn-a btn-sm" style="margin-left:4px"
+        onclick="bukaModalRole('${u.id}','${u.full_name||u.email}','${u.email||''}','${u.role||'user'}')">
+        ⚙️ Role
+      </button>
+    </td>
   </tr>`).join('');
 
   // Event listener aman untuk tombol detail user
@@ -1870,6 +1878,10 @@ function showPanel(id){
   document.querySelectorAll('.sn').forEach(s=>s.classList.remove('act'));
   document.getElementById('panel-'+id).classList.add('active');
   document.getElementById('sn-'+id).classList.add('act');
+  // Reload data assign setiap buka panel assign
+  if(id === 'assign'){
+    try{ loadAssignData(); }catch(e){ console.warn('loadAssignData:',e); }
+  }
 }
 
 /* ════════════════════════════════════
