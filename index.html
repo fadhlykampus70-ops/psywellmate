@@ -1909,12 +1909,14 @@ function loadSesiQuestion(){
   setTimeout(()=>{
     bt.textContent=qs[n];
     if(_ttsUnlocked && _ttsEnabled){
-      // Musik OFF dulu — Elina bicara pertanyaan, musik & mic start SETELAH Elina selesai
       musicForceStop();
       musicShow(true);
-      elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
+      // Jeda 200ms agar browser tidak race condition
+      setTimeout(()=>{
+        elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
+      }, 200);
     } else {
-      // TTS tidak aktif: langsung tampilkan musik + mic
+      musicShow(true);
       musicEnsureStarted();
       document.getElementById('sq-ta').focus();
       if(_micSupported) setTimeout(()=>startMicSesi(), 400);
@@ -2757,16 +2759,26 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsAktif = true;
       _ttsWaveOn(waveEl);
       _ttsDisableInput(true);
-      musicDuck();
+      if(_musPlaying) musicForceStop();
     };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
-      musicUnduck();
-      if(waveEl === 'tts-wave-q'){
+      if(waveEl === 'tts-wave-q' && jenisOverride === 'pertanyaan'){
+        musicEnsureStarted();
         _afterElinaQuestion();
+      } else {
+        musicEnsureStarted();
       }
+    };
+    utt.onerror = (e) => {
+      _ttsAktif = false;
+      _ttsWaveOff(waveEl);
+      _ttsDisableInput(false);
+      console.warn('TTS error:', e.error);
+      musicEnsureStarted();
+      if(_micSupported) setTimeout(()=>startMicSesi(), 400);
     };
     utt.onerror = () => {
       _ttsAktif = false;
@@ -3271,10 +3283,9 @@ function musicDuck(){
 
 // Kembalikan volume normal setelah Elina selesai bicara
 function musicUnduck(){
-  if(!_musInited){ _musInited=true; _musLoad(_musIdx, false); }
   const audio=_musAudio();
   if(!audio) return;
-  if(!_musPlaying){ audio.play().then(()=>{_musPlaying=true;_musUpdateUI(true);}).catch(()=>{}); }
+  if(!_musPlaying) return;
   _musDucked=false;
   // Visual: EQ kembali normal
   const eq2=document.getElementById('mp-eq');
