@@ -1846,20 +1846,41 @@ function beginSesiQuestions(){
 // Warmup TTS dengan utterance kosong untuk unlock gesture browser
 // Dipanggil SETELAH ada user gesture (klik tombol), sehingga speechSynthesis terbuka
 function _ttsWarmup(onReady){
-  if(!window.speechSynthesis || !_ttsEnabled){ _ttsUnlocked=true; onReady(); return; }
-  // Pastikan voices tersedia dulu
+  // Di Vercel (HTTPS), speechSynthesis.speak utterance kosong
+  // kadang tidak trigger onend — pakai timeout sebagai fallback
+  if(!window.speechSynthesis || !_ttsEnabled){
+    _ttsUnlocked=true; onReady(); return;
+  }
+  let _warmupDone = false;
+  const selesai = () => {
+    if(_warmupDone) return;
+    _warmupDone = true;
+    _ttsUnlocked = true;
+    onReady();
+  };
   const doWarmup = () => {
     const utt = new SpeechSynthesisUtterance('');
     utt.volume = 0;
     utt.rate   = 1;
-    utt.onend  = ()=>{ _ttsUnlocked=true; onReady(); };
-    utt.onerror= ()=>{ _ttsUnlocked=true; onReady(); }; // tetap lanjut meski gagal
+    utt.onend  = selesai;
+    utt.onerror= selesai;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utt);
+    // Fallback: jika onend tidak terpanggil dalam 1.5 detik
+    // langsung lanjut saja
+    setTimeout(selesai, 1500);
   };
   if(window.speechSynthesis.getVoices().length === 0){
-    window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.onvoiceschanged=null; doWarmup(); };
-    setTimeout(()=>{ if(!_ttsUnlocked){ window.speechSynthesis.onvoiceschanged=null; doWarmup(); } }, 2000);
+    window.speechSynthesis.onvoiceschanged = ()=>{
+      window.speechSynthesis.onvoiceschanged = null;
+      doWarmup();
+    };
+    setTimeout(()=>{
+      if(!_warmupDone){
+        window.speechSynthesis.onvoiceschanged = null;
+        doWarmup();
+      }
+    }, 1000);
   } else {
     doWarmup();
   }
@@ -2761,30 +2782,29 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsDisableInput(true);
       if(_musPlaying) musicForceStop();
     };
+    utt.onstart = () => {
+      _ttsAktif = true;
+      _ttsWaveOn(waveEl);
+      _ttsDisableInput(true);
+      // Pastikan musik mati saat TTS mulai
+      if(_musPlaying) musicForceStop();
+    };
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
-      if(waveEl === 'tts-wave-q' && jenisOverride === 'pertanyaan'){
-        musicEnsureStarted();
+      // Setelah TTS selesai → musik fade in + mic ON
+      musicEnsureStarted();
+      if(waveEl === 'tts-wave-q'){
         _afterElinaQuestion();
-      } else {
-        musicEnsureStarted();
       }
     };
     utt.onerror = (e) => {
       _ttsAktif = false;
       _ttsWaveOff(waveEl);
       _ttsDisableInput(false);
-      console.warn('TTS error:', e.error);
-      musicEnsureStarted();
-      if(_micSupported) setTimeout(()=>startMicSesi(), 400);
-    };
-    utt.onerror = () => {
-      _ttsAktif = false;
-      _ttsWaveOff(waveEl);
-      _ttsDisableInput(false);
-      // Error TTS → tetap nyalakan musik + mic supaya user bisa lanjut
+      console.warn('TTS error:', e?.error);
+      // Error TTS → tetap nyalakan musik + mic
       musicEnsureStarted();
       if(_micSupported) setTimeout(()=>startMicSesi(), 400);
     };
@@ -3283,9 +3303,10 @@ function musicDuck(){
 
 // Kembalikan volume normal setelah Elina selesai bicara
 function musicUnduck(){
+  // Hanya unduck jika musik sedang playing
+  // Jangan autoplay paksa — pakai musicEnsureStarted untuk resume
   const audio=_musAudio();
-  if(!audio) return;
-  if(!_musPlaying) return;
+  if(!audio || !_musPlaying) return;
   _musDucked=false;
   // Visual: EQ kembali normal
   const eq2=document.getElementById('mp-eq');
