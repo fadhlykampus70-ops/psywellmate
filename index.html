@@ -1526,7 +1526,8 @@ async function doResumeSesi(){
     S.currentQIdx    = answeredInLastSesi;
     renderSteps(getStepIdxForSesi(S.currentSesiNum));
     showSc('sc-sesi-q');
-    loadSesiQuestion();
+    ttsInit();
+    _ttsWarmup(() => { loadSesiQuestion(); });
   }
 }
 
@@ -2780,12 +2781,6 @@ function elinaBicara(teks, jenisOverride, waveId){
       _ttsAktif = true;
       _ttsWaveOn(waveEl);
       _ttsDisableInput(true);
-      if(_musPlaying) musicForceStop();
-    };
-    utt.onstart = () => {
-      _ttsAktif = true;
-      _ttsWaveOn(waveEl);
-      _ttsDisableInput(true);
       // Pastikan musik mati saat TTS mulai
       if(_musPlaying) musicForceStop();
     };
@@ -2844,9 +2839,9 @@ function elinaBicaraRespons(teks, jenisOverride, onDone){
     utt.onend = () => {
       _ttsAktif = false;
       _ttsWaveOff('tts-wave-resp');
-      musicEnsureStarted();          // musik fade in
       if(onDone) onDone();           // enable input kembali
-      if(_micSupported) setTimeout(()=>startMicSesi(), 500);
+      musicEnsureStarted();          // musik fade in
+      if(_micSupported) setTimeout(()=>startMicSesi(), 600);
     };
     utt.onerror = () => {
       _ttsAktif = false;
@@ -2854,7 +2849,7 @@ function elinaBicaraRespons(teks, jenisOverride, onDone){
       if(onDone) onDone();
       // Error → tetap nyalakan musik + mic supaya user bisa lanjut
       musicEnsureStarted();
-      if(_micSupported) setTimeout(()=>startMicSesi(), 450);
+      if(_micSupported) setTimeout(()=>startMicSesi(), 600);
     };
     window.speechSynthesis.speak(utt);
   };
