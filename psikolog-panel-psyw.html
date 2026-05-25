@@ -905,26 +905,30 @@ async function loadAllData(){
   document.getElementById('pg-loader').classList.remove('hide');
   try{
     // 1. Semua therapy_sessions
-    const {data:sess} = await sb.from('therapy_sessions')
+    const {data:sess, error:sessErr} = await sb.from('therapy_sessions')
       .select('*').order('created_at',{ascending:false});
+    if(sessErr) console.warn('sessions error:',sessErr.message);
     _allSessions = sess || [];
 
     // 2. Semua PHQ assessments
-    const {data:phq} = await sb.from('phq_assessments')
+    const {data:phq, error:phqErr} = await sb.from('phq_assessments')
       .select('*').order('created_at',{ascending:false});
+    if(phqErr) console.warn('phq error:',phqErr.message);
     _allPHQ = phq || [];
 
     // 3. Semua assignments
-    const {data:asgn} = await sb.from('patient_assignments')
+    const {data:asgn, error:asgnErr} = await sb.from('patient_assignments')
       .select('*').eq('is_active', true);
+    if(asgnErr) console.warn('assignments error:',asgnErr.message);
     _allAssignments = asgn || [];
 
-    // 4. Semua profiles (untuk nama psikolog di kolom assigned)
-    const {data:prof} = await sb.from('profiles')
+    // 4. Semua profiles (hanya role psychologist untuk nama assigned)
+    const {data:prof, error:profErr} = await sb.from('profiles')
       .select('id, full_name, role');
+    if(profErr) console.warn('profiles error:',profErr.message);
     _allProfiles = prof || [];
 
-    // Hitung pasien yang assigned ke saya
+    // Hitung pasien yang assigned ke saya (berdasarkan user_id — Opsi A)
     _myAssigned = _allAssignments
       .filter(a => a.psikolog_user_id === _cuId)
       .map(a => a.patient_user_id);
@@ -936,6 +940,7 @@ async function loadAllData(){
 
   } catch(err){
     toast('❌ Gagal memuat data: ' + err.message);
+    console.error('loadAllData error:', err);
   } finally {
     document.getElementById('pg-loader').classList.add('hide');
   }
