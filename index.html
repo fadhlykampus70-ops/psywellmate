@@ -855,7 +855,7 @@ function sapaanCap(){
 ══════════════════════════════════════════ */
 const NLP = {
   positif: ['bahagia','senang','gembira','baik','bagus','indah','syukur','bersyukur','cinta','sayang','semangat','harapan','bangga','berhasil','sukses','damai','tenang','nyaman','aman','sehat','segar','bersemangat','luar biasa','menyenangkan','hebat','kuat','tabah','sabar','ikhlas','percaya','optimis','bermanfaat','berarti','bermakna','berharga','ringan','lega','puas','beruntung','tercukupi','dicintai','dihargai','didukung','terhubung','dekat','akrab','hangat','erat'],
-  negatif: ['sedih','menangis','susah','sulit','berat','lelah','capek','stress','stres','cemas','khawatir','takut','marah','kesal','frustrasi','kecewa','sakit','nyeri','menderita','kesepian','sendiri','terisolasi','terbuang','tidak dihargai','tidak berharga','putus asa','pesimis','hancur','hilang','kehilangan','ditinggal','mati','bunuh','menyakiti','tidak bisa','gagal','hancur','beban','tertekan','terpuruk','malu','bersalah','menyesal','trauma','luka','perih','pahit','hampa','kosong','sia-sia','tidak berguna','tidak mampu','tidak sanggup','terpenjara','terjebak'],
+  negatif: ['sedih','menangis','susah','sulit','berat','lelah','capek','stress','stres','cemas','khawatir','takut','marah','kesal','frustrasi','kecewa','sakit','nyeri','menderita','kesepian','sendiri','terisolasi','terbuang','tidak dihargai','tidak berharga','putus asa','pesimis','hancur','hilang','kehilangan','ditinggal','mati','bunuh','menyakiti','tidak bisa','gagal','beban','tertekan','terpuruk','malu','bersalah','menyesal','trauma','luka','perih','pahit','hampa','kosong','sia-sia','tidak berguna','tidak mampu','tidak sanggup','terpenjara','terjebak'],
   emosi: {
     'sedih':['sedih','menangis','duka','pilu','nestapa','merana','kepedihan','air mata'],
     'marah':['marah','kesal','frustrasi','jengkel','dongkol','murka','benci','dendam','emosi'],
@@ -872,7 +872,220 @@ const NLP = {
     'sosial':['teman','sahabat','tetangga','masyarakat','komunitas','bergaul','pertemanan','persahabatan','lingkungan'],
     'masa lalu':['dulu','dahulu','masa kecil','masa lalu','kenangan','ingatan','waktu kecil','sewaktu kecil','zaman'],
     'masa depan':['masa depan','nanti','harapan','cita-cita','rencana','impian','khawatir','takut masa depan'],
-    'spiritualitas':['ibadah','shalat','doa','agama','tuhan','iman','bersyukur','pasrah','ikhlas','masjid','gereja','tempat ibadah']
+    'spiritualitas':['ibadah','shalat','doa','agama','tuhan','iman','bersyukur','pasrah','ikhlas','masjid','gereja','tempat ibadah'],
+    'pendidikan':['sekolah','kuliah','kampus','universitas','mahasiswa','siswa','guru','dosen','pelajaran','belajar','ujian','tugas','skripsi','tesis','nilai','rapor','akademik','kelas','semester','wisuda'],
+    'percintaan':['pacar','kekasih','cinta','sayang','hubungan','romantis','jatuh cinta','putus','selingkuh','menikah','pernikahan','tunangan','gebetan','pdkt','lamaran'],
+    'pertemanan':['bestie','kawan','teman dekat','geng','circle','nongkrong','curhat'],
+    'keuangan':['uang','keuangan','finansial','tabungan','hutang','utang','cicilan','pinjaman','kredit','investasi','modal','biaya','pengeluaran','pemasukan','bangkrut','rugi','untung','ekonomi','lunas','tagihan'],
+    'kehilangan':['kehilangan','ditinggalkan','meninggal','wafat','berpulang','duka','dukacita','kematian','kepergian','berpisah'],
+    'trauma':['trauma','traumatis','kekerasan','pelecehan','penganiayaan','dibully','bullying','ditakuti','ancaman','pengalaman buruk'],
+    'identitas diri':['jati diri','identitas','siapa saya','kepribadian','karakter','potensi diri','tujuan hidup','makna hidup','nilai hidup'],
+    'kepercayaan diri':['percaya diri','minder','insecure','ragu diri','harga diri','kelebihan','kelemahan'],
+    'stres':['tertekan','beban','burnout','jenuh','kelelahan','overthinking','tekanan','banyak pikiran'],
+    'kecemasan':['gelisah','panik','overthinking','deg-degan','tidak tenang','resah'],
+    'harapan':['berharap','optimis','impian','cita-cita','keinginan','target','tujuan','mimpi','ambisi'],
+    'kesepian':['kesepian','sendirian','terasing','dikucilkan','hampa','sunyi','tidak ditemani'],
+    'pengambilan keputusan':['dilema','opsi','alternatif','memutuskan','langkah','jalan terbaik','pertimbangan'],
+    'konflik':['bertengkar','konflik','perselisihan','cekcok','debat','salah paham','pertengkaran','berdebat'],
+    'kemarahan':['amarah','murka','benci','dendam','emosi meledak','tidak bisa menahan'],
+    'kekecewaan':['kecewa','mengecewakan','tidak sesuai harapan','merasa dikhianati','harapan tidak terwujud'],
+    'rasa bersalah':['bersalah','menyesal','merasa berdosa','tidak bisa memaafkan diri','menyiksa diri','salah saya'],
+    'penolakan':['ditolak','tidak diterima','diabaikan','dibuang','dikesampingkan','tidak dipedulikan'],
+    'burnout':['kelelahan total','tidak ada semangat','kehilangan motivasi','tidak bisa bekerja lagi','capek luar dalam','sudah tidak kuat'],
+    'dukungan sosial':['tidak ada yang mendukung','merasa sendirian','tidak ada tempat bercerita','butuh teman','ingin didengar','tidak ada yang peduli'],
+    'perubahan':['perubahan besar','hidup berubah','situasi berubah','harus beradaptasi','transisi','fase baru','babak baru'],
+    'resiliensi':['bangkit kembali','bertahan','tidak menyerah','terus berjuang','kuat menghadapi','pulih dari'],
+    'motivasi':['semangat hilang','tidak ada motivasi','malas','tidak bergairah','kehilangan tujuan','tidak tahu mau apa']
+  },
+  frase_topik: {
+    keluarga: [
+      'hubungan dengan orang tua','bertengkar dengan ayah','bertengkar dengan ibu',
+      'masalah keluarga','konflik keluarga','hubungan dengan kakak','hubungan dengan adik',
+      'masalah rumah tangga','suami tidak mengerti','istri tidak memahami',
+      'anak saya sulit diatur','keluarga saya tidak mendukung',
+      'merasa tidak dianggap keluarga','hubungan dengan mertua'
+    ],
+    pekerjaan: [
+      'beban kerja berat','tekanan pekerjaan','masalah di kantor',
+      'konflik dengan atasan','konflik dengan rekan kerja','takut kehilangan pekerjaan',
+      'ingin mengundurkan diri','sulit mencari pekerjaan','gaji tidak cukup',
+      'pekerjaan membuat stres','lembur setiap hari','tidak nyaman di kantor',
+      'target kerja terlalu tinggi','takut dipecat','tidak cocok dengan pekerjaan'
+    ],
+    kesehatan: [
+      'kondisi kesehatan saya','sering merasa sakit','sulit tidur malam',
+      'mudah merasa lelah','baru keluar rumah sakit','hasil pemeriksaan dokter',
+      'sedang menjalani pengobatan','khawatir dengan kesehatan','proses pemulihan kesehatan',
+      'kesehatan semakin menurun','nyeri yang tidak kunjung hilang','sering mengalami pusing'
+    ],
+    sosial: [
+      'sulit bergaul dengan orang lain','hubungan dengan tetangga',
+      'merasa tidak diterima lingkungan','masalah dengan teman',
+      'konflik dalam komunitas','hubungan sosial memburuk',
+      'sulit berinteraksi dengan orang','merasa dijauhi orang lain',
+      'sulit membangun relasi','tidak nyaman dalam pergaulan',
+      'kurang memiliki teman dekat'
+    ],
+    'masa lalu': [
+      'pengalaman masa kecil','kejadian di masa lalu','kenangan yang sulit dilupakan',
+      'teringat kejadian lama','masa lalu yang menyakitkan','pengalaman buruk dahulu',
+      'masih mengingat kejadian itu','kenangan bersama keluarga',
+      'kejadian yang membekas','sulit melupakan masa lalu'
+    ],
+    'masa depan': [
+      'khawatir tentang masa depan','rencana untuk masa depan',
+      'takut menghadapi masa depan','harapan di masa mendatang',
+      'belum memiliki tujuan hidup','bingung menentukan masa depan',
+      'impian yang belum terwujud','langkah selanjutnya dalam hidup',
+      'takut gagal di masa depan','masa depan terasa tidak pasti'
+    ],
+    spiritualitas: [
+      'hubungan dengan tuhan','kehidupan spiritual saya','mencari ketenangan batin',
+      'lebih mendekat kepada tuhan','berusaha lebih ikhlas','berusaha lebih bersyukur',
+      'meningkatkan kualitas ibadah','mencari makna hidup','memperkuat keimanan',
+      'kehilangan semangat beribadah','percaya pada kehendak tuhan'
+    ],
+    pendidikan: [
+      'kesulitan dalam belajar','nilai akademik menurun','tekanan tugas kuliah',
+      'banyak tugas sekolah','persiapan menghadapi ujian','sulit memahami pelajaran',
+      'hubungan dengan dosen','hubungan dengan guru','sedang mengerjakan skripsi',
+      'kesulitan menyelesaikan skripsi','khawatir nilai jelek','takut tidak lulus',
+      'bingung memilih jurusan','masalah di kampus','prestasi akademik menurun'
+    ],
+    percintaan: [
+      'hubungan dengan pacar','konflik dengan pasangan','baru saja putus',
+      'hubungan sedang renggang','pasangan tidak memahami saya',
+      'kehilangan orang yang dicintai','masalah dalam hubungan asmara',
+      'takut kehilangan pasangan','ingin mengakhiri hubungan',
+      'kesulitan membangun hubungan','hubungan jarak jauh','sedang jatuh cinta',
+      'pasangan berubah sikap','merasa tidak dicintai'
+    ],
+    pertemanan: [
+      'masalah dengan sahabat','konflik dengan teman','teman menjauhi saya',
+      'kehilangan teman dekat','sulit mendapatkan teman',
+      'hubungan pertemanan memburuk','merasa tidak dihargai teman',
+      'teman tidak memahami saya','persahabatan yang renggang',
+      'merasa dikucilkan teman','teman mengkhianati saya','sulit percaya kepada teman'
+    ],
+    keuangan: [
+      'masalah keuangan keluarga','kesulitan memenuhi kebutuhan',
+      'penghasilan tidak mencukupi','banyak hutang yang harus dibayar',
+      'kesulitan membayar cicilan','khawatir kondisi finansial',
+      'keuangan semakin memburuk','usaha mengalami kerugian',
+      'tabungan semakin menipis','sulit mengatur keuangan','pendapatan tidak stabil'
+    ],
+    kehilangan: [
+      'kehilangan orang yang dicintai','baru saja kehilangan',
+      'ditinggalkan orang terdekat','mengalami kehilangan besar',
+      'kehilangan anggota keluarga','kehilangan pekerjaan',
+      'kehilangan kesempatan penting','sulit menerima kehilangan',
+      'masih berduka hingga sekarang','merasa sangat kehilangan'
+    ],
+    trauma: [
+      'pengalaman yang traumatis','kejadian yang sangat menakutkan',
+      'masih teringat kejadian buruk','sulit melupakan kejadian tersebut',
+      'pengalaman kekerasan masa lalu','pernah menjadi korban bullying',
+      'pernah mengalami pelecehan','sering teringat kejadian buruk',
+      'merasa takut kembali','pengalaman yang membekas'
+    ],
+    'identitas diri': [
+      'sedang mencari jati diri','bingung dengan diri sendiri',
+      'belum mengenal diri sendiri','ingin memahami diri lebih baik',
+      'sedang menemukan tujuan hidup','bertanya tentang siapa diri saya',
+      'kehilangan arah hidup','merasa tidak memiliki tujuan','mencari makna kehidupan'
+    ],
+    'kepercayaan diri': [
+      'kurang percaya diri','merasa tidak mampu','sering meragukan diri sendiri',
+      'takut tampil di depan umum','merasa minder dengan orang lain',
+      'sulit menghargai diri sendiri','tidak yakin dengan kemampuan saya',
+      'merasa tidak cukup baik','sulit menerima diri sendiri'
+    ],
+    stres: [
+      'terlalu banyak pikiran','merasa sangat tertekan','beban hidup terasa berat',
+      'stres karena pekerjaan','stres karena kuliah','merasa kewalahan dengan keadaan',
+      'sulit beristirahat dengan tenang','kehilangan energi untuk beraktivitas',
+      'tekanan hidup semakin besar','merasa lelah secara mental'
+    ],
+    kecemasan: [
+      'cemas berlebihan tentang sesuatu','sulit berhenti khawatir',
+      'pikiran negatif terus muncul','takut sesuatu buruk terjadi',
+      'sering merasa gelisah','sulit merasa tenang',
+      'jantung berdebar saat cemas','merasa panik tanpa alasan jelas',
+      'cemas menghadapi masa depan','khawatir secara terus menerus'
+    ],
+    harapan: [
+      'berharap keadaan membaik','ingin kehidupan yang lebih baik',
+      'masih memiliki harapan','berusaha mencapai impian',
+      'ingin mengubah hidup','mengejar cita cita',
+      'berharap mendapatkan kesempatan','memiliki tujuan hidup yang jelas',
+      'ingin berkembang menjadi lebih baik'
+    ],
+    kesepian: [
+      'merasa sangat kesepian','tidak memiliki teman dekat',
+      'merasa sendirian setiap hari','tidak ada yang memahami saya',
+      'merasa terasing dari lingkungan','kesulitan menemukan teman',
+      'tidak memiliki tempat bercerita','merasa hampa dalam hidup',
+      'merasa tidak memiliki siapa siapa'
+    ],
+    'pengambilan keputusan': [
+      'bingung mengambil keputusan','sulit menentukan pilihan',
+      'tidak tahu harus memilih yang mana','berada dalam situasi dilema',
+      'takut mengambil keputusan yang salah','masih mempertimbangkan pilihan',
+      'kesulitan menentukan langkah','ragu terhadap pilihan sendiri'
+    ],
+    konflik: [
+      'terjadi pertengkaran','konflik yang berkepanjangan','sulit berdamai dengan orang lain',
+      'hubungan yang penuh perselisihan','tidak bisa menyelesaikan konflik',
+      'masalah yang tidak kunjung selesai','situasi yang memanas'
+    ],
+    kemarahan: [
+      'tidak bisa menahan marah','sering meledak marah',
+      'amarah yang sulit dikontrol','merasa sangat marah pada seseorang',
+      'emosi yang tidak bisa dikendalikan','menyimpan dendam lama'
+    ],
+    kekecewaan: [
+      'merasa sangat kecewa','harapan tidak sesuai kenyataan',
+      'sudah berusaha tapi gagal','merasa dikhianati orang lain',
+      'kepercayaan yang disia siakan','sudah berkorban tapi tidak dihargai'
+    ],
+    'rasa bersalah': [
+      'merasa bersalah atas kejadian itu','tidak bisa memaafkan diri sendiri',
+      'terus menyalahkan diri sendiri','menyesal atas keputusan yang dibuat',
+      'merasa menjadi penyebab masalah','beban rasa bersalah yang berat'
+    ],
+    penolakan: [
+      'merasa ditolak','tidak diterima oleh orang lain',
+      'diabaikan oleh orang terdekat','tidak dipedulikan sama sekali',
+      'merasa tidak berharga di mata orang lain','selalu dikesampingkan'
+    ],
+    burnout: [
+      'sudah tidak kuat lagi','kelelahan yang sangat dalam',
+      'tidak ada semangat untuk beraktivitas','kehilangan gairah hidup',
+      'merasa hampa dan lelah sekaligus','tidak bisa berfungsi seperti biasa',
+      'burnout karena pekerjaan','burnout karena kuliah'
+    ],
+    'dukungan sosial': [
+      'tidak ada yang mendukung saya','merasa berjuang sendiri',
+      'tidak ada tempat untuk bercerita','ingin didengar dan dipahami',
+      'tidak ada yang peduli','butuh seseorang yang bisa dipercaya',
+      'merasa tidak ada yang bisa diandalkan'
+    ],
+    perubahan: [
+      'hidup sedang berubah drastis','harus menghadapi situasi baru',
+      'perubahan yang tidak terduga','sulit beradaptasi dengan perubahan',
+      'sedang dalam masa transisi','fase hidup yang baru',
+      'kehidupan yang berbeda dari sebelumnya'
+    ],
+    resiliensi: [
+      'mencoba untuk bangkit kembali','berusaha untuk tidak menyerah',
+      'ingin pulih dari keterpurukan','berjuang untuk terus maju',
+      'mencari kekuatan untuk bertahan','belajar dari pengalaman sulit'
+    ],
+    motivasi: [
+      'kehilangan semangat hidup','tidak tahu harus mulai dari mana',
+      'merasa tidak ada tujuan','sulit menemukan motivasi','malas melakukan apapun',
+      'tidak bergairah menjalani hari','ingin kembali bersemangat'
+    ]
   }
 };
 
@@ -891,9 +1104,15 @@ function analyzeNLP(text){
   }
 
   const topics=[];
+  // Cek kata tunggal dari NLP.topik
   for(const[top,words] of Object.entries(NLP.topik)){
     let c=0; words.forEach(w=>{if(t.includes(w))c++;});
-    if(c>0) topics.push(top);
+    if(c>0 && !topics.includes(top)) topics.push(top);
+  }
+  // Cek frasa multi-kata dari NLP.frase_topik
+  for(const[top,frases] of Object.entries(NLP.frase_topik||{})){
+    let c=0; frases.forEach(f=>{if(t.includes(f))c++;});
+    if(c>0 && !topics.includes(top)) topics.push(top);
   }
 
   return {sentiment, emotion:detectedEmo, topics};
@@ -953,6 +1172,89 @@ const MTR = {
     'Rasa rindu itu bisa terasa sangat berat, apalagi jika yang dirindukan sudah tidak bisa dijangkau. Boleh {sp} ceritakan lebih tentang orang atau momen yang {sp} rindukan?',
     'Ada kehangatan sekaligus kesedihan dalam cerita {sp}. Kenangan apa yang paling sering muncul ketika {sp} merasakan rindu itu?',
     'Merindukan seseorang atau sesuatu yang bermakna adalah tanda betapa berartinya hal itu bagi {sp}. Apakah rindu itu datang setiap hari, atau ada momen-momen tertentu yang memicunya?',
+  ],
+
+  T1_NEG_TRAUMA: [
+    'Pengalaman seperti itu sungguh berat dan meninggalkan bekas yang dalam. {sp} tidak perlu terburu-buru — ceritakan seperlunya saja, sesuai yang terasa aman. Sudah berapa lama bayangan pengalaman itu masih terasa hadir?',
+    'Terima kasih telah mempercayakan ini. Apa yang {sp} alami dulu itu nyata, dan perasaan yang muncul setelahnya pun nyata adanya. Apakah ada momen tertentu yang paling sering kembali muncul dalam pikiran {sp}?',
+    'Butuh keberanian yang sangat besar untuk menyentuh pengalaman seperti ini. Saya di sini, mendengarkan. Apakah {sp} pernah sebelumnya menceritakan hal ini kepada siapapun?',
+    'Luka dari pengalaman seperti itu tidak selalu mudah untuk dijelaskan. Dari yang {sp} rasakan sekarang — apa yang paling terasa berat untuk dibawa setiap harinya?',
+  ],
+
+  T1_NEG_KESEPIAN: [
+    'Kesepian yang terasa mendalam itu bisa sangat menguras, apalagi jika sudah berlangsung lama. Apakah ada momen-momen tertentu ketika rasa kesepian itu terasa paling kuat?',
+    'Merasa tidak ada yang benar-benar memahami — itu salah satu perasaan yang paling melelahkan. Sudah berapa lama {sp} merasakannya?',
+    'Saya di sini dan mendengarkan {sp}. Kalau boleh, ceritakan — apakah ada seseorang yang dulu hadir dan membuat {sp} tidak merasa sendiri, tapi kini sudah tidak ada?',
+    '{sp} tidak sendirian malam ini, setidaknya di sini. Apa yang biasanya {sp} lakukan ketika rasa sepi itu datang?',
+  ],
+
+  T1_NEG_BURNOUT: [
+    'Kelelahan yang seperti {sp} ceritakan itu bukan sekadar capek biasa — itu tanda bahwa {sp} sudah memberi terlalu banyak untuk waktu yang terlalu lama. Kapan terakhir kali {sp} merasa benar-benar beristirahat?',
+    'Ada perbedaan antara lelah dan kehilangan diri — dan yang {sp} rasakan terdengar seperti yang kedua. Apakah masih ada hal kecil yang membuat {sp} masih mau bangun di pagi hari?',
+    'Tubuh dan pikiran kadang harus berbicara keras dulu sebelum kita mau mendengarkan. Dari semua yang {sp} tanggung — apa yang terasa paling menguras?',
+    'Burnout itu nyata dan valid. Apakah ada seseorang di sekitar {sp} yang tahu seberapa lelahnya {sp} sebenarnya?',
+  ],
+
+  T1_NEG_PERCINTAAN: [
+    'Hubungan yang dekat dengan hati memang bisa menjadi sumber kebahagiaan sekaligus sumber luka yang dalam. Dari yang {sp} ceritakan — apa yang paling terasa menyakitkan saat ini?',
+    'Perasaan dalam hubungan itu kompleks dan tidak selalu mudah diungkapkan. Apakah {sp} sudah lama menyimpan perasaan ini sendirian?',
+    'Tidak mudah menceritakan hal-hal yang menyangkut hati. Terima kasih sudah mau berbagi. Apakah ada bagian dari hubungan ini yang {sp} rasa belum pernah disampaikan kepada siapapun?',
+    'Ketika seseorang yang kita sayangi tidak memahami kita — rasa sakitnya bisa berlapis. Apa yang paling {sp} harapkan bisa berubah dari situasi ini?',
+  ],
+
+  T1_NEG_KEUANGAN: [
+    'Tekanan keuangan itu bisa terasa sangat menyesakkan, karena menyentuh hampir semua aspek kehidupan sehari-hari. Sudah berapa lama {sp} menghadapi situasi ini?',
+    'Beban finansial yang berat sering membuat seseorang merasa sendirian dan malu untuk bercerita. Apakah ada orang terdekat yang tahu tentang kondisi ini?',
+    'Menghadapi masalah keuangan butuh ketenangan yang tidak mudah didapat. Dari semua yang dihadapi — apa yang paling membuat {sp} sulit tidur di malam hari?',
+    'Keuangan bukan hanya soal angka — ia menyentuh rasa aman, rasa berharga, dan ketenangan. Apa yang paling {sp} khawatirkan dari situasi ini?',
+  ],
+
+  T1_NEG_KEHILANGAN: [
+    'Kehilangan seseorang atau sesuatu yang berarti meninggalkan ruang kosong yang tidak mudah diisi. Boleh {sp} ceritakan siapa atau apa yang paling {sp} rindukan?',
+    'Duka itu tidak punya jadwal — ia bisa datang kapan saja, dalam bentuk yang paling tidak terduga. Bagaimana {sp} menjalani hari-hari sejak kehilangan itu?',
+    'Terima kasih sudah mau menceritakan ini. Kehilangan yang {sp} alami itu nyata dan perasaan yang hadir setelahnya pun nyata. Apakah ada yang ingin {sp} sampaikan kepada orang atau hal yang hilang itu, jika bisa?',
+    'Proses berduka itu berbeda bagi setiap orang, dan tidak ada yang salah dengan cara {sp} merasakannya. Apakah ada seseorang yang mendampingi {sp} dalam proses ini?',
+  ],
+
+  T1_NEG_IDENTITAS: [
+    'Bertanya tentang siapa diri kita sebenarnya adalah salah satu pertanyaan paling dalam yang bisa seseorang hadapi. Apa yang paling membuat {sp} merasa bingung tentang diri sendiri saat ini?',
+    'Tidak semua orang berani jujur pada diri sendiri seperti yang {sp} lakukan. Apakah perasaan bingung tentang identitas ini sudah lama ada, atau baru muncul belakangan?',
+    'Kadang kita merasa seperti mengenakan pakaian yang tidak benar-benar pas — kita berfungsi, tapi tidak sepenuhnya merasa jadi diri sendiri. Apakah {sp} merasakan sesuatu seperti itu?',
+  ],
+
+  T1_NEG_KEPERCAYAAN_DIRI: [
+    'Meragukan diri sendiri itu melelahkan, apalagi jika sudah menjadi suara yang terus-menerus hadir. Sejak kapan suara itu mulai terasa keras bagi {sp}?',
+    'Rasa tidak percaya diri sering datang bukan karena kita tidak mampu, tapi karena kita pernah diajarkan untuk meragukan diri. Apakah ada pengalaman tertentu yang {sp} rasa menjadi awal dari perasaan ini?',
+    'Saya mendengar {sp}. Ada perbedaan antara tidak mampu dan merasa tidak mampu — dan itu perbedaan yang sangat penting. Apa yang biasanya memicu rasa ragu itu muncul?',
+  ],
+
+  T1_NEG_PENGAMBILAN_KEPUTUSAN: [
+    'Berada di persimpangan pilihan bisa terasa sangat membebani, terutama jika keputusan itu menyangkut hal yang penting. Apa yang membuat pilihan ini terasa begitu sulit bagi {sp}?',
+    'Dilema itu nyata — ketika setiap pilihan punya konsekuensinya sendiri dan tidak ada yang terasa sempurna. Sudah berapa lama {sp} bergulat dengan keputusan ini?',
+    'Boleh ceritakan lebih — apa yang paling {sp} takutkan jika mengambil salah satu dari pilihan yang ada?',
+    'Terkadang kita sudah tahu jawabannya, tapi butuh ruang untuk meyakinkan diri sendiri. Ketika {sp} membayangkan dua pilihan itu — mana yang membuat dada terasa lebih lega?',
+  ],
+
+  T1_NEG_STRES: [
+    'Tekanan yang terus menumpuk itu bisa membuat segalanya terasa berat bahkan untuk hal-hal kecil sekalipun. Dari semua yang {sp} hadapi — apa yang terasa paling menekan saat ini?',
+    'Stres yang berkepanjangan bukan tanda kelemahan — itu tanda bahwa {sp} sudah menanggung terlalu banyak. Apakah ada ruang istirahat yang {sp} masih bisa temukan di tengah semua ini?',
+    'Tubuh dan pikiran punya batas. Apakah {sp} sudah merasakan tanda-tanda bahwa keduanya sudah mulai kelelahan?',
+  ],
+
+  T1_NEG_KECEMASAN: [
+    'Pikiran yang terus berputar dan sulit berhenti itu memang bisa sangat melelahkan. Biasanya, tentang apa yang paling sering membuat pikiran {sp} tidak bisa tenang?',
+    'Rasa cemas itu kadang datang bahkan tanpa alasan yang jelas — dan itu sendiri bisa membuat kita semakin cemas. Sudah berapa lama {sp} merasakan gelombang seperti ini?',
+    'Kekhawatiran yang terus-menerus itu berat untuk ditanggung sendirian. Apakah ada seseorang yang tahu seberapa sering rasa cemas ini datang?',
+  ],
+
+  T1_POS_HARAPAN: [
+    'Ada cahaya yang nyata dalam kata-kata {sp} — harapan itu bukan hal kecil, terutama di tengah situasi yang tidak mudah. Apa yang membuat {sp} masih bisa memegang harapan itu?',
+    'Memiliki impian dan tujuan yang jelas adalah kekuatan tersendiri. Boleh {sp} ceritakan lebih — apa yang paling {sp} harapkan bisa terwujud?',
+  ],
+
+  T1_POS_RESILIENSI: [
+    'Bangkit setelah jatuh bukan hal yang mudah, dan {sp} sedang melakukannya. Apa yang memberi {sp} kekuatan untuk terus berdiri?',
+    'Ada ketangguhan yang luar biasa dalam cerita {sp}. Dari semua yang sudah dilewati — apa pelajaran terbesar yang {sp} bawa?',
   ],
 
   T1_NEG_DEFAULT: [
@@ -1081,30 +1383,129 @@ const MTR = {
     keluarga: [
       'Keluarga rupanya memegang tempat yang sangat penting dalam cerita {sp}. ',
       'Ada warna keluarga yang kuat di sana. ',
+      'Hubungan keluarga tampaknya menjadi salah satu sumber pengalaman yang paling berkesan bagi {sp}. ',
     ],
     pekerjaan: [
       'Dunia kerja tampaknya membawa tekanan tersendiri bagi {sp}. ',
       'Pekerjaan memang bisa menjadi sumber baik kebanggaan maupun kelelahan. ',
+      'Tanggung jawab pekerjaan yang {sp} ceritakan terlihat cukup menguras energi dan perhatian. ',
     ],
     kesehatan: [
       'Kondisi kesehatan yang {sp} hadapi tentu bukan hal mudah. ',
       'Perjalanan kesehatan seperti itu membutuhkan ketabahan yang luar biasa. ',
+      'Pengalaman terkait kesehatan tampaknya membawa dampak yang cukup besar dalam kehidupan sehari-hari {sp}. ',
     ],
     sosial: [
       'Hubungan dengan orang-orang di sekitar {sp} tampaknya sangat bermakna. ',
       'Lingkungan sosial rupanya memainkan peran penting dalam cerita {sp}. ',
+      'Interaksi dengan orang lain tampaknya memberikan pengaruh yang cukup besar terhadap pengalaman tersebut. ',
     ],
     'masa lalu': [
       'Kenangan masa lalu itu masih terasa sangat hidup bagi {sp}. ',
       'Masa lalu yang {sp} ceritakan tampaknya masih membawa pengaruh yang besar. ',
+      'Ada jejak emosional dari masa lalu yang tampaknya masih terasa hingga saat ini. ',
     ],
     'masa depan': [
       'Pikiran tentang masa depan tampaknya cukup mengisi benak {sp}. ',
       'Ada kekhawatiran sekaligus harapan tentang yang akan datang. ',
+      'Membayangkan langkah berikutnya memang dapat menghadirkan campuran antara optimisme dan keraguan. ',
     ],
     spiritualitas: [
       'Dimensi spiritual tampaknya menjadi pegangan penting bagi {sp}. ',
       'Kehidupan spiritual {sp} tampak menjadi sumber kekuatan yang berarti. ',
+      'Pencarian makna dan kedekatan spiritual tampaknya menjadi bagian penting dari pengalaman tersebut. ',
+    ],
+    pendidikan: [
+      'Tekanan dunia pendidikan tampaknya cukup besar dalam keseharian {sp}. ',
+      'Perjalanan akademik sering membawa beban tersendiri yang tidak selalu mudah diceritakan. ',
+    ],
+    percintaan: [
+      'Hati yang sedang bergulat dengan perasaan memang butuh ruang untuk bercerita. ',
+      'Hal-hal yang menyentuh perasaan terdalam memang tidak selalu mudah diungkapkan. ',
+    ],
+    pertemanan: [
+      'Persahabatan yang bermakna — atau yang menyakitkan — meninggalkan bekas yang tidak kecil. ',
+      'Hubungan dengan teman-teman rupanya memegang tempat penting dalam cerita {sp}. ',
+    ],
+    keuangan: [
+      'Tekanan finansial menyentuh hampir semua sisi kehidupan sehari-hari. ',
+      'Beban keuangan yang berat memang tidak mudah dibicarakan, tapi penting untuk tidak ditanggung sendiri. ',
+    ],
+    kehilangan: [
+      'Kehilangan yang dirasakan {sp} itu nyata dan layak untuk diberikan ruang. ',
+      'Proses berduka tidak pernah linier — ia datang dan pergi dengan caranya sendiri. ',
+    ],
+    trauma: [
+      'Pengalaman yang membekas itu membutuhkan waktu dan ruang yang aman untuk diproses. ',
+      'Tidak semua luka terlihat dari luar, tapi bukan berarti ia tidak nyata. ',
+    ],
+    'identitas diri': [
+      'Pertanyaan tentang siapa diri kita adalah salah satu pencarian paling dalam yang bisa dialami manusia. ',
+      'Proses mengenal diri sendiri memang tidak selalu nyaman, tapi ia adalah perjalanan yang sangat berharga. ',
+    ],
+    'kepercayaan diri': [
+      'Rasa meragukan diri sendiri itu melelahkan, terutama ketika sudah berlangsung lama. ',
+      'Kepercayaan diri bukan tentang tidak pernah ragu — tapi tentang terus melangkah meski ragu itu ada. ',
+    ],
+    stres: [
+      'Tekanan yang menumpuk itu memang bisa membuat segalanya terasa lebih berat dari seharusnya. ',
+      'Stres yang berkepanjangan adalah tanda bahwa seseorang sedang menanggung terlalu banyak. ',
+    ],
+    kecemasan: [
+      'Pikiran yang terus berputar itu bisa sangat menguras — bahkan sebelum hari benar-benar dimulai. ',
+      'Kecemasan yang terus-menerus memang tidak mudah dikendalikan sendirian. ',
+    ],
+    harapan: [
+      'Ada sesuatu yang berharga dalam harapan yang masih {sp} pegang erat. ',
+      'Harapan yang bertahan di tengah kesulitan adalah tanda kekuatan yang nyata. ',
+    ],
+    kesepian: [
+      'Rasa kesepian yang mendalam itu bisa hadir bahkan di tengah keramaian sekalipun. ',
+      'Merasa tidak dipahami oleh siapapun adalah salah satu perasaan yang paling menguras. ',
+    ],
+    'pengambilan keputusan': [
+      'Berada di persimpangan pilihan memang bisa terasa sangat membebani. ',
+      'Keputusan besar sering datang bersama ketidakpastian yang tidak mudah ditanggung. ',
+    ],
+    konflik: [
+      'Konflik yang berkepanjangan memang bisa menguras energi dan emosi secara bersamaan. ',
+      'Situasi yang penuh perselisihan sering meninggalkan perasaan yang berat dan tidak terselesaikan. ',
+    ],
+    kemarahan: [
+      'Amarah yang dalam itu sering menyimpan luka atau ketidakadilan yang belum tersampaikan. ',
+      'Rasa marah yang kuat itu valid — dan ia butuh ruang yang aman untuk diungkapkan. ',
+    ],
+    kekecewaan: [
+      'Kekecewaan yang besar itu sering datang dari harapan yang sungguh-sungguh dipegang. ',
+      'Merasa dikhianati atau dikecewakan oleh seseorang yang dipercaya itu meninggalkan luka tersendiri. ',
+    ],
+    'rasa bersalah': [
+      'Beban rasa bersalah itu bisa terasa sangat berat untuk dibawa sendirian. ',
+      'Menyalahkan diri sendiri terus-menerus adalah salah satu bentuk penderitaan yang paling melelahkan. ',
+    ],
+    penolakan: [
+      'Merasa ditolak atau tidak diterima meninggalkan rasa yang tidak mudah dijelaskan dengan kata-kata. ',
+      'Diabaikan oleh orang yang kita harapkan peduli adalah salah satu hal yang paling menyakitkan. ',
+    ],
+    burnout: [
+      'Kelelahan yang sudah sampai ke tingkat ini bukan hal yang bisa diabaikan begitu saja. ',
+      'Burnout itu bukan tanda kelemahan — ia tanda bahwa seseorang sudah memberi terlalu banyak dari dirinya. ',
+    ],
+    'dukungan sosial': [
+      'Merasa berjuang sendirian tanpa ada yang mendukung itu sangat menguras. ',
+      'Kebutuhan untuk didengar dan dipahami adalah kebutuhan yang sangat manusiawi. ',
+    ],
+    perubahan: [
+      'Menghadapi perubahan besar dalam hidup memang membutuhkan energi dan keberanian tersendiri. ',
+      'Masa transisi sering membawa ketidakpastian yang tidak mudah untuk dijalani. ',
+    ],
+    resiliensi: [
+      'Ada kekuatan yang nyata dalam upaya {sp} untuk terus bangkit. ',
+      'Bertahan dan terus melangkah meski sulit adalah sesuatu yang layak untuk diakui. ',
+    ],
+    motivasi: [
+      'Kehilangan semangat bukan berarti semangat itu sudah pergi selamanya. ',
+      'Ada masa-masa ketika kita butuh jeda — bukan karena kita menyerah, tapi karena kita manusia. ',
     ],
   },
 };
@@ -1118,16 +1519,29 @@ function getMultiTurnResponse(turnNum, nlp){
   let pool;
   if(turnNum === 1){
     if(sentiment === 'negatif'){
-      if(emotion === 'sedih')      pool = MTR.T1_NEG_SEDIH;
-      else if(emotion === 'marah') pool = MTR.T1_NEG_MARAH;
-      else if(emotion === 'takut') pool = MTR.T1_NEG_TAKUT;
-      else if(emotion === 'malu')  pool = MTR.T1_NEG_MALU;
-      else if(emotion === 'rindu') pool = MTR.T1_NEG_RINDU;
-      else                         pool = MTR.T1_NEG_DEFAULT;
+      if(emotion === 'sedih')                           pool = MTR.T1_NEG_SEDIH;
+      else if(emotion === 'marah')                      pool = MTR.T1_NEG_MARAH;
+      else if(emotion === 'takut')                      pool = MTR.T1_NEG_TAKUT;
+      else if(emotion === 'malu')                       pool = MTR.T1_NEG_MALU;
+      else if(emotion === 'rindu')                      pool = MTR.T1_NEG_RINDU;
+      else if(topics.includes('trauma'))                pool = MTR.T1_NEG_TRAUMA;
+      else if(topics.includes('kesepian'))              pool = MTR.T1_NEG_KESEPIAN;
+      else if(topics.includes('burnout'))               pool = MTR.T1_NEG_BURNOUT;
+      else if(topics.includes('percintaan'))            pool = MTR.T1_NEG_PERCINTAAN;
+      else if(topics.includes('keuangan'))              pool = MTR.T1_NEG_KEUANGAN;
+      else if(topics.includes('kehilangan'))            pool = MTR.T1_NEG_KEHILANGAN;
+      else if(topics.includes('identitas diri'))        pool = MTR.T1_NEG_IDENTITAS;
+      else if(topics.includes('kepercayaan diri'))      pool = MTR.T1_NEG_KEPERCAYAAN_DIRI;
+      else if(topics.includes('pengambilan keputusan')) pool = MTR.T1_NEG_PENGAMBILAN_KEPUTUSAN;
+      else if(topics.includes('stres'))                 pool = MTR.T1_NEG_STRES;
+      else if(topics.includes('kecemasan'))             pool = MTR.T1_NEG_KECEMASAN;
+      else                                              pool = MTR.T1_NEG_DEFAULT;
     } else if(sentiment === 'positif'){
-      if(emotion === 'senang')     pool = MTR.T1_POS_SENANG;
-      else if(emotion === 'bangga')pool = MTR.T1_POS_BANGGA;
-      else                         pool = MTR.T1_POS_DEFAULT;
+      if(emotion === 'senang')                          pool = MTR.T1_POS_SENANG;
+      else if(emotion === 'bangga')                     pool = MTR.T1_POS_BANGGA;
+      else if(topics.includes('harapan'))               pool = MTR.T1_POS_HARAPAN;
+      else if(topics.includes('resiliensi'))            pool = MTR.T1_POS_RESILIENSI;
+      else                                              pool = MTR.T1_POS_DEFAULT;
     } else {
       pool = MTR.T1_NETRAL;
     }
@@ -2171,13 +2585,36 @@ async function finishSesi(){
 
 // Label topik yang user-friendly
 const TOPIK_LABEL = {
-  'keluarga':     {label:'Keluarga', icon:'👨‍👩‍👧'},
-  'pekerjaan':    {label:'Pekerjaan', icon:'💼'},
-  'kesehatan':    {label:'Kesehatan', icon:'🌱'},
-  'sosial':       {label:'Persahabatan', icon:'🤝'},
-  'masa lalu':    {label:'Kenangan', icon:'📖'},
-  'masa depan':   {label:'Harapan', icon:'✨'},
-  'spiritualitas':{label:'Spiritualitas', icon:'🙏'}
+  'keluarga':              {label:'Keluarga', icon:'👨‍👩‍👧'},
+  'pekerjaan':             {label:'Pekerjaan', icon:'💼'},
+  'kesehatan':             {label:'Kesehatan', icon:'🌱'},
+  'sosial':                {label:'Persahabatan', icon:'🤝'},
+  'masa lalu':             {label:'Kenangan', icon:'📖'},
+  'masa depan':            {label:'Masa Depan', icon:'🔭'},
+  'spiritualitas':         {label:'Spiritualitas', icon:'🙏'},
+  'pendidikan':            {label:'Pendidikan', icon:'📚'},
+  'percintaan':            {label:'Percintaan', icon:'💗'},
+  'pertemanan':            {label:'Pertemanan', icon:'🤝'},
+  'keuangan':              {label:'Keuangan', icon:'💰'},
+  'kehilangan':            {label:'Kehilangan', icon:'🕊️'},
+  'trauma':                {label:'Pemulihan', icon:'🌱'},
+  'identitas diri':        {label:'Identitas Diri', icon:'🪞'},
+  'kepercayaan diri':      {label:'Kepercayaan Diri', icon:'💪'},
+  'stres':                 {label:'Stres', icon:'🌊'},
+  'kecemasan':             {label:'Kecemasan', icon:'🫧'},
+  'harapan':               {label:'Harapan', icon:'✨'},
+  'kesepian':              {label:'Kesepian', icon:'🌙'},
+  'pengambilan keputusan': {label:'Keputusan', icon:'⚖️'},
+  'konflik':               {label:'Konflik', icon:'🔥'},
+  'kemarahan':             {label:'Kemarahan', icon:'⚡'},
+  'kekecewaan':            {label:'Kekecewaan', icon:'💭'},
+  'rasa bersalah':         {label:'Rasa Bersalah', icon:'🍂'},
+  'penolakan':             {label:'Penolakan', icon:'🚪'},
+  'burnout':               {label:'Burnout', icon:'🕯️'},
+  'dukungan sosial':       {label:'Dukungan', icon:'🫂'},
+  'perubahan':             {label:'Perubahan', icon:'🔄'},
+  'resiliensi':            {label:'Resiliensi', icon:'🌳'},
+  'motivasi':              {label:'Motivasi', icon:'🚀'}
 };
 
 // Template narasi per paragraf — dipilih berdasarkan konteks
