@@ -349,7 +349,39 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 /* Volume slider */
 .mp-vol{width:56px;accent-color:var(--primary);cursor:pointer;-webkit-appearance:none;height:3px;border-radius:3px;outline:none;background:var(--border2)}
 .mp-vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--primary);cursor:pointer}
-
+/* ══ CRISIS MODAL ══ */
+.crisis-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fup .25s ease}
+.crisis-box{background:var(--surface);border:2px solid rgba(201,92,92,.35);border-radius:18px;padding:1.85rem;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.crisis-icon{font-size:2.4rem;margin-bottom:.65rem;display:block;animation:pop .4s ease}
+.crisis-title{font-family:'Lora',serif;font-size:1.2rem;color:var(--white);margin-bottom:.55rem}
+.crisis-body{font-size:.86rem;color:var(--muted);line-height:1.75;margin-bottom:.9rem}
+.crisis-hotline{background:rgba(58,158,111,.08);border:1px solid rgba(58,158,111,.25);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;text-align:left}
+.crisis-hotline .ch-label{font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary);margin-bottom:.4rem}
+.crisis-hotline .ch-item{font-size:.84rem;color:var(--text);margin-bottom:.2rem;display:flex;align-items:center;gap:8px}
+.crisis-hotline .ch-item a{color:var(--primary);text-decoration:none;font-weight:600}
+.crisis-hotline .ch-item a:hover{text-decoration:underline}
+.crisis-btn-wrap{display:flex;flex-direction:column;gap:8px}
+.crisis-btn-ok{padding:11px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:.2s}.crisis-btn-ok:hover{opacity:.87}
+.crisis-btn-help{padding:11px;background:rgba(201,92,92,.12);color:var(--red);border:1.5px solid rgba(201,92,92,.3);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:.2s}.crisis-btn-help:hover{background:rgba(201,92,92,.2)}
+.crisis-banner{display:none;align-items:center;gap:8px;background:rgba(212,154,42,.1);border:1px solid rgba(212,154,42,.3);border-radius:8px;padding:.55rem .85rem;margin:.4rem 0;font-size:.78rem;color:var(--amber);line-height:1.5}
+.crisis-banner.show{display:flex}
+/* ══ SC-PSIKOLOG ══ */
+.psi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:1.2rem}
+.psi-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:1.1rem;cursor:pointer;transition:.25s;position:relative}
+.psi-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.psi-card.selected{border-color:var(--primary);background:var(--primary-soft)}
+.psi-card.recommended::before{content:'⭐ Direkomendasikan';position:absolute;top:-10px;left:12px;background:var(--accent);color:#fff;font-size:.6rem;font-weight:700;padding:2px 10px;border-radius:10px;letter-spacing:.5px}
+.psi-name{font-size:.92rem;font-weight:600;color:var(--white);margin-bottom:.25rem}
+.psi-email{font-size:.74rem;color:var(--muted);margin-bottom:.5rem}
+.psi-spec{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.5rem}
+.psi-spec-tag{padding:2px 9px;border-radius:10px;font-size:.65rem;font-weight:600;background:var(--primary-soft);color:var(--primary)}
+.psi-bio{font-size:.78rem;color:var(--muted);line-height:1.5}
+.psi-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;display:none;align-items:center;justify-content:center;font-size:.75rem}
+.psi-card.selected .psi-check{display:flex}
+.consent-box{background:rgba(107,143,113,.07);border:1px solid rgba(107,143,113,.22);border-radius:8px;padding:.85rem 1rem;font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:1rem}
+.consent-box label{display:flex;align-items:flex-start;gap:8px;cursor:pointer}
+.consent-box input[type=checkbox]{margin-top:2px;accent-color:var(--primary);width:15px;height:15px;flex-shrink:0}
+  
 </style>
 </head>
 <body>
@@ -481,6 +513,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="field"><label>Apakah memiliki pasangan yang tinggal serumah?</label><input type="text" id="d-ps" placeholder="Contoh: Ada / Tidak ada"></div>
       <div class="field"><label>Jumlah anak yang tinggal serumah</label><input type="text" id="d-as" placeholder="Contoh: 2 (kosongkan jika belum ada)"></div>
       <div class="brow"><button class="btn-sm bp" onclick="submitData()">Lanjutkan →</button></div>
+      
     </div>
 
     <!-- SC: PILIH TAHAP -->
@@ -671,11 +704,37 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
       <div class="brow">
         <button class="btn-sm bp" onclick="restartApp()">Mulai Sesi Baru</button>
+        <button class="btn-sm bp" onclick="showPsikologPage()" style="background:var(--accent)">🌿 Lanjut ke Psikolog</button>
         <button class="btn-sm bo" onclick="goPage('riwayat')">Lihat Riwayat</button>
         <button class="btn-sm bo" onclick="goPage('beranda')">Beranda</button>
       </div>
     </div>
-
+  <!-- SC: PILIH PSIKOLOG -->
+    <div id="sc-psikolog" class="card" style="display:none">
+      <h2>Lanjutkan ke Psikolog 🌿</h2>
+      <p class="sub" id="psi-sub">Berdasarkan perjalanan terapimu, berikut psikolog yang dapat membantu lebih lanjut.</p>
+      <div class="ibox" id="psi-rekomendasi-info" style="display:none"></div>
+      <div class="psi-grid" id="psi-grid">
+        <div style="color:var(--muted);font-size:.85rem;padding:1rem">Memuat daftar psikolog…</div>
+      </div>
+      <div class="consent-box">
+        <label>
+          <input type="checkbox" id="psi-consent-check" onchange="togglePsiLanjutBtn()">
+          <span>Saya setuju data berikut dikirim ke psikolog yang dipilih: <strong>nama, usia, jenis kelamin, skor PHQ sebelum dan sesudah terapi, serta ringkasan topik sesi.</strong> Data ini hanya digunakan untuk keperluan konsultasi klinis.</span>
+        </label>
+      </div>
+      <div id="psi-selected-info" style="display:none;background:var(--primary-soft);border:1px solid rgba(106,158,127,.3);border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:var(--primary);margin-bottom:1rem">
+        ✓ Psikolog dipilih: <strong id="psi-selected-name">—</strong>
+      </div>
+      <div class="brow">
+        <button class="btn-sm bp" id="psi-lanjut-btn" onclick="kirimRujukan()" disabled style="opacity:.4;cursor:not-allowed">Kirim ke Psikolog →</button>
+        <button class="btn-sm bo" onclick="showSc('sc-final')">← Kembali ke Hasil</button>
+      </div>
+      <div id="psi-sending" style="display:none;text-align:center;padding:.75rem;font-size:.82rem;color:var(--muted)">
+        <span class="spin" style="border-color:rgba(106,158,127,.3);border-top-color:var(--primary)"></span> Mengirim rujukan…
+      </div>
+      <div id="psi-success" style="display:none;background:rgba(58,158,111,.1);border:1px solid rgba(58,158,111,.3);border-radius:8px;padding:.85rem 1rem;font-size:.84rem;color:var(--green);margin-top:.75rem;line-height:1.65"></div>
+    </div>
   </div>
 </div>
 
@@ -698,7 +757,28 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 </div>
 
 <div id="toast"></div>
+<!-- MODAL: CRISIS ALERT -->
+<div id="modal-crisis" style="display:none;position:fixed;inset:0;z-index:600">
+  <div class="crisis-overlay">
+    <div class="crisis-box">
+      <span class="crisis-icon" id="crisis-icon">💚</span>
+      <div class="crisis-title" id="crisis-title">Elina Ada di Sini Untukmu</div>
+      <div class="crisis-body" id="crisis-body">Dari yang kamu ceritakan tadi, Elina ingin memastikan kamu baik-baik saja sekarang.</div>
+      <div class="crisis-hotline" id="crisis-hotline" style="display:none">
+        <div class="ch-label">Bantuan Tersedia Sekarang</div>
+        <div class="ch-item">📞 <span>Hotline Kemenkes RI: <a href="tel:119">119 ext 8</a> (24 jam)</span></div>
+        <div class="ch-item">💬 <span>Chat: <a href="https://sejiwa.or.id" target="_blank">sejiwa.or.id</a></span></div>
+        <div class="ch-item">🌿 <span>Psikolog PsyWellMate siap membantu</span></div>
+      </div>
+      <div class="crisis-btn-wrap" id="crisis-btn-wrap"></div>
+    </div>
+  </div>
+</div>
 
+<!-- BANNER WASPADA -->
+<div class="crisis-banner" id="crisis-banner-waspada">
+  🌿 <span id="crisis-banner-txt">Elina memperhatikanmu.</span>
+</div>
 <script>
 /* ══════════════════════════════════════════
    SUPABASE CONFIG
@@ -1577,6 +1657,239 @@ function getMultiTurnResponse(turnNum, nlp){
 function getAIResponse(nlp, sesiNum, qIdx){
   return getMultiTurnResponse(1, nlp);
 }
+/* ══════════════════════════════════════════
+   CRISIS DETECTION
+══════════════════════════════════════════ */
+const TRIGGER_KRITIS = [
+  'bunuh diri','mengakhiri hidup','mengakhiri nyawa','akhiri hidup',
+  'tidak ingin hidup lagi','ingin mati','lebih baik mati',
+  'mati saja','mau mati','pingin mati','pengen mati','ingin sekali mati',
+  'sudah tidak mau hidup','tidak mau hidup lagi','tidak ingin ada lagi',
+  'sudah punya rencana','sudah siapkan cara','minum obat banyak','overdosis',
+  'menyakiti diri sendiri','melukai diri','menyiksa diri',
+  'memotong diri','menyayat tangan','menyayat lengan',
+  'capek hidup','lelah hidup','bosan hidup','jenuh hidup',
+  'tidak sanggup lagi','tidak kuat lagi hidup','sudah tidak bisa bertahan',
+  'tidak ada alasan untuk hidup','tidak ada alasan hidup lagi',
+  'ini pesan terakhir saya','kalian tidak akan lihat saya',
+  'ini terakhir kalinya kita bicara','selamat tinggal untuk selamanya',
+];
+const TRIGGER_WASPADA = [
+  'tidak ada harapan','sudah putus asa','tidak ada jalan keluar',
+  'semua akan lebih baik tanpa saya','tidak ada yang peduli pada saya',
+  'tidak berguna sama sekali','ingin menghilang','ingin pergi selamanya',
+  'tidak bisa bertahan lagi','tidak ada gunanya lagi','sia-sia semuanya',
+  'menyerah dengan hidup','ingin menyakiti orang',
+  'dendam dan ingin membalas','tidak ada yang sayang pada saya',
+  'beban bagi semua orang','tidak ada yang mengerti saya',
+  'sendirian selamanya','biarkan saja saya mati',
+  'tidak masalah kalau saya mati',
+];
+const TRIGGER_PERHATIAN = [
+  'merasa tidak berharga','merasa sangat kosong','hampa sekali',
+  'hidup terasa tidak bermakna','tidak punya tujuan hidup',
+  'tidak bisa tidur berhari-hari','tidak makan berhari-hari',
+  'menyalahkan diri terus-menerus','menghukum diri sendiri',
+  'tidak pantas untuk bahagia','tidak layak untuk dicintai',
+  'semua ini salah saya','saya penyebab semua masalah',
+];
+const KONTEKS_BUKAN_DIRI = [
+  'anjing','kucing','hewan','peliharaan','teman','dia','mereka','orang lain',
+  'kakak','adik','ayah','ibu','tetangga','karakter','film','cerita',
+  'buku','tokoh','aktor','artis','berita','lagu','burung','hamster','ikan',
+  'kelinci','tikus','dalam film','dalam cerita','dalam buku','di berita',
+  'di televisi','di youtube','di tiktok','katanya','konon','ceritanya',
+];
+const KONTEKS_DIRI_SENDIRI = [
+  'saya','aku','gue','gw','diriku','diri saya','diri aku',
+  'saya ingin','aku ingin','saya mau','aku mau',
+  'saya sudah','aku sudah','saya tidak','aku tidak',
+];
+
+function scanCrisisTrigger(text){
+  const t = text.toLowerCase();
+  let foundLevel = null, foundWords = [];
+  for(const w of TRIGGER_KRITIS){ if(t.includes(w)){foundLevel='kritis';foundWords.push(w);} }
+  if(!foundLevel){ for(const w of TRIGGER_WASPADA){ if(t.includes(w)){foundLevel='waspada';foundWords.push(w);} } }
+  if(!foundLevel){ for(const w of TRIGGER_PERHATIAN){ if(t.includes(w)){foundLevel='perhatian';foundWords.push(w);} } }
+  if(!foundLevel) return null;
+  let tentangDiri=false, adaBukanDiri=false;
+  for(const w of KONTEKS_DIRI_SENDIRI){ if(t.includes(w)){tentangDiri=true;break;} }
+  for(const w of KONTEKS_BUKAN_DIRI){ if(t.includes(w)){adaBukanDiri=true;break;} }
+  let needsConfirmation = adaBukanDiri || !tentangDiri;
+  let finalLevel = foundLevel;
+  if(adaBukanDiri && foundLevel==='kritis') finalLevel='waspada';
+  if(adaBukanDiri && foundLevel==='waspada') finalLevel='perhatian';
+  return { level:finalLevel, originalLevel:foundLevel, words:[...new Set(foundWords)], needsConfirmation, tentangDiri, adaBukanDiri };
+}
+
+function showCrisisModal(level, needsConfirmation, onConfirm, onDeny){
+  _crisisLevel = level;
+  const modal   = document.getElementById('modal-crisis');
+  const icon    = document.getElementById('crisis-icon');
+  const title   = document.getElementById('crisis-title');
+  const body    = document.getElementById('crisis-body');
+  const hotline = document.getElementById('crisis-hotline');
+  const btnWrap = document.getElementById('crisis-btn-wrap');
+  if(level==='kritis'){
+    icon.textContent = '💚';
+    title.textContent = 'Elina Ada di Sini Untukmu';
+    if(needsConfirmation){
+      body.textContent = 'Elina ingin memastikan — dari yang baru kamu ceritakan, apakah perasaan ini tentang dirimu sendiri sekarang?';
+      hotline.style.display = 'none';
+      btnWrap.innerHTML = `<button class="crisis-btn-help" onclick="_crisisUserConfirm()">Ya, ini tentang saya</button><button class="crisis-btn-ok" onclick="_crisisUserDeny()">Bukan, tentang hal lain</button>`;
+    } else {
+      body.innerHTML = 'Dari yang kamu ceritakan, Elina sangat ingin kamu tahu bahwa kamu tidak sendirian. Ada orang yang peduli dan siap mendengarkan kamu sekarang.';
+      hotline.style.display = 'block';
+      btnWrap.innerHTML = `<button class="crisis-btn-help" onclick="_crisisUserConfirm()">Saya butuh bantuan segera</button><button class="crisis-btn-ok" onclick="_crisisUserDeny()">Saya baik-baik saja</button>`;
+    }
+  } else {
+    icon.textContent = '🌿';
+    title.textContent = 'Elina Memperhatikanmu';
+    body.textContent = 'Dari cerita yang baru disampaikan, Elina ingin memastikan kamu baik-baik saja. Apakah perasaan ini tentang dirimu sendiri?';
+    hotline.style.display = 'none';
+    btnWrap.innerHTML = `<button class="crisis-btn-help" onclick="_crisisUserConfirm()">Ya, tentang saya</button><button class="crisis-btn-ok" onclick="_crisisUserDeny()">Bukan, tentang hal lain</button>`;
+  }
+  window._crisisOnConfirm = onConfirm;
+  window._crisisOnDeny    = onDeny;
+  modal.style.display = 'block';
+}
+
+function tutupModalCrisis(){ document.getElementById('modal-crisis').style.display='none'; _crisisLevel=null; }
+function _crisisUserConfirm(){ document.getElementById('modal-crisis').style.display='none'; if(window._crisisOnConfirm) window._crisisOnConfirm(); }
+function _crisisUserDeny(){ document.getElementById('modal-crisis').style.display='none'; if(window._crisisOnDeny) window._crisisOnDeny(); }
+
+function _showCrisisBanner(pesan){
+  const banner = document.getElementById('crisis-banner-waspada');
+  const txt    = document.getElementById('crisis-banner-txt');
+  if(!banner) return;
+  txt.innerHTML = `🌿 ${pesan} Hubungi <strong><a href="tel:119" style="color:var(--amber)">119 ext 8</a></strong> jika butuh bantuan segera.`;
+  banner.classList.add('show');
+  const chatArea = document.getElementById('sq-chat-area');
+  if(chatArea) chatArea.parentNode.insertBefore(banner, chatArea.nextSibling);
+}
+
+async function _saveCrisisAlert(answerText, level, words, confirmStatus, isFirst){
+  if(!S.sessionId||!_cu) return null;
+  try{
+    const {data,error} = await sb.from('crisis_alerts').insert({
+      user_id:_cu.id, session_id:S.sessionId,
+      session_number:S.currentSesiNum, question_index:S.currentQIdx,
+      answer_text:answerText, triggered_words:words,
+      alert_level:level, confirmation_status:confirmStatus,
+      popup_shown:(level!=='perhatian'), is_first_in_session:isFirst,
+      created_at:new Date().toISOString(),
+    }).select().maybeSingle();
+    if(error) console.warn('_saveCrisisAlert error:',error);
+    window._lastCrisisAlertId = data?.id||null;
+    return data;
+  }catch(e){ console.warn('_saveCrisisAlert exception:',e); return null; }
+}
+
+async function _updateCrisisConfirmation(status){
+  if(!window._lastCrisisAlertId) return;
+  try{ await sb.from('crisis_alerts').update({confirmation_status:status}).eq('id',window._lastCrisisAlertId); }
+  catch(e){ console.warn('_updateCrisisConfirmation error:',e); }
+}
+
+async function _eskalasi(answerText, level, words){
+  if(S.sessionId&&_cu){
+    try{
+      await sb.from('admin_notifications').insert({
+        user_id:_cu.id, session_id:S.sessionId,
+        notif_type:'crisis_kritis', ref_id:window._lastCrisisAlertId||null,
+        title:`⚠️ Crisis Alert — ${S.nama}, ${S.usia} thn`,
+        body:`Trigger kritis dikonfirmasi di Sesi ${S.currentSesiNum}. Kata: ${words.join(', ')}`,
+        priority:3, created_at:new Date().toISOString(),
+      });
+    }catch(e){ console.warn('notif insert error:',e); }
+  }
+  if(!_crisisEmailSentThisSession){
+    _crisisEmailSentThisSession = true;
+    await _kirimEmailCrisis(answerText, level, words);
+    if(window._lastCrisisAlertId){
+      try{
+        await sb.from('crisis_alerts').update({
+          email_sent:true, email_sent_at:new Date().toISOString(),
+          email_target:'fadhlyalfallah07@gmail.com', // ⚠️ GANTI sebelum production
+          admin_status:'new',
+        }).eq('id',window._lastCrisisAlertId);
+      }catch(e){ console.warn('update crisis email_sent error:',e); }
+    }
+  }
+}
+
+async function _kirimEmailCrisis(answerText, level, words){
+  const RESEND_API_KEY = 'GANTI_DENGAN_RESEND_API_KEY_KAMU'; // ⚠️ GANTI
+  const emailTo   = 'fadhlyalfallah07@gmail.com'; // ⚠️ GANTI sebelum production
+  const emailFrom = 'onboarding@resend.dev';       // ⚠️ GANTI dengan domain sendiri
+  const htmlBody = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+    <div style="background:#c95c5c;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
+      <h2 style="margin:0">⚠️ Crisis Alert — PsyWellMate</h2>
+      <p style="margin:4px 0 0;opacity:.85;font-size:14px">Pasien membutuhkan perhatian segera</p>
+    </div>
+    <div style="background:#fff;border:1px solid #eee;padding:24px;border-radius:0 0 8px 8px">
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px">
+        <tr><td style="padding:6px 0;color:#888;width:140px">Nama</td><td style="font-weight:600">${S.nama||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">Usia</td><td>${S.usia||'—'} tahun</td></tr>
+        <tr><td style="padding:6px 0;color:#888">Jenis Kelamin</td><td>${S.jk||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">Skor PHQ Awal</td><td>${S.preScore||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">Sesi Saat Ini</td><td>Sesi ${S.currentSesiNum}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">Level Alert</td><td><strong style="color:#c95c5c">${level.toUpperCase()}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:#888">Kata Trigger</td><td>${words.join(', ')}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">Waktu</td><td>${new Date().toLocaleString('id-ID')}</td></tr>
+      </table>
+      <div style="background:#fff5f5;border-left:4px solid #c95c5c;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:16px">
+        <div style="font-size:12px;color:#888;margin-bottom:4px">Jawaban yang memicu alert:</div>
+        <div style="font-size:14px;color:#333;line-height:1.6">${answerText}</div>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #c3e6cb;border-radius:8px;padding:12px 16px">
+        <div style="font-size:12px;color:#3a9e6f;font-weight:600;margin-bottom:4px">TINDAKAN YANG DISARANKAN</div>
+        <ul style="margin:0;padding-left:16px;font-size:13px;color:#555;line-height:1.8">
+          <li>Hubungi pasien dalam 24 jam</li>
+          <li>Cek panel admin PsyWellMate untuk detail lengkap</li>
+        </ul>
+      </div>
+      <p style="font-size:11px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:12px">
+        Email otomatis PsyWellMate. Jangan balas email ini.
+      </p>
+    </div>
+  </div>`;
+  try{
+    await fetch('https://api.resend.com/emails',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
+      body:JSON.stringify({from:emailFrom,to:[emailTo],subject:`⚠️ [URGENT] Crisis Alert — ${S.nama}, ${S.usia} thn — PsyWellMate`,html:htmlBody}),
+    });
+  }catch(e){ console.warn('_kirimEmailCrisis error:',e); }
+}
+
+async function checkCrisisTrigger(text){
+  const result = scanCrisisTrigger(text);
+  if(!result) return;
+  const {level, words, needsConfirmation} = result;
+  const isFirstKritis = (level==='kritis' && !_crisisEmailSentThisSession);
+  await _saveCrisisAlert(text, level, words, 'pending', isFirstKritis);
+  if(level==='perhatian'){
+    _showCrisisBanner('Elina memperhatikanmu. Jika kamu butuh dukungan lebih, ada psikolog yang siap membantu.');
+    return;
+  }
+  showCrisisModal(level, needsConfirmation,
+    async()=>{
+      _crisisConfirmed = true;
+      await _updateCrisisConfirmation('confirmed');
+      if(level==='kritis'){
+        showCrisisModal('kritis', false,
+          async()=>{ await _eskalasi(text, level, words); },
+          async()=>{ await _eskalasi(text, level, words); }
+        );
+      } else {
+        _showCrisisBanner('Ada psikolog PsyWellMate yang siap mendengarkan. Hubungi 119 ext 8 kapan pun dibutuhkan.');
+      }
+    },
+    async()=>{ await _updateCrisisConfirmation('denied'); }
+  );
+}
 
 /* ══════════════════════════════════════════
    DATA PHQ
@@ -1970,6 +2283,15 @@ function _mulaiSesiBaru(){
   });
   // Reset multi-turn state
   _mtTurn=0; _mtFirstSaved=false; _mtNlpFirst=null;
+  // Reset crisis & psikolog state
+  _crisisLevel = null;
+  _crisisConfirmed = false;
+  _crisisEmailSentThisSession = false;
+  window._lastCrisisAlertId = null;
+  _selectedPsikologId = null;
+  _allPsikologData = [];
+  const _cb = document.getElementById('crisis-banner-waspada');
+  if(_cb) _cb.classList.remove('show');
   goPage('app');
   renderSteps(0);
   showSc('sc-data');
@@ -2301,6 +2623,13 @@ function _ttsWarmup(onReady){
 }
 
 let _recSesi=null, _isRecSesi=false, _micSupported=false;
+// ── State Crisis Detection ──
+let _crisisLevel = null;
+let _crisisConfirmed = false;
+let _crisisEmailSentThisSession = false;
+// ── State Psikolog ──
+let _allPsikologData = [];
+let _selectedPsikologId = null;
 // Multi-turn chat state — reset setiap pertanyaan baru
 let _mtTurn = 0;           // turn ke-berapa dalam 1 pertanyaan (mulai dari 1)
 let _mtFirstSaved = false; // sudah simpan ke life_review_progress?
@@ -2329,6 +2658,8 @@ function loadSesiQuestion(){
   _mtTurn = 0;
   _mtFirstSaved = false;
   _mtNlpFirst = null;
+  // Reset crisis alert ID per pertanyaan
+  window._lastCrisisAlertId = null;
 
   // Reset tampilan chat
   document.getElementById('sq-hist').innerHTML='';
@@ -2390,6 +2721,8 @@ async function sendSesiAnswer(){
 
   // Analisis NLP
   const nlp = analyzeNLP(txt);
+  // Deteksi bahaya — non-blocking
+  checkCrisisTrigger(txt).catch(e => console.warn('crisis check error:', e));
 
   // Simpan jawaban pertama ke life_review_progress (hanya sekali per pertanyaan)
   if(!_mtFirstSaved){
@@ -3070,7 +3403,179 @@ async function showFinal(){
     }
   }
 }
+/* ══════════════════════════════════════════
+   REKOMENDASI & RUJUKAN PSIKOLOG
+══════════════════════════════════════════ */
+async function showPsikologPage(){
+  showSc('sc-psikolog');
+  try{
+    const {data,error} = await sb.from('psychologists').select('*').eq('is_active',true).order('is_standby',{ascending:false});
+    if(error) throw error;
+    _allPsikologData = data||[];
+  }catch(e){ _allPsikologData=[]; console.warn('load psikolog error:',e); }
 
+  let dominanTopik=[];
+  try{
+    const {data:progressAll} = await sb.from('life_review_progress').select('nlp_topics').eq('session_id',S.sessionId);
+    if(progressAll){
+      const tc={};
+      progressAll.forEach(p=>{ (p.nlp_topics||[]).forEach(t=>{tc[t]=(tc[t]||0)+1;}); });
+      dominanTopik = Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t])=>t);
+    }
+  }catch(e){ console.warn('load topik error:',e); }
+
+  document.getElementById('psi-sub').textContent = `Berdasarkan perjalanan terapi ${getSapaan()}, berikut psikolog yang dapat membantu lebih lanjut.`;
+
+  if(dominanTopik.length>0){
+    const infoEl = document.getElementById('psi-rekomendasi-info');
+    infoEl.innerHTML = `<strong>Topik dominan dari sesimu:</strong> ${dominanTopik.join(', ')}. Psikolog dengan spesialisasi relevan ditandai ⭐`;
+    infoEl.style.display = 'block';
+  }
+  renderPsikologGrid(dominanTopik);
+}
+
+function renderPsikologGrid(dominanTopik){
+  const grid = document.getElementById('psi-grid');
+  if(_allPsikologData.length===0){
+    grid.innerHTML=`<div style="color:var(--muted);font-size:.85rem;padding:1rem;grid-column:1/-1">Belum ada psikolog terdaftar. Hubungi admin PsyWellMate.</div>`;
+    return;
+  }
+  const isRekomen = p => {
+    if(!p.specialization||p.specialization.length===0) return false;
+    const spec = p.specialization.map(s=>s.toLowerCase());
+    return dominanTopik.some(t=>spec.some(s=>s.includes(t)||t.includes(s)));
+  };
+  const sorted = [..._allPsikologData].sort((a,b)=>{
+    const ra=isRekomen(a)?2:a.is_standby?1:0, rb=isRekomen(b)?2:b.is_standby?1:0;
+    return rb-ra;
+  });
+  grid.innerHTML = sorted.map(psi=>{
+    const rek = isRekomen(psi);
+    const tags = (psi.specialization||[]).map(s=>`<span class="psi-spec-tag">${s}</span>`).join('');
+    return `<div class="psi-card ${rek?'recommended':''}" id="psi-card-${psi.id}" onclick="pilihPsikolog('${psi.id}','${(psi.full_name||'').replace(/'/g,'&apos;')}')">
+      <div class="psi-check">✓</div>
+      <div class="psi-name">${psi.full_name||'—'}</div>
+      <div class="psi-email">📧 ${psi.email||'—'}</div>
+      ${tags?`<div class="psi-spec">${tags}</div>`:''}
+      ${psi.bio?`<div class="psi-bio">${psi.bio}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function pilihPsikolog(id, nama){
+  document.querySelectorAll('.psi-card').forEach(c=>c.classList.remove('selected'));
+  const card = document.getElementById(`psi-card-${id}`);
+  if(card) card.classList.add('selected');
+  _selectedPsikologId = id;
+  document.getElementById('psi-selected-name').textContent = nama;
+  document.getElementById('psi-selected-info').style.display = 'block';
+  togglePsiLanjutBtn();
+}
+
+function togglePsiLanjutBtn(){
+  const btn = document.getElementById('psi-lanjut-btn');
+  const ok  = document.getElementById('psi-consent-check').checked && _selectedPsikologId;
+  btn.disabled = !ok;
+  btn.style.opacity = ok?'1':'0.4';
+  btn.style.cursor  = ok?'pointer':'not-allowed';
+}
+
+async function kirimRujukan(){
+  if(!_selectedPsikologId){toast('⚠️ Pilih psikolog terlebih dahulu');return;}
+  if(!document.getElementById('psi-consent-check').checked){toast('⚠️ Centang persetujuan data terlebih dahulu');return;}
+  const psi = _allPsikologData.find(p=>p.id===_selectedPsikologId);
+  if(!psi){toast('⚠️ Psikolog tidak ditemukan');return;}
+
+  let dominanTopik=[];
+  try{
+    const {data:pa} = await sb.from('life_review_progress').select('nlp_topics').eq('session_id',S.sessionId);
+    if(pa){ const tc={}; pa.forEach(p=>{(p.nlp_topics||[]).forEach(t=>{tc[t]=(tc[t]||0)+1;});}); dominanTopik=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t])=>t); }
+  }catch(e){}
+
+  document.getElementById('psi-lanjut-btn').style.display='none';
+  document.getElementById('psi-sending').style.display='block';
+
+  const preS = getSev(S.preScore,S.tahap);
+  const postS = S.postScore ? getSev(S.postScore,S.tahap) : null;
+  const reportData = {
+    nama:S.nama, usia:S.usia, jk:S.jk, tahap:S.tahap, penyakit:S.penyakit,
+    phq_pre:S.preScore, sev_pre:preS.l,
+    phq_post:S.postScore||null, sev_post:postS?postS.l:null,
+    topik:dominanTopik, session_id:S.sessionId,
+    tgl_terapi:new Date().toLocaleDateString('id-ID'),
+  };
+
+  try{
+    const {data:ref,error:refErr} = await sb.from('referral_requests').insert({
+      user_id:_cu.id, session_id:S.sessionId,
+      patient_name:S.nama, patient_age:S.usia, patient_gender:S.jk,
+      phq_pre_score:S.preScore, phq_post_score:S.postScore||null,
+      phq_pre_sev:preS.l, phq_post_sev:postS?postS.l:null,
+      psychologist_id:_selectedPsikologId,
+      referral_reason:`PHQ: ${S.preScore} (${preS.l}) → ${S.postScore||'—'}. Topik: ${dominanTopik.join(', ')||'umum'}`,
+      dominant_topics:dominanTopik, referral_type:'self', status:'pending',
+      patient_consent:true, consented_at:new Date().toISOString(),
+      report_data:reportData, created_at:new Date().toISOString(),
+    }).select().maybeSingle();
+    if(refErr) throw refErr;
+
+    await sb.from('admin_notifications').insert({
+      user_id:_cu.id, session_id:S.sessionId,
+      notif_type:'referral_request', ref_id:ref?.id||null,
+      title:`📋 Rujukan Baru — ${S.nama}, ${S.usia} thn`,
+      body:`Pasien memilih psikolog: ${psi.full_name}. Menunggu persetujuan admin.`,
+      priority:2, created_at:new Date().toISOString(),
+    });
+
+    await _kirimEmailRujukan(psi, reportData);
+
+    if(ref?.id){
+      await sb.from('referral_requests').update({
+        status:'sent', email_sent:true,
+        email_sent_at:new Date().toISOString(), email_target:psi.email,
+      }).eq('id',ref.id);
+    }
+
+    document.getElementById('psi-sending').style.display='none';
+    const sEl = document.getElementById('psi-success');
+    sEl.innerHTML = `✅ Rujukan berhasil dikirim ke <strong>${psi.full_name}</strong> (${psi.email}).<br>Psikolog akan menghubungimu dalam waktu dekat. Terima kasih sudah mempercayakan perjalanan ini kepada PsyWellMate. 🌿`;
+    sEl.style.display = 'block';
+  }catch(e){
+    document.getElementById('psi-sending').style.display='none';
+    document.getElementById('psi-lanjut-btn').style.display='flex';
+    toast('❌ Gagal mengirim rujukan: '+e.message);
+  }
+}
+
+async function _kirimEmailRujukan(psi, data){
+  const RESEND_API_KEY = 'GANTI_DENGAN_RESEND_API_KEY_KAMU'; // ⚠️ GANTI
+  const emailFrom = 'onboarding@resend.dev'; // ⚠️ GANTI dengan domain sendiri
+  const htmlBody = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+    <div style="background:#6a9e7f;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
+      <h2 style="margin:0">🌿 Rujukan Pasien Baru — PsyWellMate</h2>
+    </div>
+    <div style="background:#fff;border:1px solid #eee;padding:24px;border-radius:0 0 8px 8px">
+      <p style="font-size:15px;color:#333;margin-bottom:16px">Yth. <strong>${psi.full_name}</strong>,</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px">
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888;width:160px">Nama Pasien</td><td style="padding:8px 12px;font-weight:600">${data.nama}</td></tr>
+        <tr><td style="padding:8px 12px;color:#888">Usia</td><td style="padding:8px 12px">${data.usia} tahun</td></tr>
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888">Jenis Kelamin</td><td style="padding:8px 12px">${data.jk}</td></tr>
+        <tr><td style="padding:8px 12px;color:#888">PHQ Sebelum Terapi</td><td style="padding:8px 12px">${data.phq_pre} — <em>${data.sev_pre}</em></td></tr>
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888">PHQ Setelah Terapi</td><td style="padding:8px 12px">${data.phq_post!==null?`${data.phq_post} — ${data.sev_post}`:'Belum tersedia'}</td></tr>
+        <tr><td style="padding:8px 12px;color:#888">Topik Dominan</td><td style="padding:8px 12px">${(data.topik||[]).join(', ')||'Umum'}</td></tr>
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888">Tanggal Terapi</td><td style="padding:8px 12px">${data.tgl_terapi}</td></tr>
+      </table>
+      <p style="font-size:11px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:12px">Email otomatis PsyWellMate. © PsyWellMate</p>
+    </div>
+  </div>`;
+  try{
+    await fetch('https://api.resend.com/emails',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
+      body:JSON.stringify({from:emailFrom,to:[psi.email],subject:`🌿 Rujukan Pasien — ${data.nama}, ${data.usia} thn — PsyWellMate`,html:htmlBody}),
+    });
+  }catch(e){ console.warn('_kirimEmailRujukan error:',e); }
+}
 
 /* ══════════════════════════════════════════
    TTS ELINA — Text-to-Speech dengan Intonasi
