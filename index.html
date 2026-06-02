@@ -1886,18 +1886,21 @@ async function checkCrisisTrigger(text){
   }
   showCrisisModal(level, needsConfirmation,
     async()=>{
+      // onConfirm — pasien klik "Ya tentang saya" / "Saya butuh bantuan segera"
       _crisisConfirmed = true;
       await _updateCrisisConfirmation('confirmed');
       if(level==='kritis'){
-        showCrisisModal('kritis', false,
-          async()=>{ await _eskalasi(text, level, words); },
-          async()=>{ await _eskalasi(text, level, words); }
-        );
+        // Langsung eskalasi tanpa modal kedua
+        await _eskalasi(text, level, words);
+        _showCrisisBanner('Ada psikolog PsyWellMate yang sedang dihubungi. Kamu tidak sendirian. Hubungi 119 ext 8 jika butuh bantuan segera.');
       } else {
         _showCrisisBanner('Ada psikolog PsyWellMate yang siap mendengarkan. Hubungi 119 ext 8 kapan pun dibutuhkan.');
       }
     },
-    async()=>{ await _updateCrisisConfirmation('denied'); }
+    async()=>{
+      // onDeny — pasien klik "Bukan" / "Saya baik-baik saja"
+      await _updateCrisisConfirmation('denied');
+    }
   );
 }
 
