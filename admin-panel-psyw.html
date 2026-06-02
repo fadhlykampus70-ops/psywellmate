@@ -219,6 +219,28 @@ tr:hover td{background:rgba(255,255,255,.015)}
   background:var(--primary);
   border-color:var(--primary);color:#fff
 }
+/* ══ NOTIF BADGE di Sidebar ══ */
+.sn-badge{display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;background:var(--red);color:#fff;
+  font-size:.6rem;font-weight:700;border-radius:9px;padding:0 5px;
+  margin-left:auto;animation:pulse-badge 1.5s infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ══ PANEL CRISIS & RUJUKAN ══ */
+.crisis-level-kritis{background:var(--red-soft);color:var(--red);border:1px solid rgba(245,101,101,.25)}
+.crisis-level-waspada{background:var(--amber-soft);color:var(--amber);border:1px solid rgba(245,200,66,.25)}
+.crisis-level-perhatian{background:var(--primary-soft);color:var(--primary);border:1px solid rgba(79,142,247,.2)}
+.crisis-level-badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:.68rem;font-weight:600}
+.referral-status-pending{background:var(--amber-soft);color:var(--amber)}
+.referral-status-sent{background:var(--green-soft);color:var(--green)}
+.referral-status-rejected{background:var(--red-soft);color:var(--red)}
+.referral-status-badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:.68rem;font-weight:600}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.notif-dot-kritis{background:var(--red)}
+.notif-dot-waspada{background:var(--amber)}
+.notif-dot-info{background:var(--primary)}
+.detail-block{background:var(--surface2);border-radius:8px;padding:.85rem 1rem;margin-bottom:.75rem;font-size:.82rem;color:var(--text);line-height:1.65}
+.detail-block .db-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:.3rem}
 </style>
 </head>
 <body>
@@ -267,11 +289,107 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="sn" onclick="showPanel('assign')" id="sn-assign"><span class="sn-icon">🔗</span> Manajemen Assign</div>
       <div class="sn" onclick="showPanel('export')" id="sn-export"><span class="sn-icon">📥</span> Export Data</div>
       <div class="sn" onclick="showPanel('logs')" id="sn-logs"><span class="sn-icon">🔍</span> Log Aktivitas</div>
+      <div class="sn-sep"></div>
+      <div class="sn" onclick="showPanel('crisis')" id="sn-crisis"><span class="sn-icon">🚨</span> Crisis Alerts <span class="sn-badge" id="badge-crisis" style="display:none">0</span></div>
+      <div class="sn" onclick="showPanel('rujukan')" id="sn-rujukan"><span class="sn-icon">📋</span> Rujukan <span class="sn-badge" id="badge-rujukan" style="display:none">0</span></div>
     </div>
 
     <!-- MAIN CONTENT -->
     <div class="main">
+    <!-- PANEL: CRISIS ALERTS -->
+      <div class="panel" id="panel-crisis">
+        <div class="sec-hd">
+          <h2>🚨 Crisis Alerts</h2>
+          <p>Semua deteksi trigger bahaya dari jawaban pasien. Kritis + dikonfirmasi pasien = email sudah terkirim ke psikolog.</p>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.2rem">
+          <div class="stat-card"><div class="stat-val" id="cr-total">—</div><div class="stat-lbl">Total Alert</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--red)" id="cr-kritis">—</div><div class="stat-lbl">Kritis</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--amber)" id="cr-waspada">—</div><div class="stat-lbl">Waspada</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--primary)" id="cr-new">—</div><div class="stat-lbl">Belum Ditangani</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Daftar Crisis Alert</div>
+            <div class="tbl-actions">
+              <select id="cr-filter-level" onchange="renderCrisisTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.75rem;outline:none">
+                <option value="">Semua Level</option>
+                <option value="kritis">Kritis</option>
+                <option value="waspada">Waspada</option>
+                <option value="perhatian">Perhatian</option>
+              </select>
+              <select id="cr-filter-status" onchange="renderCrisisTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.75rem;outline:none">
+                <option value="">Semua Status</option>
+                <option value="new">Baru</option>
+                <option value="reviewed">Sudah Dilihat</option>
+                <option value="handled">Ditangani</option>
+                <option value="false_positive">False Positive</option>
+              </select>
+              <button class="btn btn-o btn-sm" onclick="loadCrisisData()">🔄 Refresh</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Pasien</th>
+                  <th>Level</th>
+                  <th>Konfirmasi</th>
+                  <th>Email Terkirim</th>
+                  <th>Status Admin</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="cr-tbody"><tr><td colspan="7" class="tbl-empty">Memuat data…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
+      <!-- PANEL: RUJUKAN -->
+      <div class="panel" id="panel-rujukan">
+        <div class="sec-hd">
+          <h2>📋 Rujukan Pasien ke Psikolog</h2>
+          <p>Daftar permintaan rujukan dari pasien. Status "pending" berarti menunggu konfirmasi admin.</p>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.2rem">
+          <div class="stat-card"><div class="stat-val" id="rj-total">—</div><div class="stat-lbl">Total Rujukan</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--amber)" id="rj-pending">—</div><div class="stat-lbl">Pending</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--green)" id="rj-sent">—</div><div class="stat-lbl">Terkirim</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--primary)" id="rj-self">—</div><div class="stat-lbl">Self-Referral</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Daftar Rujukan</div>
+            <div class="tbl-actions">
+              <select id="rj-filter-status" onchange="renderRujukanTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.75rem;outline:none">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="sent">Terkirim</option>
+                <option value="rejected">Ditolak</option>
+              </select>
+              <button class="btn btn-o btn-sm" onclick="loadRujukanData()">🔄 Refresh</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Pasien</th>
+                  <th>Psikolog Tujuan</th>
+                  <th>PHQ</th>
+                  <th>Topik Dominan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="rj-tbody"><tr><td colspan="7" class="tbl-empty">Memuat data…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
       <!-- OVERVIEW -->
       <div class="panel active" id="panel-overview">
         <div class="sec-hd">
@@ -700,7 +818,38 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
   </div>
 </div>
+<!-- MODAL: DETAIL CRISIS ALERT -->
+<div class="modal-overlay" id="modal-crisis-detail">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <div class="modal-title" id="mcd-title">🚨 Detail Crisis Alert</div>
+      <button class="modal-close" onclick="closeModal('modal-crisis-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="mcd-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-crisis-detail')">Tutup</button>
+      <button class="btn btn-a btn-sm" id="mcd-btn-review" onclick="updateCrisisStatus('reviewed')">Tandai Sudah Dilihat</button>
+      <button class="btn btn-g btn-sm" id="mcd-btn-handled" onclick="updateCrisisStatus('handled')">✓ Ditangani</button>
+      <button class="btn btn-o btn-sm" id="mcd-btn-fp" onclick="updateCrisisStatus('false_positive')">False Positive</button>
+    </div>
+  </div>
+</div>
 
+<!-- MODAL: DETAIL RUJUKAN -->
+<div class="modal-overlay" id="modal-rujukan-detail">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <div class="modal-title" id="mrd-title">📋 Detail Rujukan</div>
+      <button class="modal-close" onclick="closeModal('modal-rujukan-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="mrd-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-rujukan-detail')">Tutup</button>
+      <button class="btn btn-r btn-sm" id="mrd-btn-reject" onclick="updateRujukanStatus('rejected')">Tolak</button>
+      <button class="btn btn-g btn-sm" id="mrd-btn-approve" onclick="updateRujukanStatus('approved')">✓ Approve & Kirim Email</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -854,7 +1003,10 @@ let _currentTranscriptSession = null;
 const PAGE_SIZE = 15;
 let _userPage = 1, _sessPage = 1;
 let _sessMap = {};
-
+// State crisis & rujukan
+let _allCrisis = [], _allRujukan = [], _allPsikolog = [];
+let _activeCrisisId = null, _activeRujukanId = null;
+let _realtimeChannel = null;
 /* ════════════════════════════════════
    LOGIN
 ════════════════════════════════════ */
@@ -938,6 +1090,7 @@ async function logActivity(action, targetUser, detail){
 async function loadAllData(){
   try{
     // Load semua data paralel
+    // Load semua data paralel
     const [usersRes, sessRes, phqRes, logsRes] = await Promise.all([
       sb.from('profiles').select('*').order('created_at',{ascending:false}),
       sb.from('therapy_sessions').select('*').order('created_at',{ascending:false}),
@@ -957,6 +1110,12 @@ async function loadAllData(){
     renderLogs();
     // Muat data assign
     try{ await loadAssignData(); }catch(e){ console.warn('loadAssignData:',e); }
+    // Muat data crisis & rujukan
+    await loadCrisisData();
+    await loadRujukanData();
+    await loadPsikologData();
+    // Aktifkan realtime listener
+    startRealtimeListener();
 
   } catch(err){
     toast('⚠️ Gagal memuat data: '+err.message);
@@ -1879,9 +2038,314 @@ function showPanel(id){
   document.getElementById('panel-'+id).classList.add('active');
   document.getElementById('sn-'+id).classList.add('act');
   // Reload data assign setiap buka panel assign
+  // Reload data assign setiap buka panel assign
   if(id === 'assign'){
     try{ loadAssignData(); }catch(e){ console.warn('loadAssignData:',e); }
   }
+  if(id === 'crisis')  loadCrisisData();
+  if(id === 'rujukan') loadRujukanData();
+}
+  /* ════════════════════════════════════
+   CRISIS ALERTS — Panel Admin
+════════════════════════════════════ */
+async function loadCrisisData(){
+  try{
+    const {data,error} = await sb.from('crisis_alerts')
+      .select('*').order('created_at',{ascending:false}).limit(200);
+    if(error) throw error;
+    _allCrisis = data||[];
+    renderCrisisTable();
+    updateCrisisBadge();
+  }catch(e){ console.warn('loadCrisisData error:',e); }
+}
+
+function renderCrisisTable(){
+  const levelFilter  = document.getElementById('cr-filter-level')?.value||'';
+  const statusFilter = document.getElementById('cr-filter-status')?.value||'';
+  let data = _allCrisis;
+  if(levelFilter)  data = data.filter(d=>d.alert_level===levelFilter);
+  if(statusFilter) data = data.filter(d=>d.admin_status===statusFilter);
+
+  // Stat cards
+  document.getElementById('cr-total').textContent   = _allCrisis.length;
+  document.getElementById('cr-kritis').textContent  = _allCrisis.filter(d=>d.alert_level==='kritis').length;
+  document.getElementById('cr-waspada').textContent = _allCrisis.filter(d=>d.alert_level==='waspada').length;
+  document.getElementById('cr-new').textContent     = _allCrisis.filter(d=>d.admin_status==='new').length;
+
+  const tbody = document.getElementById('cr-tbody');
+  if(!data.length){ tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">Tidak ada data</td></tr>`; return; }
+
+  tbody.innerHTML = data.map(d=>{
+    const usr  = _allUsers.find(u=>u.id===d.user_id);
+    const nama = usr?.full_name||'—';
+    const lvlClass = d.alert_level==='kritis'?'crisis-level-kritis':d.alert_level==='waspada'?'crisis-level-waspada':'crisis-level-perhatian';
+    const konfirmasi = d.confirmation_status==='confirmed'
+      ?'<span class="badge b-red">✓ Dikonfirmasi</span>'
+      :d.confirmation_status==='denied'
+      ?'<span class="badge b-green">✗ Dibantah</span>'
+      :'<span class="badge" style="background:var(--surface2);color:var(--muted)">Pending</span>';
+    const emailSent = d.email_sent
+      ?`<span class="badge b-green">✓ Terkirim</span>`
+      :`<span class="badge" style="background:var(--surface2);color:var(--muted)">Belum</span>`;
+    const stMap = {new:'<span class="badge b-red">Baru</span>',reviewed:'<span class="badge b-amber">Dilihat</span>',handled:'<span class="badge b-green">Ditangani</span>',false_positive:'<span class="badge" style="background:var(--surface2);color:var(--muted)">False+</span>'};
+    return `<tr>
+      <td style="white-space:nowrap;font-size:.75rem">${fmtDate(d.created_at)}</td>
+      <td><strong>${nama}</strong><br><span style="font-size:.7rem;color:var(--muted)">Sesi ${d.session_number} · Q${d.question_index+1}</span></td>
+      <td><span class="crisis-level-badge ${lvlClass}">${d.alert_level.toUpperCase()}</span></td>
+      <td>${konfirmasi}</td>
+      <td>${emailSent}</td>
+      <td>${stMap[d.admin_status]||d.admin_status}</td>
+      <td><button class="btn btn-o btn-sm" onclick="openCrisisDetail('${d.id}')">Detail</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateCrisisBadge(){
+  const newCount = _allCrisis.filter(d=>d.admin_status==='new'&&d.alert_level==='kritis').length;
+  const badge = document.getElementById('badge-crisis');
+  if(!badge) return;
+  if(newCount>0){ badge.textContent=newCount; badge.style.display='inline-flex'; }
+  else badge.style.display='none';
+}
+
+function openCrisisDetail(id){
+  const d = _allCrisis.find(c=>c.id===id);
+  if(!d) return;
+  _activeCrisisId = id;
+  const usr  = _allUsers.find(u=>u.id===d.user_id);
+  const nama = usr?.full_name||'—';
+  const lvlClass = d.alert_level==='kritis'?'crisis-level-kritis':d.alert_level==='waspada'?'crisis-level-waspada':'crisis-level-perhatian';
+  document.getElementById('mcd-title').textContent = `🚨 Crisis Alert — ${nama}`;
+  document.getElementById('mcd-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-lbl">Nama Pasien</div><div class="detail-val">${nama}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Level Alert</div><div class="detail-val"><span class="crisis-level-badge ${lvlClass}">${d.alert_level.toUpperCase()}</span></div></div>
+      <div class="detail-item"><div class="detail-lbl">Sesi / Pertanyaan</div><div class="detail-val">Sesi ${d.session_number} / Q${d.question_index+1}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Waktu</div><div class="detail-val">${fmtDate(d.created_at)}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Konfirmasi Pasien</div><div class="detail-val">${d.confirmation_status}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Email Terkirim</div><div class="detail-val">${d.email_sent?'✓ Ya ('+fmtDateShort(d.email_sent_at)+')':'Belum'}</div></div>
+    </div>
+    <div class="detail-block">
+      <div class="db-label">Kata Trigger Terdeteksi</div>
+      ${(d.triggered_words||[]).map(w=>`<span class="badge b-red" style="margin-right:4px">${w}</span>`).join('')||'—'}
+    </div>
+    <div class="detail-block">
+      <div class="db-label">Jawaban Pasien yang Memicu Alert</div>
+      ${d.answer_text||'—'}
+    </div>
+    ${d.admin_notes?`<div class="detail-block"><div class="db-label">Catatan Admin</div>${d.admin_notes}</div>`:''}
+  `;
+  // Tampilkan/sembunyikan tombol sesuai status
+  const isHandled = d.admin_status==='handled'||d.admin_status==='false_positive';
+  document.getElementById('mcd-btn-review').style.display   = d.admin_status==='new'?'inline-flex':'none';
+  document.getElementById('mcd-btn-handled').style.display  = isHandled?'none':'inline-flex';
+  document.getElementById('mcd-btn-fp').style.display       = isHandled?'none':'inline-flex';
+  openModal('modal-crisis-detail');
+}
+
+async function updateCrisisStatus(status){
+  if(!_activeCrisisId) return;
+  try{
+    await sb.from('crisis_alerts').update({
+      admin_status:status, handled_at:new Date().toISOString(), handled_by:_cu.id
+    }).eq('id',_activeCrisisId);
+    closeModal('modal-crisis-detail');
+    toast('✓ Status diperbarui');
+    await loadCrisisData();
+  }catch(e){ toast('❌ Gagal update: '+e.message); }
+}
+
+/* ════════════════════════════════════
+   RUJUKAN — Panel Admin
+════════════════════════════════════ */
+async function loadPsikologData(){
+  try{
+    const {data} = await sb.from('psychologists').select('*').eq('is_active',true);
+    _allPsikolog = data||[];
+  }catch(e){ console.warn('loadPsikologData error:',e); }
+}
+
+async function loadRujukanData(){
+  try{
+    const {data,error} = await sb.from('referral_requests')
+      .select('*').order('created_at',{ascending:false}).limit(200);
+    if(error) throw error;
+    _allRujukan = data||[];
+    renderRujukanTable();
+    updateRujukanBadge();
+  }catch(e){ console.warn('loadRujukanData error:',e); }
+}
+
+function renderRujukanTable(){
+  const statusFilter = document.getElementById('rj-filter-status')?.value||'';
+  let data = _allRujukan;
+  if(statusFilter) data = data.filter(d=>d.status===statusFilter);
+
+  document.getElementById('rj-total').textContent   = _allRujukan.length;
+  document.getElementById('rj-pending').textContent = _allRujukan.filter(d=>d.status==='pending').length;
+  document.getElementById('rj-sent').textContent    = _allRujukan.filter(d=>d.status==='sent').length;
+  document.getElementById('rj-self').textContent    = _allRujukan.filter(d=>d.referral_type==='self').length;
+
+  const tbody = document.getElementById('rj-tbody');
+  if(!data.length){ tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">Tidak ada data</td></tr>`; return; }
+
+  tbody.innerHTML = data.map(d=>{
+    const psi  = _allPsikolog.find(p=>p.id===d.psychologist_id);
+    const psiNama = psi?.full_name||d.email_target||'—';
+    const stClass = d.status==='sent'?'b-green':d.status==='rejected'?'b-red':'b-amber';
+    const topik = (d.dominant_topics||[]).join(', ')||'—';
+    const phqInfo = `Pre: ${d.phq_pre_score??'—'} → Post: ${d.phq_post_score??'—'}`;
+    return `<tr>
+      <td style="white-space:nowrap;font-size:.75rem">${fmtDateShort(d.created_at)}</td>
+      <td><strong>${d.patient_name||'—'}</strong><br><span style="font-size:.7rem;color:var(--muted)">${d.patient_age||'—'} thn · ${d.patient_gender||'—'}</span></td>
+      <td>${psiNama}<br><span style="font-size:.7rem;color:var(--muted)">${psi?.email||'—'}</span></td>
+      <td style="font-size:.75rem">${phqInfo}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${topik}</td>
+      <td><span class="referral-status-badge referral-status-${d.status}">${d.status.toUpperCase()}</span></td>
+      <td><button class="btn btn-o btn-sm" onclick="openRujukanDetail('${d.id}')">Detail</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateRujukanBadge(){
+  const pendingCount = _allRujukan.filter(d=>d.status==='pending').length;
+  const badge = document.getElementById('badge-rujukan');
+  if(!badge) return;
+  if(pendingCount>0){ badge.textContent=pendingCount; badge.style.display='inline-flex'; }
+  else badge.style.display='none';
+}
+
+function openRujukanDetail(id){
+  const d = _allRujukan.find(r=>r.id===id);
+  if(!d) return;
+  _activeRujukanId = id;
+  const psi = _allPsikolog.find(p=>p.id===d.psychologist_id);
+  document.getElementById('mrd-title').textContent = `📋 Rujukan — ${d.patient_name||'—'}`;
+  const rd = d.report_data||{};
+  document.getElementById('mrd-body').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-lbl">Nama Pasien</div><div class="detail-val">${d.patient_name||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Usia / Jenis Kelamin</div><div class="detail-val">${d.patient_age||'—'} thn · ${d.patient_gender||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">PHQ Sebelum Terapi</div><div class="detail-val">${d.phq_pre_score??'—'} <span style="font-size:.75rem;color:var(--muted)">(${d.phq_pre_sev||'—'})</span></div></div>
+      <div class="detail-item"><div class="detail-lbl">PHQ Setelah Terapi</div><div class="detail-val">${d.phq_post_score??'—'} <span style="font-size:.75rem;color:var(--muted)">(${d.phq_post_sev||'—'})</span></div></div>
+      <div class="detail-item"><div class="detail-lbl">Psikolog Dipilih</div><div class="detail-val">${psi?.full_name||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Email Psikolog</div><div class="detail-val">${psi?.email||d.email_target||'—'}</div></div>
+    </div>
+    <div class="detail-block">
+      <div class="db-label">Topik Dominan dari Sesi</div>
+      ${(d.dominant_topics||[]).map(t=>`<span class="badge b-blue" style="margin-right:4px">${t}</span>`).join('')||'—'}
+    </div>
+    <div class="detail-block">
+      <div class="db-label">Alasan Rujukan (dari Sistem)</div>
+      ${d.referral_reason||'—'}
+    </div>
+    <div class="detail-block">
+      <div class="db-label">Penyakit Kronis</div>
+      ${rd.penyakit||d.report_data?.penyakit||'Tidak ada'}
+    </div>
+    <div class="detail-block">
+      <div class="db-label">Status</div>
+      <span class="referral-status-badge referral-status-${d.status}">${d.status.toUpperCase()}</span>
+      ${d.email_sent?` · <span style="font-size:.75rem;color:var(--green)">Email terkirim ${fmtDateShort(d.email_sent_at)}</span>`:''}
+    </div>
+    <div style="background:var(--amber-soft);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:.75rem 1rem;font-size:.78rem;color:var(--amber);line-height:1.6;margin-top:.5rem">
+      ⚠️ Dengan menekan "Approve & Kirim Email", data pasien di atas akan langsung dikirim ke email psikolog. Pastikan data sudah benar.
+    </div>
+  `;
+  const isPending = d.status==='pending';
+  document.getElementById('mrd-btn-approve').style.display = isPending?'inline-flex':'none';
+  document.getElementById('mrd-btn-reject').style.display  = isPending?'inline-flex':'none';
+  openModal('modal-rujukan-detail');
+}
+
+async function updateRujukanStatus(status){
+  if(!_activeRujukanId) return;
+  const d = _allRujukan.find(r=>r.id===_activeRujukanId);
+  if(!d) return;
+
+  if(status==='approved'){
+    // Approve: kirim email langsung
+    const psi = _allPsikolog.find(p=>p.id===d.psychologist_id);
+    if(!psi){ toast('⚠️ Data psikolog tidak ditemukan'); return; }
+    try{
+      // Kirim email rujukan via Resend
+      await _adminKirimEmailRujukan(psi, d);
+      // Update status ke sent
+      await sb.from('referral_requests').update({
+        status:'sent', reviewed_by:_cu.id, reviewed_at:new Date().toISOString(),
+        email_sent:true, email_sent_at:new Date().toISOString(), email_target:psi.email,
+      }).eq('id',_activeRujukanId);
+      // Update notif admin jadi read
+      await sb.from('admin_notifications').update({is_read:true,read_at:new Date().toISOString()})
+        .eq('ref_id',_activeRujukanId).eq('notif_type','referral_request');
+      closeModal('modal-rujukan-detail');
+      toast('✅ Email rujukan berhasil dikirim ke '+psi.full_name);
+      await loadRujukanData();
+    }catch(e){ toast('❌ Gagal kirim email: '+e.message); }
+
+  } else if(status==='rejected'){
+    const alasan = prompt('Alasan penolakan (opsional):');
+    await sb.from('referral_requests').update({
+      status:'rejected', reviewed_by:_cu.id, reviewed_at:new Date().toISOString(),
+      admin_notes: alasan||''
+    }).eq('id',_activeRujukanId);
+    closeModal('modal-rujukan-detail');
+    toast('Rujukan ditolak');
+    await loadRujukanData();
+  }
+}
+
+async function _adminKirimEmailRujukan(psi, d){
+  const RESEND_API_KEY = 'GANTI_DENGAN_RESEND_API_KEY_KAMU'; // ⚠️ GANTI
+  const emailFrom = 'onboarding@resend.dev'; // ⚠️ GANTI dengan domain sendiri
+  const rd = d.report_data||{};
+  const htmlBody = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+    <div style="background:#6a9e7f;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
+      <h2 style="margin:0">🌿 Rujukan Pasien — PsyWellMate</h2>
+      <p style="margin:4px 0 0;opacity:.85;font-size:14px">Disetujui oleh Admin PsyWellMate</p>
+    </div>
+    <div style="background:#fff;border:1px solid #eee;padding:24px;border-radius:0 0 8px 8px">
+      <p style="font-size:15px;color:#333;margin-bottom:16px">Yth. <strong>${psi.full_name}</strong>,</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px">
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888;width:160px">Nama Pasien</td><td style="padding:8px 12px;font-weight:600">${d.patient_name||'—'}</td></tr>
+        <tr><td style="padding:8px 12px;color:#888">Usia</td><td style="padding:8px 12px">${d.patient_age||'—'} tahun · ${d.patient_gender||'—'}</td></tr>
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888">PHQ Sebelum</td><td style="padding:8px 12px">${d.phq_pre_score??'—'} (${d.phq_pre_sev||'—'})</td></tr>
+        <tr><td style="padding:8px 12px;color:#888">PHQ Setelah</td><td style="padding:8px 12px">${d.phq_post_score??'—'} (${d.phq_post_sev||'—'})</td></tr>
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888">Topik Dominan</td><td style="padding:8px 12px">${(d.dominant_topics||[]).join(', ')||'Umum'}</td></tr>
+        <tr><td style="padding:8px 12px;color:#888">Penyakit Kronis</td><td style="padding:8px 12px">${rd.penyakit||'Tidak ada'}</td></tr>
+        <tr style="background:#f8f9fa"><td style="padding:8px 12px;color:#888">Tanggal Terapi</td><td style="padding:8px 12px">${rd.tgl_terapi||fmtDateShort(d.created_at)}</td></tr>
+      </table>
+      <p style="font-size:11px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:12px">
+        Email ini dikirim oleh Admin PsyWellMate setelah verifikasi. © PsyWellMate
+      </p>
+    </div>
+  </div>`;
+  const res = await fetch('https://api.resend.com/emails',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
+    body:JSON.stringify({from:emailFrom,to:[psi.email],subject:`🌿 Rujukan Pasien — ${d.patient_name||'—'} — PsyWellMate`,html:htmlBody}),
+  });
+  if(!res.ok){ const err=await res.json(); throw new Error(err.message||'Resend error'); }
+}
+
+/* ════════════════════════════════════
+   REALTIME LISTENER — Supabase
+   Auto-refresh panel saat ada data baru
+════════════════════════════════════ */
+function startRealtimeListener(){
+  if(_realtimeChannel) _realtimeChannel.unsubscribe();
+  _realtimeChannel = sb.channel('admin-realtime')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'crisis_alerts'},
+      payload=>{ _allCrisis.unshift(payload.new); renderCrisisTable(); updateCrisisBadge();
+        if(payload.new.alert_level==='kritis') toast('🚨 Crisis Alert baru masuk!',5000); })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'crisis_alerts'},
+      ()=>{ loadCrisisData(); })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'referral_requests'},
+      payload=>{ _allRujukan.unshift(payload.new); renderRujukanTable(); updateRujukanBadge();
+        toast('📋 Rujukan baru dari '+( payload.new.patient_name||'pasien'),4000); })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'referral_requests'},
+      ()=>{ loadRujukanData(); })
+    .subscribe();
 }
 
 /* ════════════════════════════════════
