@@ -1857,11 +1857,16 @@ async function _kirimEmailCrisis(answerText, level, words){
   </div>`;
 
   try{
+    const { data:{ session:_sess } } = await sb.auth.getSession();
+    const _token = _sess?.access_token || '';
     const res = await fetch(EDGE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${_token}`,
+      },
       body: JSON.stringify({
-        to:      'fadhlyalfallah07@gmail.com', // ⚠️ GANTI sebelum production
+        to:      'fadhlyalfallah07@gmail.com', // ⚠️ GANTI sebelum production// ⚠️ GANTI sebelum production
         subject: `⚠️ [URGENT] Crisis Alert — ${S.nama}, ${S.usia} thn — PsyWellMate`,
         html:    htmlBody,
       }),
@@ -3585,9 +3590,14 @@ async function _kirimEmailRujukan(psi, data){
   </div>`;
 
   try{
+    const { data:{ session:_sess2 } } = await sb.auth.getSession();
+    const _token2 = _sess2?.access_token || '';
     const res = await fetch(EDGE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${_token2}`,
+      },
       body: JSON.stringify({
         to:      psi.email,
         subject: `🌿 Rujukan Pasien — ${data.nama}, ${data.usia} thn — PsyWellMate`,
