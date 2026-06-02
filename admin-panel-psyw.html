@@ -2296,9 +2296,10 @@ async function updateRujukanStatus(status){
 }
 
 async function _adminKirimEmailRujukan(psi, d){
-  const RESEND_API_KEY = 're_DG9aA4W3_GksHbSZFCZUXUtRZr5k263YN'; // ⚠️ GANTI
-  const emailFrom = 'onboarding@resend.dev'; // ⚠️ GANTI dengan domain sendiri
+  // Pakai Supabase Edge Function — API key aman di server
+  const EDGE_URL = 'https://xxcxygdssveddjonwxat.supabase.co/functions/v1/send-email';
   const rd = d.report_data||{};
+
   const htmlBody = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
     <div style="background:#6a9e7f;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
       <h2 style="margin:0">🌿 Rujukan Pasien — PsyWellMate</h2>
@@ -2320,12 +2321,17 @@ async function _adminKirimEmailRujukan(psi, d){
       </p>
     </div>
   </div>`;
-  const res = await fetch('https://api.resend.com/emails',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
-    body:JSON.stringify({from:emailFrom,to:[psi.email],subject:`🌿 Rujukan Pasien — ${d.patient_name||'—'} — PsyWellMate`,html:htmlBody}),
+
+  const res = await fetch(EDGE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to:      psi.email,
+      subject: `🌿 Rujukan Pasien — ${d.patient_name||'—'} — PsyWellMate`,
+      html:    htmlBody,
+    }),
   });
-  if(!res.ok){ const err=await res.json(); throw new Error(err.message||'Resend error'); }
+  if(!res.ok){ const err=await res.json(); throw new Error(err.message||'Edge Function error'); }
 }
 
 /* ════════════════════════════════════
