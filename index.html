@@ -930,8 +930,13 @@ function sapaanCap(){
 }
 
 /* ══════════════════════════════════════════
-   NLP SEDERHANA (Rule-Based)
+   NLP — CLAUDE AI ENGINE
+   analyzeNLP() tetap ada sebagai fallback sinkron
+   untuk crisis detection & logging.
+   Respons Elina kini dihasilkan oleh Claude API.
 ══════════════════════════════════════════ */
+
+/* ── Fallback rule-based (hanya untuk crisis check & db logging) ── */
 const NLP = {
   positif: ['bahagia','senang','gembira','baik','bagus','indah','syukur','bersyukur','cinta','sayang','semangat','harapan','bangga','berhasil','sukses','damai','tenang','nyaman','aman','sehat','segar','bersemangat','luar biasa','menyenangkan','hebat','kuat','tabah','sabar','ikhlas','percaya','optimis','bermanfaat','berarti','bermakna','berharga','ringan','lega','puas','beruntung','tercukupi','dicintai','dihargai','didukung','terhubung','dekat','akrab','hangat','erat'],
   negatif: ['sedih','menangis','susah','sulit','berat','lelah','capek','stress','stres','cemas','khawatir','takut','marah','kesal','frustrasi','kecewa','sakit','nyeri','menderita','kesepian','sendiri','terisolasi','terbuang','tidak dihargai','tidak berharga','putus asa','pesimis','hancur','hilang','kehilangan','ditinggal','mati','bunuh','menyakiti','tidak bisa','gagal','beban','tertekan','terpuruk','malu','bersalah','menyesal','trauma','luka','perih','pahit','hampa','kosong','sia-sia','tidak berguna','tidak mampu','tidak sanggup','terpenjara','terjebak'],
@@ -1168,6 +1173,7 @@ const NLP = {
   }
 };
 
+/* ── analyzeNLP: rule-based fallback untuk crisis check & logging ── */
 function analyzeNLP(text){
   const t = text.toLowerCase();
   let posCount=0, negCount=0;
@@ -1183,12 +1189,10 @@ function analyzeNLP(text){
   }
 
   const topics=[];
-  // Cek kata tunggal dari NLP.topik
   for(const[top,words] of Object.entries(NLP.topik)){
     let c=0; words.forEach(w=>{if(t.includes(w))c++;});
     if(c>0 && !topics.includes(top)) topics.push(top);
   }
-  // Cek frasa multi-kata dari NLP.frase_topik
   for(const[top,frases] of Object.entries(NLP.frase_topik||{})){
     let c=0; frases.forEach(f=>{if(t.includes(f))c++;});
     if(c>0 && !topics.includes(top)) topics.push(top);
@@ -1197,1024 +1201,480 @@ function analyzeNLP(text){
   return {sentiment, emotion:detectedEmo, topics};
 }
   /* ══════════════════════════════════════════
-   NLP LAYER 2 — EXTRACT, LENGTH, RECALL
-   ──────────────────────────────────────────
-   Fungsi-fungsi ini bekerja DI ATAS analyzeNLP()
-   untuk menghasilkan respons yang lebih personal.
-
-   Yang bisa Anda tambah manual nanti:
-   - RECALL_PREFIX      : awalan kalimat mirror
-   - RECALL_SUFFIX      : akhiran kalimat mirror
-   - POLA_KALIMAT       : pola situasi spesifik user
-   - PEMANCING_CERITA   : kalimat pemancing jawaban pendek
+   CLAUDE AI ENGINE — EMOTION-AWARE RESPONSES
+   analyzeNLP tetap dipakai untuk crisis & logging.
+   Respons Elina kini dihasilkan Claude API.
 ══════════════════════════════════════════ */
 
-/* ── 1. Deteksi panjang jawaban user ── */
-function detectLength(text){
-  const words = text.trim().split(/\s+/).length;
-  if(words <= 8)  return 'pendek';
-  if(words <= 30) return 'sedang';
-  return 'panjang';
+/* ══════════════════════════════════════════
+   NLP ENGINE — EMOTION-AWARE (ZERO COST)
+   Mendeteksi emosi, topik, intensitas, dan negasi
+   sepenuhnya di browser — tanpa API berbayar.
+══════════════════════════════════════════ */
+
+/* ── Leksikon Emosi Berbobot ── */
+const EMO_LEX = {
+  sedih: {
+    words: {
+      'sedih':2,'menangis':3,'duka':2,'pilu':3,'nestapa':3,'merana':2,'kepedihan':3,
+      'air mata':2,'muram':2,'murung':2,'sendu':2,'pilu':3,'tersayat':3,'hancur hati':3,
+      'patah hati':3,'berduka':3,'terluka':2,'perih':2,'sakit hati':2,'kecewa':2,
+      'hampa':2,'kosong':2,'sia-sia':2,'tidak berharga':3,'tidak berarti':3,
+      'tidak ada gunanya':3,'putus asa':3,'hopeless':3,'down':1,'galau':2,
+      'menghela':1,'menyesal':2,'menyayat':3,'meratap':3,'depresi':3,'terpuruk':3,
+    }
+  },
+  marah: {
+    words: {
+      'marah':2,'kesal':2,'frustrasi':2,'jengkel':2,'dongkol':2,'murka':3,
+      'benci':3,'dendam':3,'emosi':2,'amarah':3,'meledak':3,'mengamuk':3,
+      'geram':2,'gondok':2,'sebal':2,'jijik':2,'muak':2,'tidak tahan':2,
+      'tidak sabar':1,'kesal sekali':3,'marah besar':3,'naik darah':3,
+      'darah mendidih':3,'tidak adil':2,'dikhianati':3,'disakiti':2,
+    }
+  },
+  takut: {
+    words: {
+      'takut':2,'cemas':2,'khawatir':2,'gelisah':2,'was-was':2,'panik':3,
+      'gugup':1,'ngeri':3,'trauma':3,'fobia':3,'gentar':2,'ketakutan':3,
+      'teror':3,'gemetar':2,'menggigil':2,'waswas':2,'resah':2,'risau':2,
+      'khawatirkan':2,'ketakutan':3,'merasa tidak aman':3,'tidak tenang':2,
+    }
+  },
+  senang: {
+    words: {
+      'senang':2,'bahagia':3,'gembira':3,'riang':2,'ceria':2,'bersuka':2,
+      'puas':2,'lega':2,'sukacita':3,'girang':2,'suka':1,'menyenangkan':2,
+      'indah':2,'menyenangkan':2,'menyenangkan':2,'bersemangat':2,'bersyukur':3,
+      'syukur':2,'beruntung':2,'bangga':3,'pencapaian':2,'berhasil':2,
+      'sukses':2,'hebat':2,'luar biasa':2,'alhamdulillah':2,'nikmat':2,
+    }
+  },
+  rindu: {
+    words: {
+      'rindu':3,'kangen':3,'merindukan':3,'ingin bertemu':3,'kangen banget':3,
+      'savahan':2,'mengenang':2,'teringat':2,'ingat terus':2,'tidak bisa lupa':2,
+      'selalu teringat':3,'merasa kehilangan':2,'ingin kembali':2,
+    }
+  },
+  malu: {
+    words: {
+      'malu':2,'rendah diri':2,'minder':2,'tidak percaya diri':2,'canggung':1,
+      'sungkan':1,'insecure':2,'malu-malu':1,'tidak pantas':2,'tidak layak':2,
+      'merasa jelek':2,'tidak cukup baik':2,'tidak mampu':2,'gagal':2,
+    }
+  },
+  kesepian: {
+    words: {
+      'kesepian':3,'sendirian':2,'terisolasi':3,'dikucilkan':3,'tidak ada teman':3,
+      'sendiri':1,'sunyi':2,'sepi':2,'hampa':2,'tidak ada yang peduli':3,
+      'tidak ada yang mengerti':3,'tidak ada yang memahami':3,'merasa asing':2,
+      'tidak ditemani':2,'tidak ada yang menemani':2,'tidak diperhatikan':2,
+    }
+  },
+  kecewa: {
+    words: {
+      'kecewa':2,'mengecewakan':2,'tidak sesuai harapan':3,'merasa dikhianati':3,
+      'harapan tidak terwujud':3,'sudah berusaha tapi':2,'gagal lagi':3,
+      'tidak dihargai':2,'tidak diapresiasi':2,'tidak dipedulikan':2,
+      'diabaikan':2,'tidak didengar':2,'dicuekin':2,
+    }
+  },
+  trauma: {
+    words: {
+      'trauma':3,'traumatis':3,'kekerasan':3,'pelecehan':3,'penganiayaan':3,
+      'dibully':3,'bullying':3,'ancaman':2,'pengalaman buruk':2,'mimpi buruk':2,
+      'kilas balik':3,'flashback':3,'tidak bisa melupakan':2,'masih ingat':1,
+      'membekas':2,'luka lama':3,'luka batin':3,
+    }
+  },
+  burnout: {
+    words: {
+      'burnout':3,'kelelahan':2,'lelah':1,'capek':1,'exhausted':2,'habis tenaga':3,
+      'tidak kuat lagi':3,'sudah tidak sanggup':3,'tidak ada semangat':3,
+      'kehilangan motivasi':3,'malas':1,'tidak bergairah':2,'jenuh':2,
+      'bosan':1,'mumet':2,'pusing':1,'stres':2,'tertekan':2,'beban':2,
+    }
+  },
+  harapan: {
+    words: {
+      'harapan':2,'optimis':2,'semangat':2,'berharap':2,'impian':2,'cita-cita':2,
+      'rencana':1,'target':1,'tujuan':2,'bangkit':3,'pulih':2,'maju':2,
+      'berkembang':2,'bersemangat':2,'ingin berubah':2,'mau mencoba':2,
+      'percaya':2,'yakin':2,'kuat':2,'tabah':2,'sabar':2,'ikhlas':2,
+    }
+  },
+};
+
+/* ── Kata Negasi ── */
+const NEGASI = ['tidak','bukan','belum','jangan','tanpa','tak','ga ','gak ','nggak','enggak','nda ','ndak '];
+
+/* ── Kata Intensifier ── */
+const INTENSIFIER = {
+  tinggi: ['sangat','amat','sekali','banget','benar-benar','sungguh','terlalu','betul-betul','luar biasa','teramat','paling','super','ekstrem'],
+  rendah: ['sedikit','agak','lumayan','cukup','kurang','rada','hampir'],
+};
+
+/* ── Analisis Emosi Utama dari Teks ── */
+function analyzeEmotionDeep(text) {
+  const t = text.toLowerCase();
+  const words = t.split(/\s+/);
+  const scores = {};
+
+  for (const [emo, data] of Object.entries(EMO_LEX)) {
+    let score = 0;
+    for (const [word, weight] of Object.entries(data.words)) {
+      const idx = t.indexOf(word);
+      if (idx === -1) continue;
+
+      // Cek negasi (3 kata sebelum kemunculan kata emosi)
+      const before = t.substring(Math.max(0, idx - 30), idx);
+      const isNegated = NEGASI.some(n => before.endsWith(n) || before.includes(n + ' '));
+      if (isNegated) { score -= weight; continue; }
+
+      // Cek intensifier (3 kata sebelum)
+      let mult = 1;
+      if (INTENSIFIER.tinggi.some(i => before.includes(i))) mult = 1.8;
+      else if (INTENSIFIER.rendah.some(i => before.includes(i))) mult = 0.5;
+
+      score += weight * mult;
+    }
+    if (score > 0) scores[emo] = score;
+  }
+
+  // Urutkan emosi berdasarkan skor
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const dominant = sorted[0]?.[0] || 'netral';
+  const secondary = sorted[1]?.[0] || null;
+  const dominantScore = sorted[0]?.[1] || 0;
+
+  // Intensitas
+  let intensitas = 'rendah';
+  if (dominantScore >= 6) intensitas = 'tinggi';
+  else if (dominantScore >= 3) intensitas = 'sedang';
+
+  // Sentimen
+  const posiEmo = ['senang','harapan','bangga'];
+  const negaEmo = ['sedih','marah','takut','kesepian','kecewa','trauma','burnout','malu','rindu'];
+  let sentiment = 'netral';
+  if (posiEmo.includes(dominant)) sentiment = 'positif';
+  else if (negaEmo.includes(dominant)) sentiment = 'negatif';
+
+  return { dominant, secondary, intensitas, sentiment, scores };
 }
 
-/* ── 2. Filter: apakah cerita tentang diri sendiri? ── */
-function isSelfStory(sentence){
-  // Hanya recall jika ada kata ganti orang pertama di kalimat tsb
-  const selfWords = ['saya','aku','ku ','ku,','ku.','gue','gw','diriku','diri saya','diri aku'];
-  const s = sentence.toLowerCase();
-  return selfWords.some(w => s.includes(w));
+/* ── Deteksi Topik ── */
+function detectTopic(text) {
+  const t = text.toLowerCase();
+  const topikMap = {
+    'keluarga':     ['keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan'],
+    'pekerjaan':    ['kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
+    'kesehatan':    ['sakit','sehat','dokter','rumah sakit','obat','penyakit','fisik','tubuh'],
+    'percintaan':   ['pacar','kekasih','cinta','hubungan','putus','selingkuh','menikah','pernikahan'],
+    'pertemanan':   ['teman','sahabat','bestie','circle','persahabatan','dikucilkan'],
+    'pendidikan':   ['sekolah','kuliah','kampus','ujian','tugas','skripsi','nilai','belajar'],
+    'keuangan':     ['uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
+    'kehilangan':   ['meninggal','wafat','berpulang','kehilangan','berpisah','ditinggal'],
+    'masa lalu':    ['dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
+    'spiritualitas':['ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
+    'identitas':    ['jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
+  };
+  const found = [];
+  for (const [topik, kata] of Object.entries(topikMap)) {
+    if (kata.some(k => t.includes(k))) found.push(topik);
+  }
+  return found.slice(0, 3);
 }
 
-/* ── 3. Ekstrak frasa kunci dari jawaban user ── */
-/*
-   CARA MENAMBAH POLA MANUAL (Anda lakukan di file ini):
-   Tambahkan objek baru di array POLA_KALIMAT di bawah.
-   Format: { trigger: ['kata','atau','frasa'], recall: 'template recall' }
-   Gunakan {sp} untuk sapaan, hasil recall otomatis dipilih acak dari RECALL_PREFIX + recall + RECALL_SUFFIX
-*/
-const POLA_KALIMAT = [
-  // KELUARGA
-  { trigger:['ditinggal orang tua','ditinggal ibu','ditinggal ayah','orang tua pergi','tidak ada orang tua'],
-    recall: '{sp} pernah ditinggal orang tua' },
-  { trigger:['orang tua bertengkar','ayah ibu bertengkar','sering bertengkar di rumah'],
-    recall: 'dulu di rumah {sp} sering ada pertengkaran' },
-  { trigger:['tidak diperhatikan orang tua','kurang kasih sayang','tidak diperhatikan keluarga'],
-    recall: '{sp} merasa kurang mendapat perhatian dari keluarga' },
-  { trigger:['jauh dari keluarga','keluarga jauh','anak tinggal jauh','anak sudah pergi'],
-    recall: '{sp} merasa jauh dari orang-orang yang disayang' },
+/* ── analyzeNLP: tetap ada untuk crisis check & DB logging ── */
+function analyzeNLP(text) {
+  const deep = analyzeEmotionDeep(text);
+  const topics = detectTopic(text);
+  return {
+    sentiment: deep.sentiment,
+    emotion: deep.dominant,
+    topics,
+    _deep: deep,
+  };
+}
 
-  // PEKERJAAN
-  { trigger:['kerja menumpuk','pekerjaan menumpuk','beban kerja','bukan jobdesk','bukan tugas saya','bukan tanggung jawab saya'],
-    recall: '{sp} menanggung beban kerja yang seharusnya bukan milik {sp}' },
-  { trigger:['dipecat','kehilangan pekerjaan','kena PHK','dikeluarkan dari kerja'],
-    recall: '{sp} pernah kehilangan pekerjaan' },
-  { trigger:['tidak cocok dengan atasan','masalah dengan bos','konflik di kantor'],
-    recall: 'ada situasi yang tidak nyaman buat {sp} di tempat kerja' },
+/* ══════════════════════════════════════════
+   TEMPLATE RESPONS — EMOTION × TOPIK × INTENSITAS
+   Setiap emosi punya pool respons berdasarkan intensitas.
+   Gunakan {sp} = sapaan, {nm} = nama.
+══════════════════════════════════════════ */
 
-  // KESEPIAN & KEHILANGAN
-  { trigger:['merasa kesepian','sangat kesepian','sendirian terus','tidak ada teman'],
-    recall: '{sp} merasa sangat kesepian' },
-  { trigger:['ditinggal pasangan','pasangan pergi','suami pergi','istri pergi','putus hubungan'],
-    recall: '{sp} pernah ditinggalkan oleh orang yang disayang' },
-  { trigger:['teman meninggal','sahabat meninggal','orang tua meninggal','kehilangan seseorang'],
-    recall: '{sp} pernah kehilangan seseorang yang sangat berarti' },
+const RESP = {
 
-  // MASA KECIL
-  { trigger:['masa kecil sulit','masa kecil berat','waktu kecil susah','kecil tidak bahagia'],
-    recall: 'masa kecil {sp} terasa cukup berat' },
-  { trigger:['dibully','diejek waktu kecil','diejek di sekolah','tidak punya teman waktu kecil'],
-    recall: '{sp} pernah mengalami perlakuan yang menyakitkan dari orang sekitar' },
+  sedih: {
+    tinggi: [
+      'Saya mendengar betapa beratnya yang {sp} rasakan saat ini. Perasaan itu nyata, dan {sp} tidak perlu menanggungnya sendiri. Boleh ceritakan, apa yang paling terasa menyakitkan?',
+      'Ini terdengar sangat berat, {nm}. Terima kasih sudah mau berbagi — saya di sini, sepenuhnya mendengarkan. Apakah ada momen tertentu yang membuat rasa sedih ini terasa paling kuat?',
+      'Ada duka yang dalam di cerita {sp}. Wajar sekali jika {sp} merasa seperti ini. Sudah berapa lama perasaan ini menemani {sp}?',
+    ],
+    sedang: [
+      'Saya merasakan ada kesedihan di balik cerita {sp}. Tidak apa-apa untuk merasa seperti ini. Boleh {sp} ceritakan lebih tentang apa yang sedang dirasakan?',
+      'Terima kasih sudah mau berbagi, {nm}. Ada rasa sedih yang {sp} bawa — apa yang biasanya membantu {sp} sedikit merasa lebih ringan?',
+      'Ada sesuatu yang terasa berat di cerita {sp}. Apakah perasaan ini sudah lama ada, atau baru-baru ini muncul?',
+    ],
+    rendah: [
+      'Ada sedikit rasa sedih di cerita {sp}, dan itu wajar. Boleh ceritakan lebih lanjut apa yang {sp} rasakan?',
+      'Saya mendengar {sp}. Ceritakan lebih — apa yang sedang terjadi dalam kehidupan {sp} saat ini?',
+    ],
+  },
 
-  // KESEHATAN
-  { trigger:['sakit lama','penyakit kronis','sudah lama sakit','tidak kunjung sembuh'],
-    recall: '{sp} sudah melewati waktu yang cukup lama berjuang dengan kesehatan' },
+  marah: {
+    tinggi: [
+      'Kemarahan yang {sp} rasakan itu sepenuhnya valid. Kadang kemarahan muncul karena ada sesuatu yang tidak adil atau menyakitkan. Apa yang paling membuat {sp} merasa seperti ini?',
+      'Ada amarah yang kuat di sini, dan saya mengerti. Sudah berapa lama {sp} menyimpan perasaan ini? Apakah ada seseorang yang tahu seberapa besarnya?',
+      'Rasa marah itu nyata dan punya alasan. Dari semua yang {sp} ceritakan — apa yang terasa paling tidak adil?',
+    ],
+    sedang: [
+      'Ada rasa kesal atau frustrasi di cerita {sp}. Itu sangat bisa dipahami. Boleh ceritakan — apa yang paling menguras energi {sp} saat ini?',
+      'Saya mendengar kekesalan {sp}, dan itu wajar. Apakah ada orang di sekitar {sp} yang tahu tentang perasaan ini?',
+    ],
+    rendah: [
+      'Sepertinya ada sesuatu yang membuat {sp} kurang nyaman. Boleh ceritakan lebih?',
+      'Saya mendengar sedikit kekesalan di cerita {sp}. Apa yang sebenarnya sedang terjadi?',
+    ],
+  },
 
-  // PERASAAN TIDAK BERHARGA
-  { trigger:['tidak berguna','merasa tidak berguna','tidak berharga','tidak ada artinya'],
-    recall: '{sp} sempat merasa seperti tidak berarti' },
-  { trigger:['gagal terus','selalu gagal','tidak pernah berhasil','merasa gagal'],
-    recall: '{sp} merasa seperti terus menemui kegagalan' },
+  takut: {
+    tinggi: [
+      'Rasa takut dan cemas yang {sp} rasakan itu nyata dan bisa dipahami. Berbagi rasa takut seperti ini sudah merupakan langkah yang berani. Apa yang paling sering mengusik pikiran {sp} akhir-akhir ini?',
+      'Ada ketakutan yang terasa besar di cerita {sp}. Ketika rasa cemas itu datang, biasanya bagaimana {sp} menghadapinya?',
+      'Kekhawatiran {sp} terdengar sangat berat. Sudah berapa lama rasa ini menemani {sp}? Apakah ada yang tahu?',
+    ],
+    sedang: [
+      'Ada sedikit rasa cemas atau khawatir di cerita {sp}. Wajar sekali. Apa yang paling membuat {sp} merasa tidak tenang saat ini?',
+      'Saya mendengar kekhawatiran {sp}. Boleh ceritakan lebih — apa yang paling sering {sp} pikirkan?',
+    ],
+    rendah: [
+      'Ada sedikit kegelisahan di cerita {sp}. Ceritakan lebih lanjut — apa yang sedang {sp} hadapi?',
+    ],
+  },
 
-  // ── KELUARGA (lanjutan) ──
-  { trigger:['tidak dekat dengan ayah','ayah tidak pernah ada','ayah tidak peduli','tidak pernah dipeluk ayah','ayah jarang di rumah'],
-    recall: '{sp} tumbuh tanpa kehadiran ayah yang benar-benar terasa' },
-  { trigger:['tidak dekat dengan ibu','ibu tidak pernah ada','ibu tidak peduli','ibu sibuk terus','tidak pernah ngobrol dengan ibu'],
-    recall: '{sp} merindukan kehangatan dari sosok ibu' },
-  { trigger:['anak sulung','anak tertua','harus mengurus adik','beban sebagai kakak','tidak sempat menikmati masa kecil'],
-    recall: '{sp} menanggung tanggung jawab yang besar sejak dini sebagai anak sulung' },
-  { trigger:['anak bungsu','dimanja','tidak dianggap serius','tidak dipercaya keluarga','selalu dianggap kecil'],
-    recall: '{sp} sering merasa tidak cukup dianggap dewasa oleh keluarga' },
-  { trigger:['orang tua pilih kasih','lebih sayang kakak','lebih sayang adik','tidak adil dalam keluarga','anak yang tidak disukai'],
-    recall: '{sp} pernah merasa tidak diperlakukan sama seperti saudara yang lain' },
-  { trigger:['keluarga tidak harmonis','keluarga berantakan','tidak ada ketenangan di rumah','rumah terasa seperti neraka'],
-    recall: 'rumah yang seharusnya menjadi tempat aman bagi {sp} justru terasa sebaliknya' },
-  { trigger:['dibesarkan nenek','tinggal dengan nenek','tidak dibesarkan orang tua','dititipkan ke keluarga lain'],
-    recall: '{sp} dibesarkan jauh dari orang tua kandung' },
-  { trigger:['orang tua bercerai','ayah ibu berpisah','keluarga pecah','broken home'],
-    recall: '{sp} tumbuh di tengah perpisahan orang tua yang tentu meninggalkan bekas' },
-  { trigger:['merawat orang tua','harus merawat ayah','harus merawat ibu','orang tua sakit','mengurus orang tua yang sakit'],
-    recall: '{sp} menanggung peran yang berat sebagai penjaga orang tua' },
+  senang: {
+    tinggi: [
+      'Sungguh menyenangkan mendengar cerita {sp}! Ada energi positif yang nyata di sana. Apa yang membuat momen itu terasa begitu bermakna bagi {sp}?',
+      'Terdengar indah sekali, {nm}! Perasaan seperti itu berharga untuk disimpan. Ceritakan lebih — apa yang membuat {sp} paling bersyukur saat itu?',
+    ],
+    sedang: [
+      'Ada kehangatan di cerita {sp}, dan itu menyenangkan untuk didengar. Apa yang biasanya membuat {sp} merasa seperti ini?',
+      'Senang mendengar ada momen baik di perjalanan {sp}. Boleh ceritakan lebih tentang itu?',
+    ],
+    rendah: [
+      'Ada sedikit kebaikan di cerita {sp}. Ceritakan lebih — apa yang membuat hari {sp} terasa sedikit lebih ringan?',
+    ],
+  },
 
-  // ── PEKERJAAN (lanjutan) ──
-  { trigger:['tidak dihargai di tempat kerja','kerja keras tidak dihargai','tidak ada apresiasi','usaha tidak diakui atasan'],
-    recall: '{sp} sudah bekerja keras tapi seolah tidak ada yang melihat itu' },
-  { trigger:['rekan kerja menjatuhkan','dijegal teman kerja','ditipu rekan kerja','persaingan tidak sehat di kantor'],
-    recall: '{sp} pernah menghadapi situasi tidak sehat di lingkungan kerjanya' },
-  { trigger:['tidak bisa kerja','sulit mendapat kerja','sudah melamar banyak','tidak lolos kerja','pengangguran'],
-    recall: '{sp} sudah berusaha keras namun jalan menuju pekerjaan terasa terus tertutup' },
-  { trigger:['kerja tapi tidak bahagia','tidak suka pekerjaan','terpaksa kerja','kerja hanya untuk uang','tidak ada passion'],
-    recall: '{sp} setiap hari menjalani pekerjaan yang tidak benar-benar diinginkan' },
-  { trigger:['pensiun','sudah pensiun','tidak kerja lagi','kehilangan rutinitas kerja','merasa tidak berguna setelah pensiun'],
-    recall: '{sp} merasakan kekosongan yang datang setelah masa kerja berakhir' },
-  { trigger:['bisnis sendiri','wirausaha','usaha sendiri','buka usaha','jualan sendiri'],
-    recall: '{sp} memilih jalan yang tidak mudah dengan membangun sesuatu sendiri' },
+  rindu: {
+    tinggi: [
+      'Ada kerinduan yang dalam di cerita {sp} — rasa rindu itu adalah tanda betapa berartinya orang atau momen itu. Boleh {sp} ceritakan lebih tentang siapa atau apa yang paling {sp} rindukan?',
+      'Rasa rindu itu bisa terasa sangat berat, terutama jika yang dirindukan sudah tidak bisa dijangkau. Kenangan apa yang paling sering muncul?',
+    ],
+    sedang: [
+      'Ada kerinduan di cerita {sp}. Siapa atau apa yang paling {sp} ingat saat ini?',
+      'Saya mendengar rasa rindu {sp}. Momen apa yang paling membekas?',
+    ],
+    rendah: [
+      'Ada rasa kangen di cerita {sp}. Boleh ceritakan lebih tentang itu?',
+    ],
+  },
 
-  // ── KESEPIAN & KEHILANGAN (lanjutan) ──
-  { trigger:['tidak ada yang peduli','tidak ada yang mengerti','tidak ada yang dengarkan','merasa tidak terlihat'],
-    recall: '{sp} merasakan kesendirian yang dalam bahkan di tengah orang banyak sekalipun' },
-  { trigger:['pindah kota','pindah tempat tinggal','jauh dari kampung halaman','merantau','merantau sendirian'],
-    recall: '{sp} menjalani hari-hari jauh dari tempat dan orang-orang yang terasa seperti rumah' },
-  { trigger:['kehilangan hewan peliharaan','anjing mati','kucing mati','hewan kesayangan mati','hewan peliharaan meninggal'],
-    recall: '{sp} kehilangan teman setia yang selama ini menemani hari-hari {sp}' },
-  { trigger:['sudah tua sendirian','tua tapi sendiri','tidak ada yang menemani di hari tua','tidak ada anak','tidak ada pasangan di hari tua'],
-    recall: '{sp} menghadapi masa tua dengan rasa sepi yang cukup dalam' },
-  { trigger:['pasangan meninggal','suami meninggal','istri meninggal','janda','duda'],
-    recall: '{sp} pernah kehilangan belahan jiwa yang sangat dicintai' },
-  { trigger:['keguguran','kehilangan bayi','bayi meninggal','anak meninggal'],
-    recall: '{sp} pernah melewati kehilangan yang sangat dalam sebagai orang tua' },
+  malu: {
+    tinggi: [
+      'Butuh keberanian besar untuk menceritakan hal seperti ini, dan {sp} sudah melakukannya. Di sini tidak ada yang menghakimi. Sejak kapan {sp} merasa seperti ini?',
+      'Perasaan tidak percaya diri atau malu itu bisa sangat membebani. Apakah ada seseorang yang selama ini {sp} percaya untuk berbagi tentang ini?',
+    ],
+    sedang: [
+      'Saya mendengar ada rasa tidak nyaman dengan diri sendiri di cerita {sp}. Tidak apa-apa — {sp} tidak sendirian. Ceritakan lebih, apa yang membuat {sp} merasa begitu?',
+    ],
+    rendah: [
+      'Ada sedikit rasa kurang percaya diri di cerita {sp}. Boleh ceritakan lebih?',
+    ],
+  },
 
-  // ── MASA KECIL (lanjutan) ──
-  { trigger:['tidak boleh menangis waktu kecil','disuruh diam','perasaan tidak pernah didengar waktu kecil','diam saja katanya'],
-    recall: 'sejak kecil {sp} sudah belajar menyimpan perasaan sendiri' },
-  { trigger:['miskin waktu kecil','tidak mampu waktu kecil','kekurangan waktu kecil','hidup susah dari kecil'],
-    recall: '{sp} tumbuh dalam keterbatasan yang mengajarkan banyak hal dengan cara yang berat' },
-  { trigger:['tidak punya mainan','tidak bisa jajan','tidak bisa bermain seperti teman','malu karena tidak mampu waktu kecil'],
-    recall: '{sp} melewati masa kecil tanpa hal-hal yang seharusnya dinikmati anak-anak' },
-  { trigger:['sering pindah sekolah','tidak punya sahabat lama','tidak sempat punya teman dekat waktu kecil'],
-    recall: '{sp} jarang memiliki tempat yang cukup lama untuk benar-benar merasa di rumah' },
-  { trigger:['kekerasan di rumah waktu kecil','melihat orang tua bertengkar hebat','trauma masa kecil','waktu kecil ketakutan'],
-    recall: '{sp} menyaksikan hal-hal yang berat sejak usia yang sangat muda' },
+  kesepian: {
+    tinggi: [
+      'Kesepian yang terasa mendalam itu sangat menguras, apalagi jika sudah berlangsung lama. {sp} tidak sendirian di sini — saya mendengarkan. Sudah berapa lama {sp} merasakannya?',
+      'Merasa tidak ada yang benar-benar memahami — itu salah satu beban paling melelahkan. Apakah ada seseorang yang dulu hadir tapi kini sudah tidak ada?',
+    ],
+    sedang: [
+      'Ada rasa kesepian di cerita {sp}. Apa yang biasanya {sp} lakukan ketika rasa sepi itu datang?',
+      'Saya di sini dan mendengarkan {sp}. Ceritakan — apakah ada seseorang yang {sp} ingin lebih dekat dengannya?',
+    ],
+    rendah: [
+      'Ada sedikit rasa sepi di cerita {sp}. Ceritakan lebih — apa yang {sp} rasakan sehari-hari?',
+    ],
+  },
 
-  // ── KESEHATAN (lanjutan) ──
-  { trigger:['operasi','habis operasi','pernah dioperasi','takut dioperasi','proses pemulihan operasi'],
-    recall: '{sp} pernah melewati proses fisik yang cukup berat lewat operasi' },
-  { trigger:['tidak bisa tidur','insomnia','susah tidur','tidur terus terbangun','tidur tidak nyenyak'],
-    recall: '{sp} merasakan kelelahan yang dalam bahkan tanpa istirahat yang cukup' },
-  { trigger:['tubuh terasa lemah','tidak punya energi','mudah lelah','lelah terus','tidak bersemangat secara fisik'],
-    recall: '{sp} merasakan kelelahan yang sepertinya bukan sekadar fisik' },
-  { trigger:['sakit mental','gangguan mental','depresi','anxiety','kecemasan berlebih','panic attack','serangan panik'],
-    recall: '{sp} sedang berjuang dengan sesuatu yang tidak selalu terlihat dari luar' },
-  { trigger:['minum obat terus','tergantung obat','tidak bisa lepas dari obat','obat banyak','capek minum obat'],
-    recall: '{sp} sudah melewati hari-hari panjang yang bergantung pada pengobatan' },
+  kecewa: {
+    tinggi: [
+      'Kekecewaan yang {sp} rasakan itu nyata, terutama ketika sudah berusaha keras. Apa yang paling terasa menyakitkan dari situasi ini?',
+      'Merasa tidak dihargai setelah sudah berusaha — itu sangat berat. Apakah {sp} pernah menyampaikan perasaan ini kepada orang yang bersangkutan?',
+    ],
+    sedang: [
+      'Ada kekecewaan di cerita {sp}. Apa yang {sp} harapkan tapi tidak terwujud?',
+    ],
+    rendah: [
+      'Terdengar ada sedikit kekecewaan di sana. Boleh {sp} ceritakan lebih?',
+    ],
+  },
 
-  // ── HARGA DIRI (lanjutan) ──
-  { trigger:['merasa lebih rendah dari orang lain','selalu kalah','orang lain lebih baik dari saya','semua orang lebih berhasil'],
-    recall: '{sp} sering merasa seperti tertinggal dari orang-orang di sekitarnya' },
-  { trigger:['tidak punya tujuan hidup','tidak tahu mau apa','hidup terasa hampa','tidak ada makna','untuk apa hidup'],
-    recall: '{sp} sedang mencari sesuatu yang bisa membuat hidup terasa berarti kembali' },
-  { trigger:['menyesal','banyak penyesalan','menyesal dengan keputusan lalu','seandainya dulu berbeda','kalau saja waktu bisa diulang'],
-    recall: '{sp} masih membawa beban penyesalan dari masa lalu' },
-  { trigger:['tidak bisa memaafkan diri sendiri','menyalahkan diri sendiri','semua salah saya','saya yang paling salah'],
-    recall: '{sp} tampaknya sangat keras dalam menghakimi diri sendiri' },
-  { trigger:['takut gagal lagi','tidak berani mencoba','sudah tidak percaya diri','trauma kegagalan','tidak mau mencoba lagi'],
-    recall: '{sp} menyimpan luka dari kegagalan yang membuat langkah ke depan terasa berat' },
+  trauma: {
+    tinggi: [
+      'Pengalaman seperti itu meninggalkan bekas yang dalam. {sp} tidak perlu terburu-buru — ceritakan seperlunya, sesuai yang terasa aman. Sudah berapa lama bayangan itu masih terasa hadir?',
+      'Terima kasih telah mempercayakan ini. Apa yang {sp} alami itu nyata. Apakah {sp} pernah sebelumnya menceritakan hal ini kepada siapapun?',
+    ],
+    sedang: [
+      'Ada luka dari masa lalu di cerita {sp}. Bagaimana perasaan {sp} saat mengingat hal itu sekarang?',
+    ],
+    rendah: [
+      'Sepertinya ada pengalaman yang masih membekas di ingatan {sp}. Boleh ceritakan sedikit tentang itu?',
+    ],
+  },
 
-  // ── AGAMA / SPIRITUAL ──
-  { trigger:['merasa jauh dari tuhan','tidak merasa tuhan ada','doa tidak dikabulkan','tuhan tidak adil','menjauhi agama'],
-    recall: '{sp} pernah merasakan jarak yang cukup jauh dalam sisi spiritualnya' },
-  { trigger:['kehilangan iman','tidak percaya lagi','kecewa dengan agama','sudah tidak rajin ibadah'],
-    recall: '{sp} sempat merasakan pergolakan dalam sisi kepercayaannya' },
-  { trigger:['ibadah tapi tidak tenang','sholat tapi tetap sedih','berdoa tapi tidak ada perubahan','rajin ibadah tapi hidup tetap berat'],
-    recall: '{sp} sudah berusaha lewat jalan spiritual tapi ketenangan itu belum juga datang' },
-  { trigger:['takut neraka','takut dosa','merasa banyak dosa','merasa tidak layak','merasa kotor secara batin'],
-    recall: '{sp} membawa beban rasa bersalah yang sangat berat secara spiritual' },
-  { trigger:['diingatkan terus soal agama','diceramahi','merasa dihakimi secara agama','dianggap tidak alim','dikritik soal ibadah'],
-    recall: '{sp} pernah merasa dihakimi alih-alih didukung dari sisi agama' },
+  burnout: {
+    tinggi: [
+      'Kelelahan yang {sp} ceritakan bukan sekadar capek biasa — itu tanda bahwa {sp} sudah memberi terlalu banyak terlalu lama. Kapan terakhir kali {sp} merasa benar-benar bisa beristirahat?',
+      'Ada perbedaan antara lelah dan kehilangan diri — dan yang {sp} rasakan terdengar sangat dalam. Masih adakah hal kecil yang membuat {sp} masih mau bangun di pagi hari?',
+    ],
+    sedang: [
+      'Terdengar seperti {sp} sedang sangat kelelahan. Dari semua yang {sp} tanggung — apa yang paling menguras energi?',
+    ],
+    rendah: [
+      'Ada tanda kelelahan di cerita {sp}. Bagaimana {sp} biasanya menjaga energi?',
+    ],
+  },
 
-  // ── PERTEMANAN ──
-  { trigger:['teman mengkhianati','dikhianati teman','teman menjauhi','dijauhi teman','tidak punya teman dekat'],
-    recall: '{sp} pernah merasakan sakit karena kehilangan orang yang dianggap teman' },
-  { trigger:['tidak cocok dengan teman','sulit bergaul','selalu salah paham dengan teman','tidak bisa dekat dengan orang lain'],
-    recall: '{sp} merasa cukup sulit untuk benar-benar dekat dengan orang lain' },
-  { trigger:['teman hanya datang saat butuh','dimanfaatkan teman','teman tidak ada saat susah','teman menghilang saat dibutuhkan'],
-    recall: '{sp} pernah merasakan kesendirian justru di saat paling membutuhkan' },
-  { trigger:['tidak diundang','tidak dilibatkan','ditinggal pergi teman','teman main tanpa saya','merasa diasingkan teman'],
-    recall: '{sp} pernah merasakan perasaan ditinggalkan dalam lingkaran pertemanan' },
-  { trigger:['teman toxic','teman yang selalu mengkritik','teman yang membuat rendah diri','teman yang menyakitkan'],
-    recall: '{sp} pernah berada dalam pertemanan yang ternyata lebih banyak menyakiti daripada mendukung' },
-  { trigger:['teman terbaik pergi','sahabat pindah','teman dekat menjauh','kehilangan sahabat'],
-    recall: '{sp} kehilangan orang yang selama ini menjadi sandaran' },
+  harapan: {
+    tinggi: [
+      'Ada semangat dan harapan yang kuat di cerita {sp} — itu sangat berharga. Apa langkah kecil yang paling ingin {sp} ambil untuk mewujudkannya?',
+      'Luar biasa mendengar tekad {sp}. Apa yang menjadi sumber kekuatan {sp} untuk terus melangkah?',
+    ],
+    sedang: [
+      'Ada harapan di cerita {sp}, dan itu indah. Ceritakan lebih — apa yang {sp} impikan ke depannya?',
+    ],
+    rendah: [
+      'Saya dengar ada sedikit harapan di sana. Apa yang membuat {sp} tetap bertahan?',
+    ],
+  },
 
-  // ── PENDIDIKAN ──
-  { trigger:['tidak tamat sekolah','tidak bisa sekolah','putus sekolah','tidak kuliah','tidak lanjut sekolah'],
-    recall: '{sp} pernah melewati masa di mana pendidikan terasa seperti sesuatu yang tidak bisa {sp} raih' },
-  { trigger:['tidak pintar di sekolah','merasa bodoh','nilai jelek','tidak berprestasi','dianggap lambat belajar'],
-    recall: '{sp} pernah merasa kurang dihargai di lingkungan pendidikan' },
-  { trigger:['gagal ujian','tidak lulus','tidak naik kelas','diulang kelas','tidak lulus ujian nasional'],
-    recall: '{sp} pernah menghadapi kegagalan di jalur pendidikan yang tentu tidak mudah dilewati' },
-  { trigger:['tidak bisa bayar kuliah','kuliah terputus karena biaya','berhenti kuliah','putus kuliah'],
-    recall: '{sp} pernah harus melepaskan impian pendidikan karena keterbatasan' },
-  { trigger:['ditekan orang tua soal sekolah','dipaksa pilih jurusan','tidak suka jurusan','salah jurusan','kuliah tapi tidak sesuai minat'],
-    recall: '{sp} pernah menempuh jalan pendidikan yang sebenarnya bukan pilihan {sp} sendiri' },
-  { trigger:['dibully di sekolah','diejek guru','dipermalukan di kelas','direndahkan di sekolah'],
-    recall: '{sp} pernah mengalami pengalaman yang menyakitkan justru di tempat yang seharusnya aman' },
+  netral: [
+    'Terima kasih sudah berbagi, {nm}. Boleh ceritakan lebih dalam — apa yang paling ingin {sp} sampaikan saat ini?',
+    'Saya mendengar {sp}. Dari semua yang {sp} ceritakan, bagian mana yang paling terasa penting untuk dibicarakan?',
+    'Saya di sini bersama {sp}. Ceritakan lebih — apa yang sedang benar-benar {sp} rasakan sekarang?',
+  ],
+};
 
-  // ── PERNIKAHAN ──
-  { trigger:['pernikahan tidak bahagia','rumah tangga bermasalah','tidak cocok dengan suami','tidak cocok dengan istri','sering bertengkar dengan pasangan'],
-    recall: '{sp} merasakan perjalanan pernikahan yang cukup berat' },
-  { trigger:['bercerai','sudah bercerai','proses cerai','gagal dalam pernikahan'],
-    recall: '{sp} pernah melewati proses perpisahan yang tentu tidak mudah' },
-  { trigger:['tidak ingin menikah','takut menikah','trauma pernikahan','belum menikah dan merasa tertinggal'],
-    recall: 'ada bagian dari {sp} yang menyimpan kekhawatiran soal hubungan yang lebih dalam' },
-  { trigger:['pasangan selingkuh','dikhianati pasangan','suami selingkuh','istri selingkuh','perselingkuhan'],
-    recall: '{sp} pernah dilukai oleh orang yang paling dipercaya dalam hidupnya' },
-  { trigger:['dijodohkan','dipaksa menikah','nikah karena terpaksa','pernikahan bukan pilihan sendiri'],
-    recall: '{sp} menjalani pernikahan yang sejak awal bukan sepenuhnya pilihan {sp}' },
-  { trigger:['pasangan kasar','suami kasar','istri kasar','kekerasan dalam rumah tangga','KDRT','dipukul pasangan'],
-    recall: '{sp} pernah berada dalam hubungan yang seharusnya aman namun justru menyakiti' },
-  { trigger:['tidak diberi nafkah','pasangan tidak bertanggung jawab','suami tidak kerja','beban rumah tangga sendiri'],
-    recall: '{sp} menanggung beban rumah tangga yang seharusnya ditanggung bersama' },
-
-  // ── TRAUMA FISIK ──
-  { trigger:['pernah dipukul','pernah disakiti secara fisik','kekerasan fisik','dianiaya','ditampar','diperlakukan kasar'],
-    recall: '{sp} pernah mengalami perlakuan fisik yang sangat menyakitkan' },
-  { trigger:['kecelakaan','pernah kecelakaan','trauma kecelakaan','cacat akibat kecelakaan'],
-    recall: '{sp} pernah melewati peristiwa fisik yang cukup berat' },
-  { trigger:['pernah dilecehkan','pelecehan','dilecehkan waktu kecil','trauma pelecehan','disentuh tanpa izin'],
-    recall: '{sp} pernah mengalami sesuatu yang seharusnya tidak pernah terjadi pada siapapun' },
-  { trigger:['bekas luka','malu dengan tubuh','tidak suka tubuh sendiri','malu dengan penampilan','minder soal fisik'],
-    recall: '{sp} menyimpan hubungan yang cukup rumit dengan tubuhnya sendiri' },
-
-  // ── KEUANGAN ──
-  { trigger:['terlilit hutang','banyak hutang','tidak bisa bayar hutang','ditagih terus','gagal bayar'],
-    recall: '{sp} sedang menanggung beban finansial yang terasa cukup menekan' },
-  { trigger:['bangkrut','usaha gagal','bisnis hancur','kehilangan semua uang','tidak punya uang'],
-    recall: '{sp} pernah mengalami masa di mana secara finansial semuanya terasa runtuh' },
-  { trigger:['tidak mampu memenuhi kebutuhan','kekurangan biaya','tidak cukup uang','hidup pas-pasan','sulit ekonomi'],
-    recall: '{sp} sudah berusaha keras meski keadaan ekonomi tidak selalu berpihak' },
-  { trigger:['malu karena tidak punya uang','malu tidak bisa traktir','malu karena miskin','gengsi soal uang'],
-    recall: '{sp} pernah merasakan malu yang dalam karena kondisi ekonomi' },
-  { trigger:['bekerja keras tapi tidak cukup','kerja banting tulang tapi tetap kurang','tidak ada habisnya kebutuhan'],
-    recall: '{sp} sudah bekerja sekeras mungkin namun rasanya tidak pernah cukup juga' },
-
-  // ── HARGA DIRI LANJUTAN ──
-  { trigger:['selalu disalahkan','kambing hitam','tidak pernah dihargai','pendapat tidak didengar'],
-    recall: '{sp} sering merasa suaranya tidak cukup didengar oleh orang-orang di sekitar' },
-  { trigger:['tidak percaya diri','minder','rendah diri','malu dengan diri sendiri','tidak suka diri sendiri'],
-    recall: '{sp} tampaknya cukup keras pada diri sendiri selama ini' },
-  { trigger:['selalu dibandingkan','dibanding-bandingkan','kalah dari saudara','tidak sepintar kakak','tidak sebaik adik'],
-    recall: '{sp} tumbuh dengan tekanan untuk selalu memenuhi standar orang lain' },
-  { trigger:['merasa tidak dicintai','tidak ada yang mencintai saya','tidak layak dicintai','takut tidak dicintai'],
-    recall: '{sp} menyimpan keraguan yang dalam soal apakah {sp} layak untuk dicintai' },
-  { trigger:['selalu mengalah','tidak bisa bilang tidak','sulit menolak','takut mengecewakan orang lain'],
-    recall: '{sp} sudah sangat lama mengutamakan orang lain hingga melupakan diri sendiri' },
-  { trigger:['tidak punya identitas','tidak tahu siapa diri saya','bingung dengan diri sendiri','tidak kenal diri sendiri'],
-    recall: '{sp} sedang berada di tengah perjalanan menemukan kembali siapa dirinya' },
-
-  // ── PERAN & TANGGUNG JAWAB ──
-  { trigger:['harus mengurus semua','semua tergantung pada saya','tidak ada yang bantu','harus kuat terus','tidak boleh lemah'],
-    recall: '{sp} sudah lama menanggung segalanya sendiri tanpa ruang untuk lemah' },
-  { trigger:['tidak sempat untuk diri sendiri','tidak punya waktu sendiri','hidup untuk orang lain terus','tidak ada waktu istirahat'],
-    recall: '{sp} sudah begitu lama memberi tanpa pernah benar-benar mengisi ulang dirinya sendiri' },
-  { trigger:['menjadi tulang punggung','satu-satunya pencari nafkah','harus cukupi keluarga','tekanan finansial keluarga'],
-    recall: '{sp} menanggung beban menafkahi yang tidak ringan seorang diri' },
-  { trigger:['tidak boleh mengeluh','harus baik-baik saja','harus terlihat kuat','tidak bisa curhat ke siapapun'],
-    recall: '{sp} terbiasa menyembunyikan perasaan demi menjaga orang-orang di sekitarnya' },
-
-  // ── MIMPI & HARAPAN YANG HILANG ──
-  { trigger:['mimpi yang tidak tercapai','cita-cita tidak terwujud','impian pupus','harapan hancur','tidak bisa mengejar impian'],
-    recall: '{sp} menyimpan mimpi yang pernah terasa sangat nyata namun terasa menjauh' },
-  { trigger:['dulu ingin jadi','dulu bercita-cita','waktu muda ingin','kalau saja dulu dilanjutkan'],
-    recall: '{sp} masih membawa bayangan masa depan yang pernah diimpikan' },
-  { trigger:['tidak ada masa depan','tidak tahu mau ke mana','tidak ada harapan','masa depan terasa gelap'],
-    recall: '{sp} sedang berada di titik di mana ke depan pun terasa belum jelas' },
-
-  // ── ISOLASI SOSIAL ──
-  { trigger:['tidak keluar rumah','mengurung diri','tidak mau bertemu orang','menghindari orang','malas bertemu siapapun'],
-    recall: '{sp} sudah cukup lama memilih untuk menjauhi dunia di luar' },
-  { trigger:['tidak bisa percaya orang','sulit percaya','takut dikhianati lagi','tidak mau dekat dengan siapapun'],
-    recall: '{sp} sudah belajar dengan cara yang menyakitkan bahwa tidak semua orang bisa dipercaya' },
-  { trigger:['introvert','pendiam','tidak suka keramaian','tidak nyaman di antara banyak orang'],
-    recall: '{sp} lebih nyaman dengan dunianya sendiri — dan itu bukan hal yang salah' },
-
-  // AGAMA / SPIRITUAL
-  { trigger:['merasa jauh dari tuhan','tidak merasa tuhan ada','doa tidak dikabulkan','tuhan tidak adil','menjauhi agama'],
-    recall: '{sp} pernah merasakan jarak yang cukup jauh dalam sisi spiritualnya' },
-  { trigger:['kehilangan iman','tidak percaya lagi','kecewa dengan agama','sudah tidak rajin ibadah'],
-    recall: '{sp} sempat merasakan pergolakan dalam sisi kepercayaannya' },
-
-  // PERTEMANAN
-  { trigger:['teman mengkhianati','dikhianati teman','teman menjauhi','dijauhi teman','tidak punya teman dekat'],
-    recall: '{sp} pernah merasakan sakit karena kehilangan orang yang dianggap teman' },
-  { trigger:['tidak cocok dengan teman','sulit bergaul','selalu salah paham dengan teman','tidak bisa dekat dengan orang lain'],
-    recall: '{sp} merasa cukup sulit untuk benar-benar dekat dengan orang lain' },
-
-  // PENDIDIKAN
-  { trigger:['tidak tamat sekolah','tidak bisa sekolah','putus sekolah','tidak kuliah','tidak lanjut sekolah'],
-    recall: '{sp} pernah melewati masa di mana pendidikan terasa seperti sesuatu yang tidak bisa {sp} raih' },
-  { trigger:['tidak pintar di sekolah','merasa bodoh','nilai jelek','tidak berprestasi','dianggap lambat belajar'],
-    recall: '{sp} pernah merasa kurang dihargai di lingkungan pendidikan' },
-
-  // PERNIKAHAN
-  { trigger:['pernikahan tidak bahagia','rumah tangga bermasalah','tidak cocok dengan suami','tidak cocok dengan istri','sering bertengkar dengan pasangan'],
-    recall: '{sp} merasakan perjalanan pernikahan yang cukup berat' },
-  { trigger:['bercerai','sudah bercerai','proses cerai','gagal dalam pernikahan'],
-    recall: '{sp} pernah melewati proses perpisahan yang tentu tidak mudah' },
-  { trigger:['tidak ingin menikah','takut menikah','trauma pernikahan','belum menikah dan merasa tertinggal'],
-    recall: 'ada bagian dari {sp} yang menyimpan kekhawatiran soal hubungan yang lebih dalam' },
-
-  // TRAUMA FISIK
-  { trigger:['pernah dipukul','pernah disakiti secara fisik','kekerasan fisik','dianiaya','ditampar','diperlakukan kasar'],
-    recall: '{sp} pernah mengalami perlakuan fisik yang sangat menyakitkan' },
-  { trigger:['kecelakaan','pernah kecelakaan','trauma kecelakaan','cacat akibat kecelakaan'],
-    recall: '{sp} pernah melewati peristiwa fisik yang cukup berat' },
-
-  // KEUANGAN
-  { trigger:['terlilit hutang','banyak hutang','tidak bisa bayar hutang','ditagih terus','gagal bayar'],
-    recall: '{sp} sedang menanggung beban finansial yang terasa cukup menekan' },
-  { trigger:['bangkrut','usaha gagal','bisnis hancur','kehilangan semua uang','tidak punya uang'],
-    recall: '{sp} pernah mengalami masa di mana secara finansial semuanya terasa runtuh' },
-  { trigger:['tidak mampu memenuhi kebutuhan','kekurangan biaya','tidak cukup uang','hidup pas-pasan','sulit ekonomi'],
-    recall: '{sp} sudah berusaha keras meski keadaan ekonomi tidak selalu berpihak' },
-
-  // HARGA DIRI LANJUTAN
-  { trigger:['selalu disalahkan','kambing hitam','tidak pernah dihargai','pendapat tidak didengar'],
-    recall: '{sp} sering merasa suaranya tidak cukup didengar oleh orang-orang di sekitar' },
-  { trigger:['tidak percaya diri','minder','rendah diri','malu dengan diri sendiri','tidak suka diri sendiri'],
-    recall: '{sp} tampaknya cukup keras pada diri sendiri selama ini' },
-  { trigger:['selalu dibandingkan','dibanding-bandingkan','kalah dari saudara','tidak sepintar kakak','tidak sebaik adik'],
-    recall: '{sp} tumbuh dengan tekanan untuk selalu memenuhi standar orang lain' },
-];
-
-/* Prefix & suffix untuk variasi kalimat recall — tambah sendiri di sini */
-const RECALL_PREFIX = [
-  // Reflektif
-  'Jadi ',
-  'Berarti ',
-  'Oo, jadi ',
-  'Kalau begitu ',
-  'Hmm, jadi ',
-  // Empatik aktif
-  'Saya mendengar bahwa ',
-  'Saya tangkap bahwa ',
-  'Saya merasakan bahwa ',
-  'Saya mendengar ',
-  // Berbasis cerita user
-  'Dari yang {sp} ceritakan, sepertinya ',
-  'Dari cerita {sp}, tampaknya ',
-  'Dari apa yang {sp} sampaikan, terasa bahwa ',
-  'Mendengar {sp}, saya menangkap bahwa ',
-  // Natural / percakapan
-  'Ya, sepertinya ',
-  'Kedengarannya ',
-  'Terdengar bahwa ',
-  'Rasanya ',
-  // Penegas empatik
-  'Ada sesuatu yang {sp} bawa — ',
-  'Di balik cerita {sp}, sepertinya ',
-  'Yang saya tangkap dari {sp} adalah — ',
-  // Halus / lembut
-  'Saya ingin memastikan saya mengerti — ',
-  'Kalau boleh saya cerminkan kembali, ',
-  'Seperti yang {sp} gambarkan, ',
-  'Dari sini saya menangkap bahwa ',
-  // Hangat
-  'Dengan tulus saya mendengar bahwa ',
-  'Saya di sini, dan saya mendengar — ',
-  'Terima kasih sudah berbagi — sepertinya ',
-  // Penutup variatif
-  'Yang {sp} rasakan itu nyata — ',
-  'Ini penting untuk diakui — ',
-  'Saya tidak ingin melewatkan ini — ',
-];
-const RECALL_SUFFIX = [
-  // Singkat & natural
-  ', ya.',
-  '.',
-  '... ya.',
-  '... begitu ya.',
-  // Acknowledgement ringan
-  ', ya — saya dengar.',
-  '. Saya mengerti.',
-  '. Saya dengar itu.',
-  '... saya mendengar sepenuhnya.',
-  // Validasi emosi
-  '... itu pasti tidak mudah.',
-  '. Itu bukan hal kecil.',
-  '... wajar jika itu masih terasa.',
-  '... itu beban yang nyata.',
-  '... dan itu butuh keberanian untuk diceritakan.',
-  // Kehadiran
-  '. Saya di sini, {sp}.',
-  '. {sp} tidak sendirian.',
-  '. Saya menemani {sp} di sini.',
-  '... dan saya di sini mendengarkan.',
-  // Apresiasi
-  '... terima kasih sudah mau berbagi.',
-  ', dan saya menghargai kejujuran {sp}.',
-  '. Saya sangat menghargai {sp} mau menceritakan ini.',
-  '... butuh keberanian untuk menyampaikan ini.',
-  // Pengakuan perasaan
-  '... dan perasaan itu valid.',
-  '... wajar sekali jika itu terasa berat.',
-  '... {sp} berhak merasakan itu.',
-  '... dan tidak ada yang salah dengan perasaan itu.',
-  // Penguatan
-  '... {sp} sudah melewati banyak hal.',
-  '... {sp} lebih kuat dari yang {sp} bayangkan.',
-  '... dan saya melihat betapa beratnya itu.',
-  // Ajakan lanjut (pasif, tanpa tanda tanya)
-  '... dan saya ingin {sp} tahu bahwa ini ruang yang aman.',
-];
-
-/* Kalimat pemancing untuk jawaban pendek — tambah sendiri di sini */
-const PEMANCING_CERITA = [
-  // Undangan terbuka
+/* Pool pemancing untuk jawaban pendek */
+const PEMANCING = [
   'Boleh ceritakan lebih lanjut, {sp}?',
   'Saya ingin mendengar lebih banyak dari {sp}...',
   'Ceritakan lebih, {sp} — saya di sini mendengarkan.',
   'Kalau {sp} mau, boleh ceritakan lebih dalam lagi?',
   'Tidak perlu terburu-buru, {sp}. Ceritakan saja pelan-pelan.',
-  // Hangat & mengundang
-  'Kalau {sp} nyaman, saya ingin mendengar lebih banyak...',
-  'Sepertinya ada lebih banyak yang ingin {sp} sampaikan. Lanjutkan saja.',
-  'Saya mendengarkan sepenuhnya, {sp}. Boleh diceritakan lebih?',
-  'Ceritakan saja, {sp} — tidak ada yang menghakimi di sini.',
-  'Saya di sini untuk mendengar, {sp}. Pelan-pelan saja.',
-  // Fokus pada perasaan
-  'Apa yang {sp} rasakan saat itu — boleh diceritakan?',
-  'Saya ingin lebih memahami apa yang {sp} alami.',
-  'Boleh {sp} gambarkan sedikit lebih — agar saya lebih memahami?',
-  'Ada bagian yang ingin {sp} ceritakan lebih dalam?',
-  'Perasaan apa yang paling kuat muncul saat {sp} mengingat ini?',
-  // Penegas keamanan
-  'Tidak ada jawaban yang salah di sini, {sp}. Ceritakan saja.',
-  'Ruang ini sepenuhnya untuk {sp} — ceritakan sebanyak yang {sp} mau.',
-  'Saya tidak kemana-mana, {sp}. Ambil waktu {sp} sendiri.',
-  'Apapun yang ingin {sp} ceritakan, saya siap mendengar.',
-  // Berbasis konteks
-  'Boleh diceritakan bagaimana itu bisa terjadi, {sp}?',
-  'Saya penasaran — bagaimana perasaan {sp} saat itu?',
-  'Sepertinya ada sesuatu yang lebih dari itu... boleh dilanjutkan?',
-  'Saya ingin memahami lebih dalam apa yang {sp} maksud.',
-  // Validasi sebelum memancing
-  'Terima kasih sudah mulai berbagi, {sp}. Kalau mau, ceritakan lebih?',
-  'Itu sudah langkah berani, {sp}. Boleh dilanjutkan?',
-  'Saya senang {sp} mau bercerita. Lanjutkan saja pelan-pelan.',
-  // Variatif
-  'Hmm... boleh diceritakan lebih, {sp}?',
-  'Ada yang ingin ditambahkan, {sp}?',
-  'Saya mendengar {sp} — dan ingin mendengar lebih.',
-  'Ceritakan dengan cara apapun yang terasa nyaman buat {sp}.',
+  'Apa yang {sp} rasakan sekarang, dengan kata-katamu sendiri?',
 ];
 
-/* Kalimat acknowledge singkat (mirror ringan, tidak balik tanya) */
-const ACKNOWLEDGE = [
-  // Singkat & natural
-  'Oo, begitu ya...',
-  'Saya mengerti, {sp}.',
-  'Hmm, iya ya...',
-  'Saya dengar {sp}.',
-  'Iya, saya mengerti perasaan {sp}.',
-  'Terima kasih sudah mau cerita, {sp}.',
-  // Hangat & hadir
-  'Iya... itu terdengar tidak mudah.',
-  'Saya di sini, {sp}. Terus saja.',
-  'Mm, saya mendengar itu.',
-  'Iya, wajar {sp} merasakan itu.',
-  'Itu pasti terasa berat ya, {sp}.',
-  'Saya sangat menghargai {sp} mau berbagi ini.',
-  // Pengakuan lebih dalam
-  'Iya... {sp} sudah melewati banyak hal.',
-  'Terima kasih, {sp} — ini bukan hal yang mudah untuk diungkapkan.',
-  'Saya mendengar setiap kata yang {sp} sampaikan.',
-  'Iya... perasaan itu nyata dan valid.',
-  // Empati tanpa berlebihan
-  'Hmm... saya mengerti kenapa itu terasa berat.',
-  'Iya, itu bukan hal kecil, {sp}.',
-  'Saya dengar betapa beratnya itu buat {sp}.',
-  'Oo... iya, saya mengerti.',
-  // Kehadiran
-  'Saya di sini, {sp} — tidak kemana-mana.',
-  '{sp} tidak sendirian dalam ini.',
-  'Saya menemani {sp} di sini.',
-  'Apapun yang {sp} rasakan, saya di sini mendengar.',
-  // Variatif & manusiawi
-  'Mm... iya.',
-  'Saya paham, {sp}.',
-  'Iya... terima kasih sudah percaya untuk menceritakan ini.',
-  'Hmm, iya — dan itu wajar sekali.',
-  'Saya mendengar {sp}, sepenuhnya.',
-  'Iya... itu memang tidak mudah dijalani.',
+/* Pool acknowledge untuk turn 3+ */
+const ACK_DEEP = [
+  'Saya mendengar {sp}, dan saya di sini.',
+  'Terima kasih sudah terus berbagi, {nm}.',
+  'Cerita {sp} sangat bermakna untuk didengar.',
+  'Apa yang {sp} rasakan itu valid sepenuhnya.',
+  'Saya mengerti ini tidak mudah untuk diceritakan, {sp}.',
 ];
-function _pickStr(arr, sp){
+
+function _pick(arr, sp, nm) {
   const s = arr[Math.floor(Math.random() * arr.length)];
-  return s.replace(/\{sp\}/g, sp);
+  return s.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm || sp);
 }
 
-function extractKeyPhrase(text){
-  const t = text.toLowerCase();
-  // Prioritas 1: cek pola kalimat spesifik (hanya jika cerita tentang diri sendiri)
-  for(const pola of POLA_KALIMAT){
-    for(const trigger of pola.trigger){
-      // Cari kalimat yang mengandung trigger
-      const sentences = t.split(/[.!?,]/);
-      for(const sent of sentences){
-        if(sent.includes(trigger) && isSelfStory(sent)){
-          return { type:'pola', recall: pola.recall };
-        }
-      }
-    }
-  }
-  // Prioritas 2: topik dari NLP lama (fallback)
-  return { type:'topik', recall: null };
+/* ── Fungsi respons utama ── */
+function getMultiTurnResponse(turnNum, nlp, rawText) {
+  const sp = getSapaan();
+  const nm = S.nama || sp;
+  const text = rawText || '';
+  const wordCount = text.trim().split(/\s+/).length;
+
+  // Jawaban sangat pendek → pancing
+  if (wordCount <= 6) return _pick(PEMANCING, sp, nm);
+
+  // Turn 3+: acknowledge ringan
+  if (turnNum >= 3) return _pick(ACK_DEEP, sp, nm);
+
+  // Gunakan deep emotion dari analyzeNLP
+  const deep = nlp._deep || analyzeEmotionDeep(text);
+  const emo = deep.dominant;
+  const intensitas = deep.intensitas;
+
+  const pool = RESP[emo];
+  if (!pool) return _pick(RESP.netral, sp, nm);
+
+  // Pool bisa berupa object {tinggi,sedang,rendah} atau array langsung
+  if (Array.isArray(pool)) return _pick(pool, sp, nm);
+
+  const subpool = pool[intensitas] || pool['sedang'] || pool['rendah'] || RESP.netral;
+  return _pick(subpool, sp, nm);
 }
 
-/* ── 4. Rakit respons utama (menggantikan getMultiTurnResponse di layer atas) ── */
-function buildAIResponse(text, nlp, turnNum){
-  const sp  = getSapaan();
-  const len = detectLength(text);
-  const key = extractKeyPhrase(text);
-
-  // Mode A — Jawaban pendek → pancing cerita lebih panjang
-  if(len === 'pendek'){
-    return _pickStr(PEMANCING_CERITA, sp);
-  }
-
-  // Mode B — Jawaban panjang + ada pola terdeteksi → recall spesifik
-  if(len === 'panjang' && key.type === 'pola'){
-    const recallText = key.recall.replace(/\{sp\}/g, sp);
-    const prefix = _pickStr(RECALL_PREFIX, sp);
-    const suffix = _pickStr(RECALL_SUFFIX, sp);
-    return prefix + recallText + suffix;
-  }
-
-  // Mode C — Jawaban sedang/panjang, tidak ada pola spesifik → validasi emosi dari NLP lama
-  const { emotion, topics } = nlp;
-  if(emotion !== 'netral'){
-    const emoMap = {
-      // Emosi dasar (sudah ada, diperkaya ekspresinya)
-      'sedih'      : 'saya tau {sp} sedang merasa sedih, dan itu nyata adanya',
-      'marah'      : 'saya mengerti betapa kesalnya {sp} dengan situasi ini',
-      'takut'      : 'wajar sekali jika {sp} merasa khawatir menghadapi ini',
-      'malu'       : 'saya mengerti jika {sp} merasa tidak nyaman dengan ini',
-      'rindu'      : 'saya merasakan betapa {sp} sangat merindukannya',
-      'bangga'     : 'senang sekali mendengar pencapaian yang {sp} raih',
-      'senang'     : 'terdengar menyenangkan ya untuk {sp}',
-      // Emosi baru
-      'kecewa'     : 'saya mengerti betapa kecewanya {sp} dengan apa yang terjadi',
-      'cemas'      : 'wajar sekali jika {sp} merasa cemas menghadapi semua ini',
-      'bersalah'   : 'saya mendengar bahwa {sp} masih membawa perasaan bersalah itu',
-      'bingung'    : 'saya paham jika {sp} merasa bingung — situasinya memang tidak sederhana',
-      'hopeless'   : 'saya mendengar {sp}, dan perasaan itu nyata — {sp} tidak sendirian',
-      // Tambahan baru
-      'lelah'      : 'saya merasakan betapa lelahnya {sp} — fisik maupun batin',
-      'putus asa'  : '{sp} mungkin merasa sudah kehabisan tenaga, dan itu sangat bisa dimengerti',
-      'hampa'      : 'rasa hampa yang {sp} rasakan itu nyata, dan saya mendengarnya',
-      'tertekan'   : 'saya mengerti betapa beratnya tekanan yang {sp} rasakan saat ini',
-      'tidak aman' : 'saya mendengar bahwa {sp} sedang tidak merasa aman, dan itu penting',
-      'menyesal'   : '{sp} masih membawa penyesalan itu, dan saya mengerti betapa beratnya',
-      'lega'       : 'terdengar ada sedikit kelegaan yang {sp} rasakan — itu baik',
-      'bersyukur'  : 'senang mendengar {sp} bisa menemukan rasa syukur di tengah semuanya',
-      'pasrah'     : 'saya mendengar kepasrahan dalam kata-kata {sp} — dan itu juga butuh keberanian',
-      'tidak berdaya' : 'saya mendengar betapa {sp} merasa tidak punya kendali atas situasinya',
-      'kesepian'   : 'rasa kesepian yang {sp} bawa itu nyata, dan saya di sini menemani',
-      'terluka'    : 'luka yang {sp} rasakan itu valid — dan tidak harus disimpan sendirian',
-      'khawatir'   : 'saya mengerti kekhawatiran {sp}, itu tanda bahwa {sp} sangat peduli',
-      'tidak dimengerti' : 'saya mendengar betapa {sp} merasa tidak cukup dipahami oleh orang sekitar',
-    };
-    const validasi = (emoMap[emotion] || 'saya mendengar {sp}').replace(/\{sp\}/g, sp);
-    return validasi + '.';
-  }
-
-  // Mode D — Fallback: acknowledge singkat
-  return _pickStr(ACKNOWLEDGE, sp);
+/* Alias */
+function getAIResponse(nlp, sesiNum, qIdx){
+  return getMultiTurnResponse(1, nlp, '');
 }
 
 /* ══════════════════════════════════════════
-   MULTI-TURN RULE-BASED RESPONSE SYSTEM
-   ─────────────────────────────────────────
-   Cara menambahkan template baru:
-   1. Cari bagian yang sesuai (contoh: T1_NEG_SEDIH untuk turn 1, negatif, emosi sedih)
-   2. Tambahkan string baru di dalam array tersebut
-   3. Gunakan {sp} untuk sapaan (kamu/Bapak/Ibu) dan {nm} untuk nama panggilan
-   ─────────────────────────────────────────
-   Variabel tersedia di template:
-   {sp}  = sapaan (kamu / Bapak / Ibu / Anda)
-   {nm}  = nama panggilan user
-   ══════════════════════════════════════════ */
-
-function _tpl(str){ return str.replace(/\{sp\}/g, getSapaan()).replace(/\{nm\}/g, S.nama||getSapaan()); }
-function _pick(arr){ return _tpl(arr[Math.floor(Math.random()*arr.length)]); }
-
-  const MTR = {
-
-  /* ────────────────────────────────────────
-     TURN 1 — Validasi + Gali Lebih Dalam
-     Tujuan: user merasa didengar, lalu terbuka lebih jauh
-  ──────────────────────────────────────── */
-  T1_NEG_SEDIH: [
-    'Rasa sedih yang {sp} rasakan itu nyata dan wajar sekali. Boleh diceritakan lebih — kapan pertama kali perasaan ini mulai terasa begitu berat?',
-    'Mendengar cerita {sp}, ada sesuatu yang terasa dalam di situ. Dari semua yang membuat {sp} sedih, mana yang paling sering muncul dalam pikiran {sp}?',
-    'Wajar sekali jika {sp} merasa seperti itu. Apakah ada seseorang yang tahu tentang perasaan ini, atau {sp} lebih sering menyimpannya sendiri?',
-    'Perasaan itu sungguh berat untuk ditanggung. Kalau {sp} mau cerita lebih dalam — apa yang biasanya memicu rasa sedih itu muncul?',
-    'Terima kasih sudah mau berbagi, {sp}. Rasa sedih seperti ini kadang datang berlapis-lapis. Apakah ada kejadian tertentu yang {sp} rasa menjadi awal dari semua ini?',
-  ],
-
-  T1_NEG_MARAH: [
-    'Perasaan marah atau kesal yang {sp} rasakan itu sepenuhnya valid. Boleh ceritakan — apa atau siapa yang paling sering membuat {sp} merasa seperti itu?',
-    'Ada kemarahan di sana, dan itu bukan tanpa alasan. Sudah berapa lama {sp} menyimpan perasaan ini?',
-    'Mengakui rasa marah itu butuh keberanian. Dari yang {sp} ceritakan — apakah ada sesuatu yang {sp} rasa tidak adil dan belum pernah disampaikan?',
-    'Rasa kesal itu bisa sangat menguras energi jika terus disimpan. Apakah ada orang di sekitar {sp} yang tahu tentang ini?',
-  ],
-
-  T1_NEG_TAKUT: [
-    'Rasa takut atau cemas yang {sp} rasakan itu sangat bisa dipahami. Kalau boleh, apa yang paling sering {sp} khawatirkan akhir-akhir ini?',
-    'Kekhawatiran seperti itu memang bisa terasa besar dan berat. Apakah rasa takut ini sudah lama ada, atau baru-baru ini muncul?',
-    'Berbagi rasa takut seperti ini sudah merupakan langkah yang kuat. Dari semua yang {sp} ceritakan — mana yang paling membuat {sp} sulit tidur di malam hari?',
-    'Wajar sekali jika {sp} merasa seperti itu. Ketika rasa cemas itu datang, biasanya apa yang {sp} lakukan untuk menghadapinya?',
-  ],
-
-  T1_NEG_MALU: [
-    'Butuh keberanian besar untuk menceritakan hal seperti ini, dan {sp} sudah melakukannya. Di sini tidak ada yang menghakimi. Boleh {sp} ceritakan lebih — sejak kapan perasaan ini ada?',
-    'Perasaan malu itu sering membuat kita diam terlalu lama. Apakah ada seseorang yang selama ini {sp} percaya untuk berbagi tentang ini?',
-    'Tidak ada yang perlu disembunyikan di sini. Dari cerita {sp}, apakah ada momen tertentu yang membuat perasaan ini semakin kuat?',
-  ],
-
-  T1_NEG_RINDU: [
-    'Rasa rindu itu bisa terasa sangat berat, apalagi jika yang dirindukan sudah tidak bisa dijangkau. Boleh {sp} ceritakan lebih tentang orang atau momen yang {sp} rindukan?',
-    'Ada kehangatan sekaligus kesedihan dalam cerita {sp}. Kenangan apa yang paling sering muncul ketika {sp} merasakan rindu itu?',
-    'Merindukan seseorang atau sesuatu yang bermakna adalah tanda betapa berartinya hal itu bagi {sp}. Apakah rindu itu datang setiap hari, atau ada momen-momen tertentu yang memicunya?',
-  ],
-
-  T1_NEG_TRAUMA: [
-    'Pengalaman seperti itu sungguh berat dan meninggalkan bekas yang dalam. {sp} tidak perlu terburu-buru — ceritakan seperlunya saja, sesuai yang terasa aman. Sudah berapa lama bayangan pengalaman itu masih terasa hadir?',
-    'Terima kasih telah mempercayakan ini. Apa yang {sp} alami dulu itu nyata, dan perasaan yang muncul setelahnya pun nyata adanya. Apakah ada momen tertentu yang paling sering kembali muncul dalam pikiran {sp}?',
-    'Butuh keberanian yang sangat besar untuk menyentuh pengalaman seperti ini. Saya di sini, mendengarkan. Apakah {sp} pernah sebelumnya menceritakan hal ini kepada siapapun?',
-    'Luka dari pengalaman seperti itu tidak selalu mudah untuk dijelaskan. Dari yang {sp} rasakan sekarang — apa yang paling terasa berat untuk dibawa setiap harinya?',
-  ],
-
-  T1_NEG_KESEPIAN: [
-    'Kesepian yang terasa mendalam itu bisa sangat menguras, apalagi jika sudah berlangsung lama. Apakah ada momen-momen tertentu ketika rasa kesepian itu terasa paling kuat?',
-    'Merasa tidak ada yang benar-benar memahami — itu salah satu perasaan yang paling melelahkan. Sudah berapa lama {sp} merasakannya?',
-    'Saya di sini dan mendengarkan {sp}. Kalau boleh, ceritakan — apakah ada seseorang yang dulu hadir dan membuat {sp} tidak merasa sendiri, tapi kini sudah tidak ada?',
-    '{sp} tidak sendirian malam ini, setidaknya di sini. Apa yang biasanya {sp} lakukan ketika rasa sepi itu datang?',
-  ],
-
-  T1_NEG_BURNOUT: [
-    'Kelelahan yang seperti {sp} ceritakan itu bukan sekadar capek biasa — itu tanda bahwa {sp} sudah memberi terlalu banyak untuk waktu yang terlalu lama. Kapan terakhir kali {sp} merasa benar-benar beristirahat?',
-    'Ada perbedaan antara lelah dan kehilangan diri — dan yang {sp} rasakan terdengar seperti yang kedua. Apakah masih ada hal kecil yang membuat {sp} masih mau bangun di pagi hari?',
-    'Tubuh dan pikiran kadang harus berbicara keras dulu sebelum kita mau mendengarkan. Dari semua yang {sp} tanggung — apa yang terasa paling menguras?',
-    'Burnout itu nyata dan valid. Apakah ada seseorang di sekitar {sp} yang tahu seberapa lelahnya {sp} sebenarnya?',
-  ],
-
-  T1_NEG_PERCINTAAN: [
-    'Hubungan yang dekat dengan hati memang bisa menjadi sumber kebahagiaan sekaligus sumber luka yang dalam. Dari yang {sp} ceritakan — apa yang paling terasa menyakitkan saat ini?',
-    'Perasaan dalam hubungan itu kompleks dan tidak selalu mudah diungkapkan. Apakah {sp} sudah lama menyimpan perasaan ini sendirian?',
-    'Tidak mudah menceritakan hal-hal yang menyangkut hati. Terima kasih sudah mau berbagi. Apakah ada bagian dari hubungan ini yang {sp} rasa belum pernah disampaikan kepada siapapun?',
-    'Ketika seseorang yang kita sayangi tidak memahami kita — rasa sakitnya bisa berlapis. Apa yang paling {sp} harapkan bisa berubah dari situasi ini?',
-  ],
-
-  T1_NEG_KEUANGAN: [
-    'Tekanan keuangan itu bisa terasa sangat menyesakkan, karena menyentuh hampir semua aspek kehidupan sehari-hari. Sudah berapa lama {sp} menghadapi situasi ini?',
-    'Beban finansial yang berat sering membuat seseorang merasa sendirian dan malu untuk bercerita. Apakah ada orang terdekat yang tahu tentang kondisi ini?',
-    'Menghadapi masalah keuangan butuh ketenangan yang tidak mudah didapat. Dari semua yang dihadapi — apa yang paling membuat {sp} sulit tidur di malam hari?',
-    'Keuangan bukan hanya soal angka — ia menyentuh rasa aman, rasa berharga, dan ketenangan. Apa yang paling {sp} khawatirkan dari situasi ini?',
-  ],
-
-  T1_NEG_KEHILANGAN: [
-    'Kehilangan seseorang atau sesuatu yang berarti meninggalkan ruang kosong yang tidak mudah diisi. Boleh {sp} ceritakan siapa atau apa yang paling {sp} rindukan?',
-    'Duka itu tidak punya jadwal — ia bisa datang kapan saja, dalam bentuk yang paling tidak terduga. Bagaimana {sp} menjalani hari-hari sejak kehilangan itu?',
-    'Terima kasih sudah mau menceritakan ini. Kehilangan yang {sp} alami itu nyata dan perasaan yang hadir setelahnya pun nyata. Apakah ada yang ingin {sp} sampaikan kepada orang atau hal yang hilang itu, jika bisa?',
-    'Proses berduka itu berbeda bagi setiap orang, dan tidak ada yang salah dengan cara {sp} merasakannya. Apakah ada seseorang yang mendampingi {sp} dalam proses ini?',
-  ],
-
-  T1_NEG_IDENTITAS: [
-    'Bertanya tentang siapa diri kita sebenarnya adalah salah satu pertanyaan paling dalam yang bisa seseorang hadapi. Apa yang paling membuat {sp} merasa bingung tentang diri sendiri saat ini?',
-    'Tidak semua orang berani jujur pada diri sendiri seperti yang {sp} lakukan. Apakah perasaan bingung tentang identitas ini sudah lama ada, atau baru muncul belakangan?',
-    'Kadang kita merasa seperti mengenakan pakaian yang tidak benar-benar pas — kita berfungsi, tapi tidak sepenuhnya merasa jadi diri sendiri. Apakah {sp} merasakan sesuatu seperti itu?',
-  ],
-
-  T1_NEG_KEPERCAYAAN_DIRI: [
-    'Meragukan diri sendiri itu melelahkan, apalagi jika sudah menjadi suara yang terus-menerus hadir. Sejak kapan suara itu mulai terasa keras bagi {sp}?',
-    'Rasa tidak percaya diri sering datang bukan karena kita tidak mampu, tapi karena kita pernah diajarkan untuk meragukan diri. Apakah ada pengalaman tertentu yang {sp} rasa menjadi awal dari perasaan ini?',
-    'Saya mendengar {sp}. Ada perbedaan antara tidak mampu dan merasa tidak mampu — dan itu perbedaan yang sangat penting. Apa yang biasanya memicu rasa ragu itu muncul?',
-  ],
-
-  T1_NEG_PENGAMBILAN_KEPUTUSAN: [
-    'Berada di persimpangan pilihan bisa terasa sangat membebani, terutama jika keputusan itu menyangkut hal yang penting. Apa yang membuat pilihan ini terasa begitu sulit bagi {sp}?',
-    'Dilema itu nyata — ketika setiap pilihan punya konsekuensinya sendiri dan tidak ada yang terasa sempurna. Sudah berapa lama {sp} bergulat dengan keputusan ini?',
-    'Boleh ceritakan lebih — apa yang paling {sp} takutkan jika mengambil salah satu dari pilihan yang ada?',
-    'Terkadang kita sudah tahu jawabannya, tapi butuh ruang untuk meyakinkan diri sendiri. Ketika {sp} membayangkan dua pilihan itu — mana yang membuat dada terasa lebih lega?',
-  ],
-
-  T1_NEG_STRES: [
-    'Tekanan yang terus menumpuk itu bisa membuat segalanya terasa berat bahkan untuk hal-hal kecil sekalipun. Dari semua yang {sp} hadapi — apa yang terasa paling menekan saat ini?',
-    'Stres yang berkepanjangan bukan tanda kelemahan — itu tanda bahwa {sp} sudah menanggung terlalu banyak. Apakah ada ruang istirahat yang {sp} masih bisa temukan di tengah semua ini?',
-    'Tubuh dan pikiran punya batas. Apakah {sp} sudah merasakan tanda-tanda bahwa keduanya sudah mulai kelelahan?',
-  ],
-
-  T1_NEG_KECEMASAN: [
-    'Pikiran yang terus berputar dan sulit berhenti itu memang bisa sangat melelahkan. Biasanya, tentang apa yang paling sering membuat pikiran {sp} tidak bisa tenang?',
-    'Rasa cemas itu kadang datang bahkan tanpa alasan yang jelas — dan itu sendiri bisa membuat kita semakin cemas. Sudah berapa lama {sp} merasakan gelombang seperti ini?',
-    'Kekhawatiran yang terus-menerus itu berat untuk ditanggung sendirian. Apakah ada seseorang yang tahu seberapa sering rasa cemas ini datang?',
-  ],
-
-  T1_POS_HARAPAN: [
-    'Ada cahaya yang nyata dalam kata-kata {sp} — harapan itu bukan hal kecil, terutama di tengah situasi yang tidak mudah. Apa yang membuat {sp} masih bisa memegang harapan itu?',
-    'Memiliki impian dan tujuan yang jelas adalah kekuatan tersendiri. Boleh {sp} ceritakan lebih — apa yang paling {sp} harapkan bisa terwujud?',
-  ],
-
-  T1_POS_RESILIENSI: [
-    'Bangkit setelah jatuh bukan hal yang mudah, dan {sp} sedang melakukannya. Apa yang memberi {sp} kekuatan untuk terus berdiri?',
-    'Ada ketangguhan yang luar biasa dalam cerita {sp}. Dari semua yang sudah dilewati — apa pelajaran terbesar yang {sp} bawa?',
-  ],
-
-  T1_NEG_DEFAULT: [
-    'Terima kasih sudah mau bercerita, {sp}. Dari yang sudah disampaikan — bagian mana yang terasa paling berat untuk {sp} saat ini?',
-    'Cerita {sp} sangat berarti. Boleh {sp} ceritakan lebih dalam — apa yang biasanya paling pertama terasa ketika kondisi ini datang?',
-    'Ada banyak hal yang {sp} tanggung rupanya. Dari semuanya, mana yang paling sering mengganggu pikiran {sp}?',
-    'Perasaan {sp} sepenuhnya valid. Sudah berapa lama {sp} merasakan semua ini?',
-  ],
-
-  T1_POS_SENANG: [
-    'Sungguh menyenangkan mendengar ada hal yang membuat {sp} merasa seperti itu. Boleh ceritakan lebih — apa yang membuat momen itu begitu berarti bagi {sp}?',
-    'Ada cahaya dalam cerita {sp}. Apakah perasaan positif ini sering hadir, atau lebih terasa di momen-momen tertentu saja?',
-    'Indah sekali mendengarnya. Dari yang {sp} ceritakan — apa yang paling {sp} syukuri dari pengalaman itu?',
-  ],
-
-  T1_POS_BANGGA: [
-    'Pencapaian itu sungguh layak untuk dirayakan. Apa yang menurut {sp} menjadi kunci sehingga bisa sampai di titik itu?',
-    'Ada kebanggaan yang nyata di sana, dan itu wajar. Apakah ada seseorang yang turut merayakan pencapaian {sp} ini?',
-    'Luar biasa perjalanan yang sudah {sp} lalui. Apa yang {sp} rasakan saat pertama kali menyadari berhasil?',
-  ],
-
-  T1_POS_DEFAULT: [
-    'Senang mendengar ada hal baik dalam perjalanan {sp}. Boleh ceritakan lebih — apa yang membuat hal itu begitu bermakna?',
-    'Cerita {sp} membawa kehangatan tersendiri. Dari pengalaman itu, apa yang paling ingin {sp} simpan dalam ingatan?',
-    'Ada sesuatu yang berharga di sana. Apakah pengalaman itu masih terasa dekat, atau sudah terasa seperti kenangan lama?',
-  ],
-
-  T1_NETRAL: [
-    'Terima kasih sudah mau bercerita. Dari yang {sp} sampaikan tadi — bagaimana perasaan {sp} setelah menceritakannya?',
-    'Cerita {sp} memberikan gambaran yang lebih jelas. Apakah ada bagian yang ingin {sp} ceritakan lebih dalam?',
-    'Ada banyak hal yang bisa kita gali dari pengalaman itu. Apa yang paling pertama terlintas di pikiran {sp} ketika mengenangnya?',
-    'Setiap cerita punya lapisannya sendiri. Dari yang baru {sp} sampaikan — bagian mana yang paling berkesan?',
-  ],
-
-  /* ────────────────────────────────────────
-     TURN 2 — Refleksi + Sudut Pandang Baru
-     Tujuan: Elina memantulkan kembali apa yang didengar,
-             lalu membuka dimensi baru dari cerita itu
-  ──────────────────────────────────────── */
-  T2_NEG: [
-    'Kalau {sp} dengarkan kembali apa yang baru saja {sp} ceritakan — perasaan apa yang paling kuat muncul?',
-    'Di balik semua yang {sp} rasakan itu, adakah sesuatu yang {sp} harapkan bisa berbeda?',
-    'Dari cerita {sp}, rasanya ada beban yang sudah lama ditanggung. Apakah pernah ada masa ketika {sp} merasa lebih ringan dari sekarang?',
-    'Mendengar {sp} bercerita, saya ingin tahu — adakah seseorang atau sesuatu yang selama ini menjadi pegangan {sp} ketika perasaan ini datang?',
-    'Sungguh tidak mudah yang sudah {sp} lalui. Ketika {sp} menceritakan ini, bagian mana yang paling sulit untuk diungkapkan?',
-    'Di tengah semua yang berat itu, apakah ada hal kecil — sekecil apapun — yang masih memberi {sp} sedikit rasa tenang atau harapan?',
-  ],
-
-  T2_POS: [
-    'Mendengar {sp} bercerita tentang itu, apa yang {sp} rasakan sekarang ketika mengingatnya kembali?',
-    'Pengalaman itu tampaknya meninggalkan jejak yang dalam. Apakah ada pelajaran dari sana yang masih {sp} bawa hingga hari ini?',
-    'Ada kehangatan yang nyata di sana. Apakah orang-orang yang terlibat dalam momen itu masih ada di kehidupan {sp} sekarang?',
-    'Dari semua yang {sp} ceritakan, apakah ada bagian yang {sp} rasa belum banyak orang yang tahu?',
-  ],
-
-  T2_NETRAL: [
-    'Dari yang {sp} ceritakan, bagian mana yang paling {sp} ingat sampai hari ini?',
-    'Apakah pengalaman itu mengubah cara {sp} melihat sesuatu — entah tentang diri sendiri atau tentang orang lain?',
-    'Kalau {sp} harus memilih satu kata untuk menggambarkan semua yang baru diceritakan tadi, kata apa yang muncul?',
-    'Ada kedalaman dalam cerita {sp}. Apakah ini pertama kalinya {sp} menceritakan hal ini, atau sudah pernah dibagi sebelumnya?',
-  ],
-
-  /* ────────────────────────────────────────
-     TURN 3 — Rangkum + Beri Ruang
-     Tujuan: Elina merangkum dengan hangat,
-             memberi ruang user untuk melengkapi atau mengoreksi
-  ──────────────────────────────────────── */
-  T3_NEG: [
-    'Dari semua yang {sp} ceritakan — rasanya {sp} sudah menanggung banyak hal sendirian untuk waktu yang cukup lama. Apakah itu terasa tepat?',
-    'Ada kelelahan yang dalam di sana, tapi juga ketangguhan yang luar biasa. {sp} masih di sini, masih bercerita — itu bukan hal kecil. Apakah ada yang ingin {sp} tambahkan?',
-    'Mendengar perjalanan {sp} — di balik semua yang berat itu, saya melihat seseorang yang sangat kuat meski mungkin {sp} sendiri tidak selalu merasa begitu. Apa yang membuat {sp} terus bertahan?',
-    'Cerita {sp} mengingatkan bahwa hidup memang tidak selalu mudah. Dari titik ini — apakah ada satu hal yang {sp} paling ingin berubah?',
-  ],
-
-  T3_POS: [
-    'Dari cerita {sp}, ada banyak hal berharga yang sudah dijalani. Apakah masih ada bagian lain yang ingin {sp} ceritakan?',
-    'Mendengar semua ini, saya merasakan betapa kayanya perjalanan yang sudah {sp} lalui. Adakah yang paling {sp} syukuri dari semua itu?',
-    'Sepertinya ada banyak cinta dan kehangatan dalam perjalanan {sp}. Apakah ada seseorang yang ingin {sp} sampaikan rasa terima kasih tapi belum sempat?',
-  ],
-
-  T3_NETRAL: [
-    'Dari semua yang sudah {sp} ceritakan — apa yang paling terasa penting untuk diingat?',
-    'Perjalanan {sp} penuh warna. Kalau {sp} lihat kembali semuanya — apa yang paling membentuk siapa {sp} hari ini?',
-    'Terima kasih sudah berbagi sebegini dalam. Apakah masih ada sesuatu yang terasa ingin disampaikan tapi belum sempat keluar?',
-  ],
-
-  /* ────────────────────────────────────────
-     TURN 4+ — Penguatan & Eksplorasi Lanjut
-     Tujuan: percakapan tetap bermakna tanpa batas turn,
-             dirotasi acak agar tidak terasa repetitif
-     → Untuk menambah template baru, cukup tambahkan
-       string baru di array T4PLUS di bawah ini
-  ──────────────────────────────────────── */
-  T4PLUS: [
-    // Penguatan keberanian bercerita
-    '{sp} sudah sangat berani hari ini. Bercerita tentang hal-hal yang dalam seperti ini bukan hal mudah. Apakah ada lagi yang ingin {sp} ceritakan?',
-    'Saya di sini dan terus mendengarkan. Tidak ada yang terlalu kecil atau terlalu besar untuk diceritakan. Apa lagi yang ada di benak {sp}?',
-    // Menggali lebih dalam
-    'Dari semua yang sudah kita bicarakan — adakah satu hal yang {sp} rasa belum tersampaikan dengan cukup?',
-    'Terkadang ada perasaan yang sulit diucapkan tapi terus terasa. Apakah ada sesuatu seperti itu yang masih {sp} simpan?',
-    'Kadang kita baru menyadari sesuatu setelah menceritakannya. Apakah ada hal baru yang muncul setelah {sp} bercerita tadi?',
-    // Refleksi diri
-    'Mendengar {sp} bercerita, saya penasaran — kalau dulu ada seseorang yang benar-benar mendengar {sp}, apa yang paling ingin {sp} katakan?',
-    'Dari semua yang sudah dijalani — apa yang menurut {sp} paling membentuk cara {sp} menghadapi kesulitan hari ini?',
-    'Setiap cerita punya bagian yang tersembunyi. Apakah ada sisi dari pengalaman ini yang jarang {sp} ceritakan kepada siapapun?',
-    // Kehangatan & kehadiran
-    '{sp} tidak sendirian dalam perjalanan ini. Apakah ada yang ingin {sp} sampaikan lebih lanjut?',
-    'Terima kasih sudah terus berbagi. Setiap kata yang {sp} sampaikan membawa kita lebih dekat pada pemahaman yang lebih dalam. Masih ada yang ingin diceritakan?',
-    // Masa depan & harapan
-    'Di tengah semua yang sudah {sp} lalui — apakah masih ada harapan atau keinginan yang {sp} pegang erat?',
-    'Setelah semua ini, kalau {sp} bisa berbicara kepada diri sendiri di masa lalu — apa yang paling ingin {sp} sampaikan?',
-    // Orang-orang bermakna
-    'Adakah seseorang dalam hidup {sp} yang paling banyak memberi pengaruh — entah positif atau negatif?',
-    'Dari semua orang yang pernah ada dalam hidup {sp}, siapa yang paling {sp} rindukan atau syukuri kehadirannya?',
-    // Kekuatan tersembunyi
-    'Mendengar semua yang sudah {sp} ceritakan — saya melihat kekuatan yang mungkin {sp} sendiri tidak selalu sadari. Apa yang membuat {sp} masih bisa berdiri sampai hari ini?',
-    'Orang yang sudah melewati sebanyak ini pasti punya cara tersendiri untuk bertahan. Apa rahasia {sp}?',
-  ],
-
-  /* ────────────────────────────────────────
-     TOPIK BOOSTER
-     Ditambahkan sebagai kalimat pembuka jika topik terdeteksi
-     → Tambahkan topik atau template baru di sini
-  ──────────────────────────────────────── */
-  TOPIK_BOOST: {
-    keluarga: [
-      'Keluarga rupanya memegang tempat yang sangat penting dalam cerita {sp}. ',
-      'Ada warna keluarga yang kuat di sana. ',
-      'Hubungan keluarga tampaknya menjadi salah satu sumber pengalaman yang paling berkesan bagi {sp}. ',
-    ],
-    pekerjaan: [
-      'Dunia kerja tampaknya membawa tekanan tersendiri bagi {sp}. ',
-      'Pekerjaan memang bisa menjadi sumber baik kebanggaan maupun kelelahan. ',
-      'Tanggung jawab pekerjaan yang {sp} ceritakan terlihat cukup menguras energi dan perhatian. ',
-    ],
-    kesehatan: [
-      'Kondisi kesehatan yang {sp} hadapi tentu bukan hal mudah. ',
-      'Perjalanan kesehatan seperti itu membutuhkan ketabahan yang luar biasa. ',
-      'Pengalaman terkait kesehatan tampaknya membawa dampak yang cukup besar dalam kehidupan sehari-hari {sp}. ',
-    ],
-    sosial: [
-      'Hubungan dengan orang-orang di sekitar {sp} tampaknya sangat bermakna. ',
-      'Lingkungan sosial rupanya memainkan peran penting dalam cerita {sp}. ',
-      'Interaksi dengan orang lain tampaknya memberikan pengaruh yang cukup besar terhadap pengalaman tersebut. ',
-    ],
-    'masa lalu': [
-      'Kenangan masa lalu itu masih terasa sangat hidup bagi {sp}. ',
-      'Masa lalu yang {sp} ceritakan tampaknya masih membawa pengaruh yang besar. ',
-      'Ada jejak emosional dari masa lalu yang tampaknya masih terasa hingga saat ini. ',
-    ],
-    'masa depan': [
-      'Pikiran tentang masa depan tampaknya cukup mengisi benak {sp}. ',
-      'Ada kekhawatiran sekaligus harapan tentang yang akan datang. ',
-      'Membayangkan langkah berikutnya memang dapat menghadirkan campuran antara optimisme dan keraguan. ',
-    ],
-    spiritualitas: [
-      'Dimensi spiritual tampaknya menjadi pegangan penting bagi {sp}. ',
-      'Kehidupan spiritual {sp} tampak menjadi sumber kekuatan yang berarti. ',
-      'Pencarian makna dan kedekatan spiritual tampaknya menjadi bagian penting dari pengalaman tersebut. ',
-    ],
-    pendidikan: [
-      'Tekanan dunia pendidikan tampaknya cukup besar dalam keseharian {sp}. ',
-      'Perjalanan akademik sering membawa beban tersendiri yang tidak selalu mudah diceritakan. ',
-    ],
-    percintaan: [
-      'Hati yang sedang bergulat dengan perasaan memang butuh ruang untuk bercerita. ',
-      'Hal-hal yang menyentuh perasaan terdalam memang tidak selalu mudah diungkapkan. ',
-    ],
-    pertemanan: [
-      'Persahabatan yang bermakna — atau yang menyakitkan — meninggalkan bekas yang tidak kecil. ',
-      'Hubungan dengan teman-teman rupanya memegang tempat penting dalam cerita {sp}. ',
-    ],
-    keuangan: [
-      'Tekanan finansial menyentuh hampir semua sisi kehidupan sehari-hari. ',
-      'Beban keuangan yang berat memang tidak mudah dibicarakan, tapi penting untuk tidak ditanggung sendiri. ',
-    ],
-    kehilangan: [
-      'Kehilangan yang dirasakan {sp} itu nyata dan layak untuk diberikan ruang. ',
-      'Proses berduka tidak pernah linier — ia datang dan pergi dengan caranya sendiri. ',
-    ],
-    trauma: [
-      'Pengalaman yang membekas itu membutuhkan waktu dan ruang yang aman untuk diproses. ',
-      'Tidak semua luka terlihat dari luar, tapi bukan berarti ia tidak nyata. ',
-    ],
-    'identitas diri': [
-      'Pertanyaan tentang siapa diri kita adalah salah satu pencarian paling dalam yang bisa dialami manusia. ',
-      'Proses mengenal diri sendiri memang tidak selalu nyaman, tapi ia adalah perjalanan yang sangat berharga. ',
-    ],
-    'kepercayaan diri': [
-      'Rasa meragukan diri sendiri itu melelahkan, terutama ketika sudah berlangsung lama. ',
-      'Kepercayaan diri bukan tentang tidak pernah ragu — tapi tentang terus melangkah meski ragu itu ada. ',
-    ],
-    stres: [
-      'Tekanan yang menumpuk itu memang bisa membuat segalanya terasa lebih berat dari seharusnya. ',
-      'Stres yang berkepanjangan adalah tanda bahwa seseorang sedang menanggung terlalu banyak. ',
-    ],
-    kecemasan: [
-      'Pikiran yang terus berputar itu bisa sangat menguras — bahkan sebelum hari benar-benar dimulai. ',
-      'Kecemasan yang terus-menerus memang tidak mudah dikendalikan sendirian. ',
-    ],
-    harapan: [
-      'Ada sesuatu yang berharga dalam harapan yang masih {sp} pegang erat. ',
-      'Harapan yang bertahan di tengah kesulitan adalah tanda kekuatan yang nyata. ',
-    ],
-    kesepian: [
-      'Rasa kesepian yang mendalam itu bisa hadir bahkan di tengah keramaian sekalipun. ',
-      'Merasa tidak dipahami oleh siapapun adalah salah satu perasaan yang paling menguras. ',
-    ],
-    'pengambilan keputusan': [
-      'Berada di persimpangan pilihan memang bisa terasa sangat membebani. ',
-      'Keputusan besar sering datang bersama ketidakpastian yang tidak mudah ditanggung. ',
-    ],
-    konflik: [
-      'Konflik yang berkepanjangan memang bisa menguras energi dan emosi secara bersamaan. ',
-      'Situasi yang penuh perselisihan sering meninggalkan perasaan yang berat dan tidak terselesaikan. ',
-    ],
-    kemarahan: [
-      'Amarah yang dalam itu sering menyimpan luka atau ketidakadilan yang belum tersampaikan. ',
-      'Rasa marah yang kuat itu valid — dan ia butuh ruang yang aman untuk diungkapkan. ',
-    ],
-    kekecewaan: [
-      'Kekecewaan yang besar itu sering datang dari harapan yang sungguh-sungguh dipegang. ',
-      'Merasa dikhianati atau dikecewakan oleh seseorang yang dipercaya itu meninggalkan luka tersendiri. ',
-    ],
-    'rasa bersalah': [
-      'Beban rasa bersalah itu bisa terasa sangat berat untuk dibawa sendirian. ',
-      'Menyalahkan diri sendiri terus-menerus adalah salah satu bentuk penderitaan yang paling melelahkan. ',
-    ],
-    penolakan: [
-      'Merasa ditolak atau tidak diterima meninggalkan rasa yang tidak mudah dijelaskan dengan kata-kata. ',
-      'Diabaikan oleh orang yang kita harapkan peduli adalah salah satu hal yang paling menyakitkan. ',
-    ],
-    burnout: [
-      'Kelelahan yang sudah sampai ke tingkat ini bukan hal yang bisa diabaikan begitu saja. ',
-      'Burnout itu bukan tanda kelemahan — ia tanda bahwa seseorang sudah memberi terlalu banyak dari dirinya. ',
-    ],
-    'dukungan sosial': [
-      'Merasa berjuang sendirian tanpa ada yang mendukung itu sangat menguras. ',
-      'Kebutuhan untuk didengar dan dipahami adalah kebutuhan yang sangat manusiawi. ',
-    ],
-    perubahan: [
-      'Menghadapi perubahan besar dalam hidup memang membutuhkan energi dan keberanian tersendiri. ',
-      'Masa transisi sering membawa ketidakpastian yang tidak mudah untuk dijalani. ',
-    ],
-    resiliensi: [
-      'Ada kekuatan yang nyata dalam upaya {sp} untuk terus bangkit. ',
-      'Bertahan dan terus melangkah meski sulit adalah sesuatu yang layak untuk diakui. ',
-    ],
-    motivasi: [
-      'Kehilangan semangat bukan berarti semangat itu sudah pergi selamanya. ',
-      'Ada masa-masa ketika kita butuh jeda — bukan karena kita menyerah, tapi karena kita manusia. ',
-    ],
-  },
+   DETEKSI EMOSI — Badge di bubble user (gratis)
+══════════════════════════════════════════ */
+const _EMO_EMOJI = {
+  'sedih':'😢','marah':'😠','takut':'😨','cemas':'😰',
+  'senang':'😊','bangga':'🌟','rindu':'💭','malu':'😳',
+  'kecewa':'😔','trauma':'💔','kesepian':'🫂','hampa':'😶',
+  'lega':'😌','bersyukur':'🙏','bingung':'🤔','harapan':'✨',
+  'burnout':'😩','netral':'💬',
+};
+const _EMO_CLS = {
+  'sedih':'nlp-neg','marah':'nlp-neg','takut':'nlp-neg','cemas':'nlp-neg',
+  'kecewa':'nlp-neg','trauma':'nlp-neg','kesepian':'nlp-neg','hampa':'nlp-neg',
+  'burnout':'nlp-neg',
+  'senang':'nlp-pos','bangga':'nlp-pos','lega':'nlp-pos','bersyukur':'nlp-pos','harapan':'nlp-pos',
+  'rindu':'nlp-emo','malu':'nlp-neu','bingung':'nlp-neu','netral':'nlp-neu',
 };
 
-/* ─── Fungsi utama: pilih respons berdasarkan turn + NLP ─── */
-function getMultiTurnResponse(turnNum, nlp, rawText){
-  const sp  = getSapaan();
-  const {sentiment, emotion, topics} = nlp;
-  const text = rawText || '';
+function _appendEmotionBadge(nlp) {
+  const hist = document.getElementById('sq-hist');
+  const rows = hist.querySelectorAll('.ch-u-row');
+  if (!rows.length) return;
+  const lastRow = rows[rows.length - 1];
+  const wrap = lastRow.querySelector('.ch-u-wrap');
+  if (!wrap) return;
 
-  // ── Turn 1: gunakan logika NLP baru (buildAIResponse) ──
-  if(turnNum === 1){
-    return buildAIResponse(text, nlp, turnNum);
-  }
+  const old = wrap.querySelector('.nlp-row');
+  if (old) old.remove();
 
-  // ── Turn 2: recall atau acknowledge singkat ──
-  if(turnNum === 2){
-    const key = extractKeyPhrase(text);
-    if(key.type === 'pola'){
-      const recallText = key.recall.replace(/\{sp\}/g, sp);
-      const prefix = _pickStr(RECALL_PREFIX, sp);
-      const suffix = _pickStr(RECALL_SUFFIX, sp);
-      return prefix + recallText + suffix;
-    }
-    return _pickStr(ACKNOWLEDGE, sp);
-  }
+  const emo = nlp.emotion || 'netral';
+  const topics = nlp.topics || [];
+  const deep = nlp._deep;
+  const intensitas = deep?.intensitas || '';
+  const emoji = _EMO_EMOJI[emo] || '💬';
+  const cls = _EMO_CLS[emo] || 'nlp-neu';
 
-  // ── Turn 3+: tetap pakai pool MTR lama (tidak diubah) ──
-  let pool;
-  if(turnNum === 3){
-    if(sentiment === 'negatif')      pool = MTR.T3_NEG;
-    else if(sentiment === 'positif') pool = MTR.T3_POS;
-    else                             pool = MTR.T3_NETRAL;
-  } else {
-    pool = MTR.T4PLUS;
-  }
-
-  let resp = _pick(pool);
-
-  // Topik booster tetap aktif di turn 3
-  if(topics.length > 0 && Math.random() > 0.5){
-    const t = topics[0];
-    const boostPool = MTR.TOPIK_BOOST[t];
-    if(boostPool){
-      const boost = _pick(boostPool);
-      resp = boost + resp;
-    }
-  }
-
-  return resp;
+  const row = document.createElement('div');
+  row.className = 'nlp-row';
+  row.style.justifyContent = 'flex-end';
+  row.innerHTML =
+    `<span class="nlp-tag ${cls}">${emoji} ${emo}${intensitas ? ' · ' + intensitas : ''}</span>` +
+    topics.slice(0,2).map(t => `<span class="nlp-tag nlp-top">🏷 ${t}</span>`).join('');
+  wrap.appendChild(row);
+  hist.scrollTop = hist.scrollHeight;
 }
 
-/* Pertahankan getAIResponse lama sebagai fallback untuk fungsi lain yang memanggilnya */
-function getAIResponse(nlp, sesiNum, qIdx){
-  return getMultiTurnResponse(1, nlp);
-}
+/* Reset history (tidak diperlukan tanpa API, tapi tetap ada agar kode lain tidak error) */
+function resetAIChatHistory() {}
+
+
 /* ══════════════════════════════════════════
    CRISIS DETECTION
 ══════════════════════════════════════════ */
@@ -3295,8 +2755,10 @@ async function sendSesiAnswer(){
   _appendUserBubble(txt);
   ta.value = '';
 
-  // Analisis NLP
+// Analisis NLP lokal (gratis, tanpa API)
   const nlp = analyzeNLP(txt);
+  // Tampilkan emotion badge langsung dari NLP lokal
+  _appendEmotionBadge(nlp);
   // Deteksi bahaya — non-blocking
   checkCrisisTrigger(txt).catch(e => console.warn('crisis check error:', e));
 
@@ -3332,9 +2794,9 @@ async function sendSesiAnswer(){
   _appendElinaTyping();
   document.getElementById('sq-chat-area').scrollTop = 9999;
 
-  // Ambil respons rule-based
-  await new Promise(r=>setTimeout(r, 700 + Math.random()*500));
-  const aiResp = getMultiTurnResponse(thisTurn, nlp, txt  );
+// Ambil respons lokal (sinkron, tanpa API)
+  await new Promise(r => setTimeout(r, 600 + Math.random() * 600));
+  const aiResp = getMultiTurnResponse(thisTurn, nlp, txt);
   _removeElinaTyping();
 
   // Tampilkan bubble Elina
