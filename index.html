@@ -1196,6 +1196,182 @@ function analyzeNLP(text){
 
   return {sentiment, emotion:detectedEmo, topics};
 }
+  /* ══════════════════════════════════════════
+   NLP LAYER 2 — EXTRACT, LENGTH, RECALL
+   ──────────────────────────────────────────
+   Fungsi-fungsi ini bekerja DI ATAS analyzeNLP()
+   untuk menghasilkan respons yang lebih personal.
+
+   Yang bisa Anda tambah manual nanti:
+   - RECALL_PREFIX      : awalan kalimat mirror
+   - RECALL_SUFFIX      : akhiran kalimat mirror
+   - POLA_KALIMAT       : pola situasi spesifik user
+   - PEMANCING_CERITA   : kalimat pemancing jawaban pendek
+══════════════════════════════════════════ */
+
+/* ── 1. Deteksi panjang jawaban user ── */
+function detectLength(text){
+  const words = text.trim().split(/\s+/).length;
+  if(words <= 8)  return 'pendek';
+  if(words <= 30) return 'sedang';
+  return 'panjang';
+}
+
+/* ── 2. Filter: apakah cerita tentang diri sendiri? ── */
+function isSelfStory(sentence){
+  // Hanya recall jika ada kata ganti orang pertama di kalimat tsb
+  const selfWords = ['saya','aku','ku ','ku,','ku.','gue','gw','diriku','diri saya','diri aku'];
+  const s = sentence.toLowerCase();
+  return selfWords.some(w => s.includes(w));
+}
+
+/* ── 3. Ekstrak frasa kunci dari jawaban user ── */
+/*
+   CARA MENAMBAH POLA MANUAL (Anda lakukan di file ini):
+   Tambahkan objek baru di array POLA_KALIMAT di bawah.
+   Format: { trigger: ['kata','atau','frasa'], recall: 'template recall' }
+   Gunakan {sp} untuk sapaan, hasil recall otomatis dipilih acak dari RECALL_PREFIX + recall + RECALL_SUFFIX
+*/
+const POLA_KALIMAT = [
+  // KELUARGA
+  { trigger:['ditinggal orang tua','ditinggal ibu','ditinggal ayah','orang tua pergi','tidak ada orang tua'],
+    recall: '{sp} pernah ditinggal orang tua' },
+  { trigger:['orang tua bertengkar','ayah ibu bertengkar','sering bertengkar di rumah'],
+    recall: 'dulu di rumah {sp} sering ada pertengkaran' },
+  { trigger:['tidak diperhatikan orang tua','kurang kasih sayang','tidak diperhatikan keluarga'],
+    recall: '{sp} merasa kurang mendapat perhatian dari keluarga' },
+  { trigger:['jauh dari keluarga','keluarga jauh','anak tinggal jauh','anak sudah pergi'],
+    recall: '{sp} merasa jauh dari orang-orang yang disayang' },
+
+  // PEKERJAAN
+  { trigger:['kerja menumpuk','pekerjaan menumpuk','beban kerja','bukan jobdesk','bukan tugas saya','bukan tanggung jawab saya'],
+    recall: '{sp} menanggung beban kerja yang seharusnya bukan milik {sp}' },
+  { trigger:['dipecat','kehilangan pekerjaan','kena PHK','dikeluarkan dari kerja'],
+    recall: '{sp} pernah kehilangan pekerjaan' },
+  { trigger:['tidak cocok dengan atasan','masalah dengan bos','konflik di kantor'],
+    recall: 'ada situasi yang tidak nyaman buat {sp} di tempat kerja' },
+
+  // KESEPIAN & KEHILANGAN
+  { trigger:['merasa kesepian','sangat kesepian','sendirian terus','tidak ada teman'],
+    recall: '{sp} merasa sangat kesepian' },
+  { trigger:['ditinggal pasangan','pasangan pergi','suami pergi','istri pergi','putus hubungan'],
+    recall: '{sp} pernah ditinggalkan oleh orang yang disayang' },
+  { trigger:['teman meninggal','sahabat meninggal','orang tua meninggal','kehilangan seseorang'],
+    recall: '{sp} pernah kehilangan seseorang yang sangat berarti' },
+
+  // MASA KECIL
+  { trigger:['masa kecil sulit','masa kecil berat','waktu kecil susah','kecil tidak bahagia'],
+    recall: 'masa kecil {sp} terasa cukup berat' },
+  { trigger:['dibully','diejek waktu kecil','diejek di sekolah','tidak punya teman waktu kecil'],
+    recall: '{sp} pernah mengalami perlakuan yang menyakitkan dari orang sekitar' },
+
+  // KESEHATAN
+  { trigger:['sakit lama','penyakit kronis','sudah lama sakit','tidak kunjung sembuh'],
+    recall: '{sp} sudah melewati waktu yang cukup lama berjuang dengan kesehatan' },
+
+  // PERASAAN TIDAK BERHARGA
+  { trigger:['tidak berguna','merasa tidak berguna','tidak berharga','tidak ada artinya'],
+    recall: '{sp} sempat merasa seperti tidak berarti' },
+  { trigger:['gagal terus','selalu gagal','tidak pernah berhasil','merasa gagal'],
+    recall: '{sp} merasa seperti terus menemui kegagalan' },
+];
+
+/* Prefix & suffix untuk variasi kalimat recall — tambah sendiri di sini */
+const RECALL_PREFIX = [
+  'Jadi ',
+  'Berarti ',
+  'Oo, jadi ',
+  'Saya mendengar bahwa ',
+  'Kalau begitu ',
+];
+const RECALL_SUFFIX = [
+  ', ya.',
+  '... begitu ya.',
+  ', ya — saya dengar.',
+  '. Saya mengerti.',
+  '.',
+];
+
+/* Kalimat pemancing untuk jawaban pendek — tambah sendiri di sini */
+const PEMANCING_CERITA = [
+  'Boleh ceritakan lebih lanjut, {sp}?',
+  'Saya ingin mendengar lebih banyak dari {sp}...',
+  'Ceritakan lebih, {sp} — saya di sini mendengarkan.',
+  'Kalau {sp} mau, boleh ceritakan lebih dalam lagi?',
+  'Tidak perlu terburu-buru, {sp}. Ceritakan saja pelan-pelan.',
+];
+
+/* Kalimat acknowledge singkat (mirror ringan, tidak balik tanya) */
+const ACKNOWLEDGE = [
+  'Oo, begitu ya...',
+  'Saya mengerti, {sp}.',
+  'Hmm, iya ya...',
+  'Saya dengar {sp}.',
+  'Iya, saya mengerti perasaan {sp}.',
+  'Terima kasih sudah mau cerita, {sp}.',
+];
+
+function _pickStr(arr, sp){
+  const s = arr[Math.floor(Math.random() * arr.length)];
+  return s.replace(/\{sp\}/g, sp);
+}
+
+function extractKeyPhrase(text){
+  const t = text.toLowerCase();
+  // Prioritas 1: cek pola kalimat spesifik (hanya jika cerita tentang diri sendiri)
+  for(const pola of POLA_KALIMAT){
+    for(const trigger of pola.trigger){
+      // Cari kalimat yang mengandung trigger
+      const sentences = t.split(/[.!?,]/);
+      for(const sent of sentences){
+        if(sent.includes(trigger) && isSelfStory(sent)){
+          return { type:'pola', recall: pola.recall };
+        }
+      }
+    }
+  }
+  // Prioritas 2: topik dari NLP lama (fallback)
+  return { type:'topik', recall: null };
+}
+
+/* ── 4. Rakit respons utama (menggantikan getMultiTurnResponse di layer atas) ── */
+function buildAIResponse(text, nlp, turnNum){
+  const sp  = getSapaan();
+  const len = detectLength(text);
+  const key = extractKeyPhrase(text);
+
+  // Mode A — Jawaban pendek → pancing cerita lebih panjang
+  if(len === 'pendek'){
+    return _pickStr(PEMANCING_CERITA, sp);
+  }
+
+  // Mode B — Jawaban panjang + ada pola terdeteksi → recall spesifik
+  if(len === 'panjang' && key.type === 'pola'){
+    const recallText = key.recall.replace(/\{sp\}/g, sp);
+    const prefix = _pickStr(RECALL_PREFIX, sp);
+    const suffix = _pickStr(RECALL_SUFFIX, sp);
+    return prefix + recallText + suffix;
+  }
+
+  // Mode C — Jawaban sedang/panjang, tidak ada pola spesifik → validasi emosi dari NLP lama
+  const { emotion, topics } = nlp;
+  if(emotion !== 'netral'){
+    const emoMap = {
+      'sedih'   : 'saya tau {sp} sedang merasa sedih',
+      'marah'   : 'saya mengerti betapa kesalnya {sp} dengan situasi ini',
+      'takut'   : 'wajar jika {sp} merasa khawatir menghadapi ini',
+      'malu'    : 'saya mengerti jika {sp} merasa tidak nyaman',
+      'rindu'   : 'saya merasakan betapa {sp} sangat merindukannya',
+      'bangga'  : 'senang sekali mendengar pencapaian {sp}',
+      'senang'  : 'terdengar menyenangkan ya untuk {sp}',
+    };
+    const validasi = (emoMap[emotion] || 'saya mendengar {sp}').replace(/\{sp\}/g, sp);
+    return validasi + '.';
+  }
+
+  // Mode D — Fallback: acknowledge singkat
+  return _pickStr(ACKNOWLEDGE, sp);
+}
 
 /* ══════════════════════════════════════════
    MULTI-TURN RULE-BASED RESPONSE SYSTEM
@@ -1213,7 +1389,7 @@ function analyzeNLP(text){
 function _tpl(str){ return str.replace(/\{sp\}/g, getSapaan()).replace(/\{nm\}/g, S.nama||getSapaan()); }
 function _pick(arr){ return _tpl(arr[Math.floor(Math.random()*arr.length)]); }
 
-const MTR = {
+  const MTR = {
 
   /* ────────────────────────────────────────
      TURN 1 — Validasi + Gali Lebih Dalam
@@ -1590,58 +1766,42 @@ const MTR = {
 };
 
 /* ─── Fungsi utama: pilih respons berdasarkan turn + NLP ─── */
-function getMultiTurnResponse(turnNum, nlp){
+function getMultiTurnResponse(turnNum, nlp, rawText){
+  const sp  = getSapaan();
   const {sentiment, emotion, topics} = nlp;
-  const sp = getSapaan();
+  const text = rawText || '';
 
-  // Pilih pool utama berdasarkan turn dan sentimen/emosi
-  let pool;
+  // ── Turn 1: gunakan logika NLP baru (buildAIResponse) ──
   if(turnNum === 1){
-    if(sentiment === 'negatif'){
-      if(emotion === 'sedih')                           pool = MTR.T1_NEG_SEDIH;
-      else if(emotion === 'marah')                      pool = MTR.T1_NEG_MARAH;
-      else if(emotion === 'takut')                      pool = MTR.T1_NEG_TAKUT;
-      else if(emotion === 'malu')                       pool = MTR.T1_NEG_MALU;
-      else if(emotion === 'rindu')                      pool = MTR.T1_NEG_RINDU;
-      else if(topics.includes('trauma'))                pool = MTR.T1_NEG_TRAUMA;
-      else if(topics.includes('kesepian'))              pool = MTR.T1_NEG_KESEPIAN;
-      else if(topics.includes('burnout'))               pool = MTR.T1_NEG_BURNOUT;
-      else if(topics.includes('percintaan'))            pool = MTR.T1_NEG_PERCINTAAN;
-      else if(topics.includes('keuangan'))              pool = MTR.T1_NEG_KEUANGAN;
-      else if(topics.includes('kehilangan'))            pool = MTR.T1_NEG_KEHILANGAN;
-      else if(topics.includes('identitas diri'))        pool = MTR.T1_NEG_IDENTITAS;
-      else if(topics.includes('kepercayaan diri'))      pool = MTR.T1_NEG_KEPERCAYAAN_DIRI;
-      else if(topics.includes('pengambilan keputusan')) pool = MTR.T1_NEG_PENGAMBILAN_KEPUTUSAN;
-      else if(topics.includes('stres'))                 pool = MTR.T1_NEG_STRES;
-      else if(topics.includes('kecemasan'))             pool = MTR.T1_NEG_KECEMASAN;
-      else                                              pool = MTR.T1_NEG_DEFAULT;
-    } else if(sentiment === 'positif'){
-      if(emotion === 'senang')                          pool = MTR.T1_POS_SENANG;
-      else if(emotion === 'bangga')                     pool = MTR.T1_POS_BANGGA;
-      else if(topics.includes('harapan'))               pool = MTR.T1_POS_HARAPAN;
-      else if(topics.includes('resiliensi'))            pool = MTR.T1_POS_RESILIENSI;
-      else                                              pool = MTR.T1_POS_DEFAULT;
-    } else {
-      pool = MTR.T1_NETRAL;
+    return buildAIResponse(text, nlp, turnNum);
+  }
+
+  // ── Turn 2: recall atau acknowledge singkat ──
+  if(turnNum === 2){
+    const key = extractKeyPhrase(text);
+    if(key.type === 'pola'){
+      const recallText = key.recall.replace(/\{sp\}/g, sp);
+      const prefix = _pickStr(RECALL_PREFIX, sp);
+      const suffix = _pickStr(RECALL_SUFFIX, sp);
+      return prefix + recallText + suffix;
     }
-  } else if(turnNum === 2){
-    if(sentiment === 'negatif')    pool = MTR.T2_NEG;
-    else if(sentiment === 'positif') pool = MTR.T2_POS;
-    else                           pool = MTR.T2_NETRAL;
-  } else if(turnNum === 3){
-    if(sentiment === 'negatif')    pool = MTR.T3_NEG;
+    return _pickStr(ACKNOWLEDGE, sp);
+  }
+
+  // ── Turn 3+: tetap pakai pool MTR lama (tidak diubah) ──
+  let pool;
+  if(turnNum === 3){
+    if(sentiment === 'negatif')      pool = MTR.T3_NEG;
     else if(sentiment === 'positif') pool = MTR.T3_POS;
-    else                           pool = MTR.T3_NETRAL;
+    else                             pool = MTR.T3_NETRAL;
   } else {
-    // Turn 4 ke atas — pool besar dirotasi acak, tidak terbatas
     pool = MTR.T4PLUS;
   }
 
-  // Ambil respons dari pool
   let resp = _pick(pool);
 
-  // Topik booster: tambahkan kalimat pembuka jika topik terdeteksi (50% chance)
-  if(topics.length > 0 && Math.random() > 0.5 && turnNum <= 2){
+  // Topik booster tetap aktif di turn 3
+  if(topics.length > 0 && Math.random() > 0.5){
     const t = topics[0];
     const boostPool = MTR.TOPIK_BOOST[t];
     if(boostPool){
@@ -2776,7 +2936,7 @@ async function sendSesiAnswer(){
 
   // Ambil respons rule-based
   await new Promise(r=>setTimeout(r, 700 + Math.random()*500));
-  const aiResp = getMultiTurnResponse(thisTurn, nlp);
+  const aiResp = getMultiTurnResponse(thisTurn, nlp, txt  );
   _removeElinaTyping();
 
   // Tampilkan bubble Elina
