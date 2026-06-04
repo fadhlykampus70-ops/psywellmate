@@ -1274,43 +1274,419 @@ const POLA_KALIMAT = [
     recall: '{sp} sempat merasa seperti tidak berarti' },
   { trigger:['gagal terus','selalu gagal','tidak pernah berhasil','merasa gagal'],
     recall: '{sp} merasa seperti terus menemui kegagalan' },
+
+  // ── KELUARGA (lanjutan) ──
+  { trigger:['tidak dekat dengan ayah','ayah tidak pernah ada','ayah tidak peduli','tidak pernah dipeluk ayah','ayah jarang di rumah'],
+    recall: '{sp} tumbuh tanpa kehadiran ayah yang benar-benar terasa' },
+  { trigger:['tidak dekat dengan ibu','ibu tidak pernah ada','ibu tidak peduli','ibu sibuk terus','tidak pernah ngobrol dengan ibu'],
+    recall: '{sp} merindukan kehangatan dari sosok ibu' },
+  { trigger:['anak sulung','anak tertua','harus mengurus adik','beban sebagai kakak','tidak sempat menikmati masa kecil'],
+    recall: '{sp} menanggung tanggung jawab yang besar sejak dini sebagai anak sulung' },
+  { trigger:['anak bungsu','dimanja','tidak dianggap serius','tidak dipercaya keluarga','selalu dianggap kecil'],
+    recall: '{sp} sering merasa tidak cukup dianggap dewasa oleh keluarga' },
+  { trigger:['orang tua pilih kasih','lebih sayang kakak','lebih sayang adik','tidak adil dalam keluarga','anak yang tidak disukai'],
+    recall: '{sp} pernah merasa tidak diperlakukan sama seperti saudara yang lain' },
+  { trigger:['keluarga tidak harmonis','keluarga berantakan','tidak ada ketenangan di rumah','rumah terasa seperti neraka'],
+    recall: 'rumah yang seharusnya menjadi tempat aman bagi {sp} justru terasa sebaliknya' },
+  { trigger:['dibesarkan nenek','tinggal dengan nenek','tidak dibesarkan orang tua','dititipkan ke keluarga lain'],
+    recall: '{sp} dibesarkan jauh dari orang tua kandung' },
+  { trigger:['orang tua bercerai','ayah ibu berpisah','keluarga pecah','broken home'],
+    recall: '{sp} tumbuh di tengah perpisahan orang tua yang tentu meninggalkan bekas' },
+  { trigger:['merawat orang tua','harus merawat ayah','harus merawat ibu','orang tua sakit','mengurus orang tua yang sakit'],
+    recall: '{sp} menanggung peran yang berat sebagai penjaga orang tua' },
+
+  // ── PEKERJAAN (lanjutan) ──
+  { trigger:['tidak dihargai di tempat kerja','kerja keras tidak dihargai','tidak ada apresiasi','usaha tidak diakui atasan'],
+    recall: '{sp} sudah bekerja keras tapi seolah tidak ada yang melihat itu' },
+  { trigger:['rekan kerja menjatuhkan','dijegal teman kerja','ditipu rekan kerja','persaingan tidak sehat di kantor'],
+    recall: '{sp} pernah menghadapi situasi tidak sehat di lingkungan kerjanya' },
+  { trigger:['tidak bisa kerja','sulit mendapat kerja','sudah melamar banyak','tidak lolos kerja','pengangguran'],
+    recall: '{sp} sudah berusaha keras namun jalan menuju pekerjaan terasa terus tertutup' },
+  { trigger:['kerja tapi tidak bahagia','tidak suka pekerjaan','terpaksa kerja','kerja hanya untuk uang','tidak ada passion'],
+    recall: '{sp} setiap hari menjalani pekerjaan yang tidak benar-benar diinginkan' },
+  { trigger:['pensiun','sudah pensiun','tidak kerja lagi','kehilangan rutinitas kerja','merasa tidak berguna setelah pensiun'],
+    recall: '{sp} merasakan kekosongan yang datang setelah masa kerja berakhir' },
+  { trigger:['bisnis sendiri','wirausaha','usaha sendiri','buka usaha','jualan sendiri'],
+    recall: '{sp} memilih jalan yang tidak mudah dengan membangun sesuatu sendiri' },
+
+  // ── KESEPIAN & KEHILANGAN (lanjutan) ──
+  { trigger:['tidak ada yang peduli','tidak ada yang mengerti','tidak ada yang dengarkan','merasa tidak terlihat'],
+    recall: '{sp} merasakan kesendirian yang dalam bahkan di tengah orang banyak sekalipun' },
+  { trigger:['pindah kota','pindah tempat tinggal','jauh dari kampung halaman','merantau','merantau sendirian'],
+    recall: '{sp} menjalani hari-hari jauh dari tempat dan orang-orang yang terasa seperti rumah' },
+  { trigger:['kehilangan hewan peliharaan','anjing mati','kucing mati','hewan kesayangan mati','hewan peliharaan meninggal'],
+    recall: '{sp} kehilangan teman setia yang selama ini menemani hari-hari {sp}' },
+  { trigger:['sudah tua sendirian','tua tapi sendiri','tidak ada yang menemani di hari tua','tidak ada anak','tidak ada pasangan di hari tua'],
+    recall: '{sp} menghadapi masa tua dengan rasa sepi yang cukup dalam' },
+  { trigger:['pasangan meninggal','suami meninggal','istri meninggal','janda','duda'],
+    recall: '{sp} pernah kehilangan belahan jiwa yang sangat dicintai' },
+  { trigger:['keguguran','kehilangan bayi','bayi meninggal','anak meninggal'],
+    recall: '{sp} pernah melewati kehilangan yang sangat dalam sebagai orang tua' },
+
+  // ── MASA KECIL (lanjutan) ──
+  { trigger:['tidak boleh menangis waktu kecil','disuruh diam','perasaan tidak pernah didengar waktu kecil','diam saja katanya'],
+    recall: 'sejak kecil {sp} sudah belajar menyimpan perasaan sendiri' },
+  { trigger:['miskin waktu kecil','tidak mampu waktu kecil','kekurangan waktu kecil','hidup susah dari kecil'],
+    recall: '{sp} tumbuh dalam keterbatasan yang mengajarkan banyak hal dengan cara yang berat' },
+  { trigger:['tidak punya mainan','tidak bisa jajan','tidak bisa bermain seperti teman','malu karena tidak mampu waktu kecil'],
+    recall: '{sp} melewati masa kecil tanpa hal-hal yang seharusnya dinikmati anak-anak' },
+  { trigger:['sering pindah sekolah','tidak punya sahabat lama','tidak sempat punya teman dekat waktu kecil'],
+    recall: '{sp} jarang memiliki tempat yang cukup lama untuk benar-benar merasa di rumah' },
+  { trigger:['kekerasan di rumah waktu kecil','melihat orang tua bertengkar hebat','trauma masa kecil','waktu kecil ketakutan'],
+    recall: '{sp} menyaksikan hal-hal yang berat sejak usia yang sangat muda' },
+
+  // ── KESEHATAN (lanjutan) ──
+  { trigger:['operasi','habis operasi','pernah dioperasi','takut dioperasi','proses pemulihan operasi'],
+    recall: '{sp} pernah melewati proses fisik yang cukup berat lewat operasi' },
+  { trigger:['tidak bisa tidur','insomnia','susah tidur','tidur terus terbangun','tidur tidak nyenyak'],
+    recall: '{sp} merasakan kelelahan yang dalam bahkan tanpa istirahat yang cukup' },
+  { trigger:['tubuh terasa lemah','tidak punya energi','mudah lelah','lelah terus','tidak bersemangat secara fisik'],
+    recall: '{sp} merasakan kelelahan yang sepertinya bukan sekadar fisik' },
+  { trigger:['sakit mental','gangguan mental','depresi','anxiety','kecemasan berlebih','panic attack','serangan panik'],
+    recall: '{sp} sedang berjuang dengan sesuatu yang tidak selalu terlihat dari luar' },
+  { trigger:['minum obat terus','tergantung obat','tidak bisa lepas dari obat','obat banyak','capek minum obat'],
+    recall: '{sp} sudah melewati hari-hari panjang yang bergantung pada pengobatan' },
+
+  // ── HARGA DIRI (lanjutan) ──
+  { trigger:['merasa lebih rendah dari orang lain','selalu kalah','orang lain lebih baik dari saya','semua orang lebih berhasil'],
+    recall: '{sp} sering merasa seperti tertinggal dari orang-orang di sekitarnya' },
+  { trigger:['tidak punya tujuan hidup','tidak tahu mau apa','hidup terasa hampa','tidak ada makna','untuk apa hidup'],
+    recall: '{sp} sedang mencari sesuatu yang bisa membuat hidup terasa berarti kembali' },
+  { trigger:['menyesal','banyak penyesalan','menyesal dengan keputusan lalu','seandainya dulu berbeda','kalau saja waktu bisa diulang'],
+    recall: '{sp} masih membawa beban penyesalan dari masa lalu' },
+  { trigger:['tidak bisa memaafkan diri sendiri','menyalahkan diri sendiri','semua salah saya','saya yang paling salah'],
+    recall: '{sp} tampaknya sangat keras dalam menghakimi diri sendiri' },
+  { trigger:['takut gagal lagi','tidak berani mencoba','sudah tidak percaya diri','trauma kegagalan','tidak mau mencoba lagi'],
+    recall: '{sp} menyimpan luka dari kegagalan yang membuat langkah ke depan terasa berat' },
+
+  // ── AGAMA / SPIRITUAL ──
+  { trigger:['merasa jauh dari tuhan','tidak merasa tuhan ada','doa tidak dikabulkan','tuhan tidak adil','menjauhi agama'],
+    recall: '{sp} pernah merasakan jarak yang cukup jauh dalam sisi spiritualnya' },
+  { trigger:['kehilangan iman','tidak percaya lagi','kecewa dengan agama','sudah tidak rajin ibadah'],
+    recall: '{sp} sempat merasakan pergolakan dalam sisi kepercayaannya' },
+  { trigger:['ibadah tapi tidak tenang','sholat tapi tetap sedih','berdoa tapi tidak ada perubahan','rajin ibadah tapi hidup tetap berat'],
+    recall: '{sp} sudah berusaha lewat jalan spiritual tapi ketenangan itu belum juga datang' },
+  { trigger:['takut neraka','takut dosa','merasa banyak dosa','merasa tidak layak','merasa kotor secara batin'],
+    recall: '{sp} membawa beban rasa bersalah yang sangat berat secara spiritual' },
+  { trigger:['diingatkan terus soal agama','diceramahi','merasa dihakimi secara agama','dianggap tidak alim','dikritik soal ibadah'],
+    recall: '{sp} pernah merasa dihakimi alih-alih didukung dari sisi agama' },
+
+  // ── PERTEMANAN ──
+  { trigger:['teman mengkhianati','dikhianati teman','teman menjauhi','dijauhi teman','tidak punya teman dekat'],
+    recall: '{sp} pernah merasakan sakit karena kehilangan orang yang dianggap teman' },
+  { trigger:['tidak cocok dengan teman','sulit bergaul','selalu salah paham dengan teman','tidak bisa dekat dengan orang lain'],
+    recall: '{sp} merasa cukup sulit untuk benar-benar dekat dengan orang lain' },
+  { trigger:['teman hanya datang saat butuh','dimanfaatkan teman','teman tidak ada saat susah','teman menghilang saat dibutuhkan'],
+    recall: '{sp} pernah merasakan kesendirian justru di saat paling membutuhkan' },
+  { trigger:['tidak diundang','tidak dilibatkan','ditinggal pergi teman','teman main tanpa saya','merasa diasingkan teman'],
+    recall: '{sp} pernah merasakan perasaan ditinggalkan dalam lingkaran pertemanan' },
+  { trigger:['teman toxic','teman yang selalu mengkritik','teman yang membuat rendah diri','teman yang menyakitkan'],
+    recall: '{sp} pernah berada dalam pertemanan yang ternyata lebih banyak menyakiti daripada mendukung' },
+  { trigger:['teman terbaik pergi','sahabat pindah','teman dekat menjauh','kehilangan sahabat'],
+    recall: '{sp} kehilangan orang yang selama ini menjadi sandaran' },
+
+  // ── PENDIDIKAN ──
+  { trigger:['tidak tamat sekolah','tidak bisa sekolah','putus sekolah','tidak kuliah','tidak lanjut sekolah'],
+    recall: '{sp} pernah melewati masa di mana pendidikan terasa seperti sesuatu yang tidak bisa {sp} raih' },
+  { trigger:['tidak pintar di sekolah','merasa bodoh','nilai jelek','tidak berprestasi','dianggap lambat belajar'],
+    recall: '{sp} pernah merasa kurang dihargai di lingkungan pendidikan' },
+  { trigger:['gagal ujian','tidak lulus','tidak naik kelas','diulang kelas','tidak lulus ujian nasional'],
+    recall: '{sp} pernah menghadapi kegagalan di jalur pendidikan yang tentu tidak mudah dilewati' },
+  { trigger:['tidak bisa bayar kuliah','kuliah terputus karena biaya','berhenti kuliah','putus kuliah'],
+    recall: '{sp} pernah harus melepaskan impian pendidikan karena keterbatasan' },
+  { trigger:['ditekan orang tua soal sekolah','dipaksa pilih jurusan','tidak suka jurusan','salah jurusan','kuliah tapi tidak sesuai minat'],
+    recall: '{sp} pernah menempuh jalan pendidikan yang sebenarnya bukan pilihan {sp} sendiri' },
+  { trigger:['dibully di sekolah','diejek guru','dipermalukan di kelas','direndahkan di sekolah'],
+    recall: '{sp} pernah mengalami pengalaman yang menyakitkan justru di tempat yang seharusnya aman' },
+
+  // ── PERNIKAHAN ──
+  { trigger:['pernikahan tidak bahagia','rumah tangga bermasalah','tidak cocok dengan suami','tidak cocok dengan istri','sering bertengkar dengan pasangan'],
+    recall: '{sp} merasakan perjalanan pernikahan yang cukup berat' },
+  { trigger:['bercerai','sudah bercerai','proses cerai','gagal dalam pernikahan'],
+    recall: '{sp} pernah melewati proses perpisahan yang tentu tidak mudah' },
+  { trigger:['tidak ingin menikah','takut menikah','trauma pernikahan','belum menikah dan merasa tertinggal'],
+    recall: 'ada bagian dari {sp} yang menyimpan kekhawatiran soal hubungan yang lebih dalam' },
+  { trigger:['pasangan selingkuh','dikhianati pasangan','suami selingkuh','istri selingkuh','perselingkuhan'],
+    recall: '{sp} pernah dilukai oleh orang yang paling dipercaya dalam hidupnya' },
+  { trigger:['dijodohkan','dipaksa menikah','nikah karena terpaksa','pernikahan bukan pilihan sendiri'],
+    recall: '{sp} menjalani pernikahan yang sejak awal bukan sepenuhnya pilihan {sp}' },
+  { trigger:['pasangan kasar','suami kasar','istri kasar','kekerasan dalam rumah tangga','KDRT','dipukul pasangan'],
+    recall: '{sp} pernah berada dalam hubungan yang seharusnya aman namun justru menyakiti' },
+  { trigger:['tidak diberi nafkah','pasangan tidak bertanggung jawab','suami tidak kerja','beban rumah tangga sendiri'],
+    recall: '{sp} menanggung beban rumah tangga yang seharusnya ditanggung bersama' },
+
+  // ── TRAUMA FISIK ──
+  { trigger:['pernah dipukul','pernah disakiti secara fisik','kekerasan fisik','dianiaya','ditampar','diperlakukan kasar'],
+    recall: '{sp} pernah mengalami perlakuan fisik yang sangat menyakitkan' },
+  { trigger:['kecelakaan','pernah kecelakaan','trauma kecelakaan','cacat akibat kecelakaan'],
+    recall: '{sp} pernah melewati peristiwa fisik yang cukup berat' },
+  { trigger:['pernah dilecehkan','pelecehan','dilecehkan waktu kecil','trauma pelecehan','disentuh tanpa izin'],
+    recall: '{sp} pernah mengalami sesuatu yang seharusnya tidak pernah terjadi pada siapapun' },
+  { trigger:['bekas luka','malu dengan tubuh','tidak suka tubuh sendiri','malu dengan penampilan','minder soal fisik'],
+    recall: '{sp} menyimpan hubungan yang cukup rumit dengan tubuhnya sendiri' },
+
+  // ── KEUANGAN ──
+  { trigger:['terlilit hutang','banyak hutang','tidak bisa bayar hutang','ditagih terus','gagal bayar'],
+    recall: '{sp} sedang menanggung beban finansial yang terasa cukup menekan' },
+  { trigger:['bangkrut','usaha gagal','bisnis hancur','kehilangan semua uang','tidak punya uang'],
+    recall: '{sp} pernah mengalami masa di mana secara finansial semuanya terasa runtuh' },
+  { trigger:['tidak mampu memenuhi kebutuhan','kekurangan biaya','tidak cukup uang','hidup pas-pasan','sulit ekonomi'],
+    recall: '{sp} sudah berusaha keras meski keadaan ekonomi tidak selalu berpihak' },
+  { trigger:['malu karena tidak punya uang','malu tidak bisa traktir','malu karena miskin','gengsi soal uang'],
+    recall: '{sp} pernah merasakan malu yang dalam karena kondisi ekonomi' },
+  { trigger:['bekerja keras tapi tidak cukup','kerja banting tulang tapi tetap kurang','tidak ada habisnya kebutuhan'],
+    recall: '{sp} sudah bekerja sekeras mungkin namun rasanya tidak pernah cukup juga' },
+
+  // ── HARGA DIRI LANJUTAN ──
+  { trigger:['selalu disalahkan','kambing hitam','tidak pernah dihargai','pendapat tidak didengar'],
+    recall: '{sp} sering merasa suaranya tidak cukup didengar oleh orang-orang di sekitar' },
+  { trigger:['tidak percaya diri','minder','rendah diri','malu dengan diri sendiri','tidak suka diri sendiri'],
+    recall: '{sp} tampaknya cukup keras pada diri sendiri selama ini' },
+  { trigger:['selalu dibandingkan','dibanding-bandingkan','kalah dari saudara','tidak sepintar kakak','tidak sebaik adik'],
+    recall: '{sp} tumbuh dengan tekanan untuk selalu memenuhi standar orang lain' },
+  { trigger:['merasa tidak dicintai','tidak ada yang mencintai saya','tidak layak dicintai','takut tidak dicintai'],
+    recall: '{sp} menyimpan keraguan yang dalam soal apakah {sp} layak untuk dicintai' },
+  { trigger:['selalu mengalah','tidak bisa bilang tidak','sulit menolak','takut mengecewakan orang lain'],
+    recall: '{sp} sudah sangat lama mengutamakan orang lain hingga melupakan diri sendiri' },
+  { trigger:['tidak punya identitas','tidak tahu siapa diri saya','bingung dengan diri sendiri','tidak kenal diri sendiri'],
+    recall: '{sp} sedang berada di tengah perjalanan menemukan kembali siapa dirinya' },
+
+  // ── PERAN & TANGGUNG JAWAB ──
+  { trigger:['harus mengurus semua','semua tergantung pada saya','tidak ada yang bantu','harus kuat terus','tidak boleh lemah'],
+    recall: '{sp} sudah lama menanggung segalanya sendiri tanpa ruang untuk lemah' },
+  { trigger:['tidak sempat untuk diri sendiri','tidak punya waktu sendiri','hidup untuk orang lain terus','tidak ada waktu istirahat'],
+    recall: '{sp} sudah begitu lama memberi tanpa pernah benar-benar mengisi ulang dirinya sendiri' },
+  { trigger:['menjadi tulang punggung','satu-satunya pencari nafkah','harus cukupi keluarga','tekanan finansial keluarga'],
+    recall: '{sp} menanggung beban menafkahi yang tidak ringan seorang diri' },
+  { trigger:['tidak boleh mengeluh','harus baik-baik saja','harus terlihat kuat','tidak bisa curhat ke siapapun'],
+    recall: '{sp} terbiasa menyembunyikan perasaan demi menjaga orang-orang di sekitarnya' },
+
+  // ── MIMPI & HARAPAN YANG HILANG ──
+  { trigger:['mimpi yang tidak tercapai','cita-cita tidak terwujud','impian pupus','harapan hancur','tidak bisa mengejar impian'],
+    recall: '{sp} menyimpan mimpi yang pernah terasa sangat nyata namun terasa menjauh' },
+  { trigger:['dulu ingin jadi','dulu bercita-cita','waktu muda ingin','kalau saja dulu dilanjutkan'],
+    recall: '{sp} masih membawa bayangan masa depan yang pernah diimpikan' },
+  { trigger:['tidak ada masa depan','tidak tahu mau ke mana','tidak ada harapan','masa depan terasa gelap'],
+    recall: '{sp} sedang berada di titik di mana ke depan pun terasa belum jelas' },
+
+  // ── ISOLASI SOSIAL ──
+  { trigger:['tidak keluar rumah','mengurung diri','tidak mau bertemu orang','menghindari orang','malas bertemu siapapun'],
+    recall: '{sp} sudah cukup lama memilih untuk menjauhi dunia di luar' },
+  { trigger:['tidak bisa percaya orang','sulit percaya','takut dikhianati lagi','tidak mau dekat dengan siapapun'],
+    recall: '{sp} sudah belajar dengan cara yang menyakitkan bahwa tidak semua orang bisa dipercaya' },
+  { trigger:['introvert','pendiam','tidak suka keramaian','tidak nyaman di antara banyak orang'],
+    recall: '{sp} lebih nyaman dengan dunianya sendiri — dan itu bukan hal yang salah' },
+
+  // AGAMA / SPIRITUAL
+  { trigger:['merasa jauh dari tuhan','tidak merasa tuhan ada','doa tidak dikabulkan','tuhan tidak adil','menjauhi agama'],
+    recall: '{sp} pernah merasakan jarak yang cukup jauh dalam sisi spiritualnya' },
+  { trigger:['kehilangan iman','tidak percaya lagi','kecewa dengan agama','sudah tidak rajin ibadah'],
+    recall: '{sp} sempat merasakan pergolakan dalam sisi kepercayaannya' },
+
+  // PERTEMANAN
+  { trigger:['teman mengkhianati','dikhianati teman','teman menjauhi','dijauhi teman','tidak punya teman dekat'],
+    recall: '{sp} pernah merasakan sakit karena kehilangan orang yang dianggap teman' },
+  { trigger:['tidak cocok dengan teman','sulit bergaul','selalu salah paham dengan teman','tidak bisa dekat dengan orang lain'],
+    recall: '{sp} merasa cukup sulit untuk benar-benar dekat dengan orang lain' },
+
+  // PENDIDIKAN
+  { trigger:['tidak tamat sekolah','tidak bisa sekolah','putus sekolah','tidak kuliah','tidak lanjut sekolah'],
+    recall: '{sp} pernah melewati masa di mana pendidikan terasa seperti sesuatu yang tidak bisa {sp} raih' },
+  { trigger:['tidak pintar di sekolah','merasa bodoh','nilai jelek','tidak berprestasi','dianggap lambat belajar'],
+    recall: '{sp} pernah merasa kurang dihargai di lingkungan pendidikan' },
+
+  // PERNIKAHAN
+  { trigger:['pernikahan tidak bahagia','rumah tangga bermasalah','tidak cocok dengan suami','tidak cocok dengan istri','sering bertengkar dengan pasangan'],
+    recall: '{sp} merasakan perjalanan pernikahan yang cukup berat' },
+  { trigger:['bercerai','sudah bercerai','proses cerai','gagal dalam pernikahan'],
+    recall: '{sp} pernah melewati proses perpisahan yang tentu tidak mudah' },
+  { trigger:['tidak ingin menikah','takut menikah','trauma pernikahan','belum menikah dan merasa tertinggal'],
+    recall: 'ada bagian dari {sp} yang menyimpan kekhawatiran soal hubungan yang lebih dalam' },
+
+  // TRAUMA FISIK
+  { trigger:['pernah dipukul','pernah disakiti secara fisik','kekerasan fisik','dianiaya','ditampar','diperlakukan kasar'],
+    recall: '{sp} pernah mengalami perlakuan fisik yang sangat menyakitkan' },
+  { trigger:['kecelakaan','pernah kecelakaan','trauma kecelakaan','cacat akibat kecelakaan'],
+    recall: '{sp} pernah melewati peristiwa fisik yang cukup berat' },
+
+  // KEUANGAN
+  { trigger:['terlilit hutang','banyak hutang','tidak bisa bayar hutang','ditagih terus','gagal bayar'],
+    recall: '{sp} sedang menanggung beban finansial yang terasa cukup menekan' },
+  { trigger:['bangkrut','usaha gagal','bisnis hancur','kehilangan semua uang','tidak punya uang'],
+    recall: '{sp} pernah mengalami masa di mana secara finansial semuanya terasa runtuh' },
+  { trigger:['tidak mampu memenuhi kebutuhan','kekurangan biaya','tidak cukup uang','hidup pas-pasan','sulit ekonomi'],
+    recall: '{sp} sudah berusaha keras meski keadaan ekonomi tidak selalu berpihak' },
+
+  // HARGA DIRI LANJUTAN
+  { trigger:['selalu disalahkan','kambing hitam','tidak pernah dihargai','pendapat tidak didengar'],
+    recall: '{sp} sering merasa suaranya tidak cukup didengar oleh orang-orang di sekitar' },
+  { trigger:['tidak percaya diri','minder','rendah diri','malu dengan diri sendiri','tidak suka diri sendiri'],
+    recall: '{sp} tampaknya cukup keras pada diri sendiri selama ini' },
+  { trigger:['selalu dibandingkan','dibanding-bandingkan','kalah dari saudara','tidak sepintar kakak','tidak sebaik adik'],
+    recall: '{sp} tumbuh dengan tekanan untuk selalu memenuhi standar orang lain' },
 ];
 
 /* Prefix & suffix untuk variasi kalimat recall — tambah sendiri di sini */
 const RECALL_PREFIX = [
+  // Reflektif
   'Jadi ',
   'Berarti ',
   'Oo, jadi ',
-  'Saya mendengar bahwa ',
   'Kalau begitu ',
+  'Hmm, jadi ',
+  // Empatik aktif
+  'Saya mendengar bahwa ',
+  'Saya tangkap bahwa ',
+  'Saya merasakan bahwa ',
+  'Saya mendengar ',
+  // Berbasis cerita user
+  'Dari yang {sp} ceritakan, sepertinya ',
+  'Dari cerita {sp}, tampaknya ',
+  'Dari apa yang {sp} sampaikan, terasa bahwa ',
+  'Mendengar {sp}, saya menangkap bahwa ',
+  // Natural / percakapan
+  'Ya, sepertinya ',
+  'Kedengarannya ',
+  'Terdengar bahwa ',
+  'Rasanya ',
+  // Penegas empatik
+  'Ada sesuatu yang {sp} bawa — ',
+  'Di balik cerita {sp}, sepertinya ',
+  'Yang saya tangkap dari {sp} adalah — ',
+  // Halus / lembut
+  'Saya ingin memastikan saya mengerti — ',
+  'Kalau boleh saya cerminkan kembali, ',
+  'Seperti yang {sp} gambarkan, ',
+  'Dari sini saya menangkap bahwa ',
+  // Hangat
+  'Dengan tulus saya mendengar bahwa ',
+  'Saya di sini, dan saya mendengar — ',
+  'Terima kasih sudah berbagi — sepertinya ',
+  // Penutup variatif
+  'Yang {sp} rasakan itu nyata — ',
+  'Ini penting untuk diakui — ',
+  'Saya tidak ingin melewatkan ini — ',
 ];
 const RECALL_SUFFIX = [
+  // Singkat & natural
   ', ya.',
+  '.',
+  '... ya.',
   '... begitu ya.',
+  // Acknowledgement ringan
   ', ya — saya dengar.',
   '. Saya mengerti.',
-  '.',
+  '. Saya dengar itu.',
+  '... saya mendengar sepenuhnya.',
+  // Validasi emosi
+  '... itu pasti tidak mudah.',
+  '. Itu bukan hal kecil.',
+  '... wajar jika itu masih terasa.',
+  '... itu beban yang nyata.',
+  '... dan itu butuh keberanian untuk diceritakan.',
+  // Kehadiran
+  '. Saya di sini, {sp}.',
+  '. {sp} tidak sendirian.',
+  '. Saya menemani {sp} di sini.',
+  '... dan saya di sini mendengarkan.',
+  // Apresiasi
+  '... terima kasih sudah mau berbagi.',
+  ', dan saya menghargai kejujuran {sp}.',
+  '. Saya sangat menghargai {sp} mau menceritakan ini.',
+  '... butuh keberanian untuk menyampaikan ini.',
+  // Pengakuan perasaan
+  '... dan perasaan itu valid.',
+  '... wajar sekali jika itu terasa berat.',
+  '... {sp} berhak merasakan itu.',
+  '... dan tidak ada yang salah dengan perasaan itu.',
+  // Penguatan
+  '... {sp} sudah melewati banyak hal.',
+  '... {sp} lebih kuat dari yang {sp} bayangkan.',
+  '... dan saya melihat betapa beratnya itu.',
+  // Ajakan lanjut (pasif, tanpa tanda tanya)
+  '... dan saya ingin {sp} tahu bahwa ini ruang yang aman.',
 ];
 
 /* Kalimat pemancing untuk jawaban pendek — tambah sendiri di sini */
 const PEMANCING_CERITA = [
+  // Undangan terbuka
   'Boleh ceritakan lebih lanjut, {sp}?',
   'Saya ingin mendengar lebih banyak dari {sp}...',
   'Ceritakan lebih, {sp} — saya di sini mendengarkan.',
   'Kalau {sp} mau, boleh ceritakan lebih dalam lagi?',
   'Tidak perlu terburu-buru, {sp}. Ceritakan saja pelan-pelan.',
+  // Hangat & mengundang
+  'Kalau {sp} nyaman, saya ingin mendengar lebih banyak...',
+  'Sepertinya ada lebih banyak yang ingin {sp} sampaikan. Lanjutkan saja.',
+  'Saya mendengarkan sepenuhnya, {sp}. Boleh diceritakan lebih?',
+  'Ceritakan saja, {sp} — tidak ada yang menghakimi di sini.',
+  'Saya di sini untuk mendengar, {sp}. Pelan-pelan saja.',
+  // Fokus pada perasaan
+  'Apa yang {sp} rasakan saat itu — boleh diceritakan?',
+  'Saya ingin lebih memahami apa yang {sp} alami.',
+  'Boleh {sp} gambarkan sedikit lebih — agar saya lebih memahami?',
+  'Ada bagian yang ingin {sp} ceritakan lebih dalam?',
+  'Perasaan apa yang paling kuat muncul saat {sp} mengingat ini?',
+  // Penegas keamanan
+  'Tidak ada jawaban yang salah di sini, {sp}. Ceritakan saja.',
+  'Ruang ini sepenuhnya untuk {sp} — ceritakan sebanyak yang {sp} mau.',
+  'Saya tidak kemana-mana, {sp}. Ambil waktu {sp} sendiri.',
+  'Apapun yang ingin {sp} ceritakan, saya siap mendengar.',
+  // Berbasis konteks
+  'Boleh diceritakan bagaimana itu bisa terjadi, {sp}?',
+  'Saya penasaran — bagaimana perasaan {sp} saat itu?',
+  'Sepertinya ada sesuatu yang lebih dari itu... boleh dilanjutkan?',
+  'Saya ingin memahami lebih dalam apa yang {sp} maksud.',
+  // Validasi sebelum memancing
+  'Terima kasih sudah mulai berbagi, {sp}. Kalau mau, ceritakan lebih?',
+  'Itu sudah langkah berani, {sp}. Boleh dilanjutkan?',
+  'Saya senang {sp} mau bercerita. Lanjutkan saja pelan-pelan.',
+  // Variatif
+  'Hmm... boleh diceritakan lebih, {sp}?',
+  'Ada yang ingin ditambahkan, {sp}?',
+  'Saya mendengar {sp} — dan ingin mendengar lebih.',
+  'Ceritakan dengan cara apapun yang terasa nyaman buat {sp}.',
 ];
 
 /* Kalimat acknowledge singkat (mirror ringan, tidak balik tanya) */
 const ACKNOWLEDGE = [
+  // Singkat & natural
   'Oo, begitu ya...',
   'Saya mengerti, {sp}.',
   'Hmm, iya ya...',
   'Saya dengar {sp}.',
   'Iya, saya mengerti perasaan {sp}.',
   'Terima kasih sudah mau cerita, {sp}.',
+  // Hangat & hadir
+  'Iya... itu terdengar tidak mudah.',
+  'Saya di sini, {sp}. Terus saja.',
+  'Mm, saya mendengar itu.',
+  'Iya, wajar {sp} merasakan itu.',
+  'Itu pasti terasa berat ya, {sp}.',
+  'Saya sangat menghargai {sp} mau berbagi ini.',
+  // Pengakuan lebih dalam
+  'Iya... {sp} sudah melewati banyak hal.',
+  'Terima kasih, {sp} — ini bukan hal yang mudah untuk diungkapkan.',
+  'Saya mendengar setiap kata yang {sp} sampaikan.',
+  'Iya... perasaan itu nyata dan valid.',
+  // Empati tanpa berlebihan
+  'Hmm... saya mengerti kenapa itu terasa berat.',
+  'Iya, itu bukan hal kecil, {sp}.',
+  'Saya dengar betapa beratnya itu buat {sp}.',
+  'Oo... iya, saya mengerti.',
+  // Kehadiran
+  'Saya di sini, {sp} — tidak kemana-mana.',
+  '{sp} tidak sendirian dalam ini.',
+  'Saya menemani {sp} di sini.',
+  'Apapun yang {sp} rasakan, saya di sini mendengar.',
+  // Variatif & manusiawi
+  'Mm... iya.',
+  'Saya paham, {sp}.',
+  'Iya... terima kasih sudah percaya untuk menceritakan ini.',
+  'Hmm, iya — dan itu wajar sekali.',
+  'Saya mendengar {sp}, sepenuhnya.',
+  'Iya... itu memang tidak mudah dijalani.',
 ];
-
 function _pickStr(arr, sp){
   const s = arr[Math.floor(Math.random() * arr.length)];
   return s.replace(/\{sp\}/g, sp);
@@ -1357,13 +1733,35 @@ function buildAIResponse(text, nlp, turnNum){
   const { emotion, topics } = nlp;
   if(emotion !== 'netral'){
     const emoMap = {
-      'sedih'   : 'saya tau {sp} sedang merasa sedih',
-      'marah'   : 'saya mengerti betapa kesalnya {sp} dengan situasi ini',
-      'takut'   : 'wajar jika {sp} merasa khawatir menghadapi ini',
-      'malu'    : 'saya mengerti jika {sp} merasa tidak nyaman',
-      'rindu'   : 'saya merasakan betapa {sp} sangat merindukannya',
-      'bangga'  : 'senang sekali mendengar pencapaian {sp}',
-      'senang'  : 'terdengar menyenangkan ya untuk {sp}',
+      // Emosi dasar (sudah ada, diperkaya ekspresinya)
+      'sedih'      : 'saya tau {sp} sedang merasa sedih, dan itu nyata adanya',
+      'marah'      : 'saya mengerti betapa kesalnya {sp} dengan situasi ini',
+      'takut'      : 'wajar sekali jika {sp} merasa khawatir menghadapi ini',
+      'malu'       : 'saya mengerti jika {sp} merasa tidak nyaman dengan ini',
+      'rindu'      : 'saya merasakan betapa {sp} sangat merindukannya',
+      'bangga'     : 'senang sekali mendengar pencapaian yang {sp} raih',
+      'senang'     : 'terdengar menyenangkan ya untuk {sp}',
+      // Emosi baru
+      'kecewa'     : 'saya mengerti betapa kecewanya {sp} dengan apa yang terjadi',
+      'cemas'      : 'wajar sekali jika {sp} merasa cemas menghadapi semua ini',
+      'bersalah'   : 'saya mendengar bahwa {sp} masih membawa perasaan bersalah itu',
+      'bingung'    : 'saya paham jika {sp} merasa bingung — situasinya memang tidak sederhana',
+      'hopeless'   : 'saya mendengar {sp}, dan perasaan itu nyata — {sp} tidak sendirian',
+      // Tambahan baru
+      'lelah'      : 'saya merasakan betapa lelahnya {sp} — fisik maupun batin',
+      'putus asa'  : '{sp} mungkin merasa sudah kehabisan tenaga, dan itu sangat bisa dimengerti',
+      'hampa'      : 'rasa hampa yang {sp} rasakan itu nyata, dan saya mendengarnya',
+      'tertekan'   : 'saya mengerti betapa beratnya tekanan yang {sp} rasakan saat ini',
+      'tidak aman' : 'saya mendengar bahwa {sp} sedang tidak merasa aman, dan itu penting',
+      'menyesal'   : '{sp} masih membawa penyesalan itu, dan saya mengerti betapa beratnya',
+      'lega'       : 'terdengar ada sedikit kelegaan yang {sp} rasakan — itu baik',
+      'bersyukur'  : 'senang mendengar {sp} bisa menemukan rasa syukur di tengah semuanya',
+      'pasrah'     : 'saya mendengar kepasrahan dalam kata-kata {sp} — dan itu juga butuh keberanian',
+      'tidak berdaya' : 'saya mendengar betapa {sp} merasa tidak punya kendali atas situasinya',
+      'kesepian'   : 'rasa kesepian yang {sp} bawa itu nyata, dan saya di sini menemani',
+      'terluka'    : 'luka yang {sp} rasakan itu valid — dan tidak harus disimpan sendirian',
+      'khawatir'   : 'saya mengerti kekhawatiran {sp}, itu tanda bahwa {sp} sangat peduli',
+      'tidak dimengerti' : 'saya mendengar betapa {sp} merasa tidak cukup dipahami oleh orang sekitar',
     };
     const validasi = (emoMap[emotion] || 'saya mendengar {sp}').replace(/\{sp\}/g, sp);
     return validasi + '.';
