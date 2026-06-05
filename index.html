@@ -1387,13 +1387,177 @@ function detectTopic(text) {
 }
 
 /* ── analyzeNLP: tetap ada untuk crisis check & DB logging ── */
+/* ══════════════════════════════════════════
+   NLP LAYER 3 — TOKOH, KEBUTUHAN, KEKUATAN, SUMMARY
+   Berjalan di atas analyzeEmotionDeep + detectTopic.
+   Sepenuhnya rule-based, tanpa API.
+══════════════════════════════════════════ */
+
+/* ── Deteksi Tokoh yang Disebut ── */
+const TOKOH_LEX = {
+  'ibu':          ['ibu','mama','emak','bunda','mami','ummi','mak'],
+  'ayah':         ['ayah','papa','bapak','abah','abi','papi','pak'],
+  'kakak':        ['kakak','kak','abang','bang','mbak'],
+  'adik':         ['adik','dik','adek'],
+  'suami':        ['suami','pak suami','mas','kang'],
+  'istri':        ['istri','istriku','bini','isteri'],
+  'anak':         ['anak','anakku','anak saya','si kecil','putra','putri'],
+  'sahabat':      ['sahabat','teman dekat','bestie','sobat','kawan lama'],
+  'teman':        ['teman','temanku','teman saya'],
+  'pasangan':     ['pacar','kekasih','pasangan','doi','gebetan'],
+  'guru':         ['guru','pak guru','bu guru','dosen','ustaz','ustazah'],
+  'atasan':       ['bos','atasan','kepala','manajer','direktur'],
+  'diri sendiri': ['diri sendiri','saya sendiri','diriku','hidupku'],
+};
+
+function detectTokoh(text) {
+  const t = text.toLowerCase();
+  const found = [];
+  for (const [tokoh, kata] of Object.entries(TOKOH_LEX)) {
+    if (kata.some(k => t.includes(k)) && !found.includes(tokoh)) found.push(tokoh);
+  }
+  return found.slice(0, 3);
+}
+
+/* ── Inferensi Kebutuhan dari Emosi + Topik + Tokoh ── */
+const KEBUTUHAN_RULES = [
+  { emosi:['sedih','trauma','kecewa'],  topik:['kehilangan','keluarga'],   need:'dukungan emosional' },
+  { emosi:['sedih','trauma'],           topik:['kehilangan'],              need:'ruang untuk berduka' },
+  { emosi:['kesepian'],                 topik:[],                          need:'koneksi dan kebersamaan' },
+  { emosi:['marah','kecewa'],           topik:['pekerjaan','keuangan'],    need:'rasa keadilan' },
+  { emosi:['takut','cemas'],            topik:['kesehatan'],               need:'rasa aman dan kepastian' },
+  { emosi:['takut','cemas'],            topik:[],                          need:'ketenangan dan rasa aman' },
+  { emosi:['burnout'],                  topik:[],                          need:'istirahat dan pemulihan' },
+  { emosi:['malu'],                     topik:[],                          need:'penerimaan diri' },
+  { emosi:['rindu'],                    topik:['kehilangan','keluarga'],   need:'penerimaan atas kehilangan' },
+  { emosi:['rindu'],                    topik:[],                          need:'kedekatan dan kehangatan' },
+  { emosi:['senang','harapan'],         topik:[],                          need:'pengakuan dan apresiasi' },
+  { emosi:['kecewa'],                   topik:['percintaan','pertemanan'], need:'kepercayaan kembali' },
+  { emosi:['marah'],                    topik:['keluarga'],                need:'didengar dan dipahami' },
+];
+
+function detectKebutuhan(emotion, topics, tokoh) {
+  const found = [];
+  for (const rule of KEBUTUHAN_RULES) {
+    const emoMatch   = rule.emosi.includes(emotion);
+    const topikMatch = rule.topik.length === 0 || rule.topik.some(t => topics.includes(t));
+    if (emoMatch && topikMatch && !found.includes(rule.need)) found.push(rule.need);
+  }
+  return found.slice(0, 2).length > 0 ? found.slice(0, 2) : ['dukungan'];
+}
+
+/* ── Deteksi Kekuatan / Resiliensi ── */
+const KEKUATAN_LEX = {
+  'ketahanan':    ['masih','tetap','bertahan','meskipun','walau','walaupun','meski','sampai sekarang','hingga kini','terus','lanjut','masih bisa','masih ada'],
+  'keberanian':   ['berani','mencoba','coba','memberanikan','maju','melangkah','memutuskan','mulai lagi','mencoba lagi'],
+  'keikhlasan':   ['ikhlas','menerima','bisa menerima','mencoba menerima','merelakan','rela','pasrah','berserah'],
+  'kepedulian':   ['peduli','perhatian','sayang','cinta','menjaga','merawat','membantu','selalu ada'],
+  'spiritualitas':['berdoa','doa','ibadah','berserah','syukur','alhamdulillah','iman','percaya tuhan'],
+  'ketekunan':    ['berusaha','usaha','kerja keras','tidak menyerah','pantang menyerah','semangat','gigih'],
+  'refleksi diri':['sadar','menyadari','berpikir','merenung','introspeksi','mengevaluasi','belajar dari'],
+};
+
+function detectKekuatan(text) {
+  const t = text.toLowerCase();
+  const found = [];
+  for (const [kekuatan, kata] of Object.entries(KEKUATAN_LEX)) {
+    if (kata.some(k => t.includes(k)) && !found.includes(kekuatan)) found.push(kekuatan);
+  }
+  return found.slice(0, 2);
+}
+
+/* ── Template Summary Kalimat Mirror ── */
+const SUMMARY_TPL = {
+  sedih: {
+    'ibu':      'Anda kehilangan sosok ibu yang sangat berarti {waktu}',
+    'ayah':     'Anda kehilangan sosok ayah yang sangat berharga {waktu}',
+    'suami':    'Anda menghadapi kehilangan suami yang meninggalkan duka mendalam',
+    'istri':    'Anda menghadapi kehilangan istri yang masih terasa hingga kini',
+    'anak':     'Kehilangan anak adalah duka yang sulit diungkapkan dengan kata-kata',
+    'sahabat':  'Anda kehilangan sahabat yang memiliki tempat istimewa dalam hidup Anda',
+    '_default': 'Anda sedang menanggung kesedihan yang cukup berat dalam hidup',
+  },
+  marah: {
+    'atasan':   'Anda mengalami situasi di tempat kerja yang terasa tidak adil',
+    'suami':    'Ada ketegangan dalam hubungan pernikahan yang membebani Anda',
+    'istri':    'Ada ketegangan dalam hubungan pernikahan yang membebani Anda',
+    '_default': 'Ada rasa marah atau frustrasi yang sedang Anda tanggung saat ini',
+  },
+  takut: {
+    '_default': 'Ada kekhawatiran dan rasa tidak aman yang sedang Anda rasakan',
+  },
+  kesepian: {
+    '_default': 'Anda sedang merasakan kesepian dan merindukan kedekatan dengan orang lain',
+  },
+  burnout: {
+    '_default': 'Anda sedang mengalami kelelahan yang cukup mendalam dalam menjalani hari-hari',
+  },
+  kecewa: {
+    '_default': 'Ada kekecewaan yang cukup dalam dari situasi yang Anda alami',
+  },
+  rindu: {
+    'ibu':      'Anda menyimpan kerinduan mendalam pada sosok ibu',
+    'ayah':     'Anda menyimpan kerinduan mendalam pada sosok ayah',
+    '_default': 'Ada kerinduan yang mendalam pada seseorang atau momen yang telah berlalu',
+  },
+  senang: {
+    '_default': 'Ada pengalaman menyenangkan yang memberikan makna dalam hidup Anda',
+  },
+  harapan: {
+    '_default': 'Ada semangat dan harapan yang masih menyala dalam diri Anda',
+  },
+  trauma: {
+    '_default': 'Anda pernah melalui pengalaman berat yang meninggalkan bekas hingga sekarang',
+  },
+  malu: {
+    '_default': 'Ada rasa tidak percaya diri yang sedang Anda tanggung',
+  },
+  netral: {
+    '_default': 'Anda sedang berbagi perjalanan hidup yang bermakna',
+  },
+};
+
+/* ── Deteksi Keterangan Waktu ── */
+function detectWaktu(text) {
+  const t = text.toLowerCase();
+  if (t.match(/smp|sekolah menengah|remaja|usia \d+\s*tahun/))      return 'saat masa remaja';
+  if (t.match(/sd|sekolah dasar|waktu kecil|masa kecil|kecil dulu/)) return 'saat masih kecil';
+  if (t.match(/kuliah|mahasis/))                                      return 'di masa kuliah';
+  if (t.match(/menikah|pernikahan|setelah menikah/))                  return 'setelah menikah';
+  if (t.match(/bekerja|kerja|karir/))                                 return 'di masa bekerja';
+  if (t.match(/lama|bertahun|puluhan tahun|sejak lama/))              return 'sudah sejak lama';
+  return '';
+}
+
+/* ── Build Summary Kalimat Mirror ── */
+function buildSummary(emotion, tokoh, text) {
+  const emo  = emotion || 'netral';
+  const pool = SUMMARY_TPL[emo] || SUMMARY_TPL['netral'];
+  let tpl    = pool['_default'];
+  for (const t of tokoh) {
+    if (pool[t]) { tpl = pool[t]; break; }
+  }
+  const waktu = detectWaktu(text);
+  return tpl.replace('{waktu}', waktu ? waktu : '').replace(/\s+/g, ' ').trim();
+}
+
+/* ── analyzeNLP lengkap dengan semua layer ── */
 function analyzeNLP(text) {
-  const deep = analyzeEmotionDeep(text);
-  const topics = detectTopic(text);
+  const deep      = analyzeEmotionDeep(text);
+  const topics    = detectTopic(text);
+  const tokoh     = detectTokoh(text);
+  const kebutuhan = detectKebutuhan(deep.dominant, topics, tokoh);
+  const kekuatan  = detectKekuatan(text);
+  const summary   = buildSummary(deep.dominant, tokoh, text);
   return {
-    sentiment: deep.sentiment,
-    emotion: deep.dominant,
+    sentiment:  deep.sentiment,
+    emotion:    deep.dominant,
+    intensitas: deep.intensitas,
     topics,
+    tokoh,
+    kebutuhan,
+    kekuatan,
+    summary,
     _deep: deep,
   };
 }
@@ -1593,6 +1757,7 @@ function _pick(arr, sp, nm) {
 }
 
 /* ── Fungsi respons utama ── */
+/* ── Fungsi respons utama ── */
 function getMultiTurnResponse(turnNum, nlp, rawText) {
   const sp = getSapaan();
   const nm = S.nama || sp;
@@ -1602,22 +1767,57 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
   // Jawaban sangat pendek → pancing
   if (wordCount <= 6) return _pick(PEMANCING, sp, nm);
 
-  // Turn 3+: acknowledge ringan
-  if (turnNum >= 3) return _pick(ACK_DEEP, sp, nm);
+  // Ambil semua lapisan NLP
+  const deep       = nlp._deep || analyzeEmotionDeep(text);
+  const emo        = nlp.emotion    || deep.dominant;
+  const intensitas = nlp.intensitas || deep.intensitas;
+  const summary    = nlp.summary    || '';
+  const kekuatan   = nlp.kekuatan   || [];
+  const kebutuhan  = nlp.kebutuhan  || [];
 
-  // Gunakan deep emotion dari analyzeNLP
-  const deep = nlp._deep || analyzeEmotionDeep(text);
-  const emo = deep.dominant;
-  const intensitas = deep.intensitas;
+  // Turn 3+: acknowledge + refleksi kebutuhan
+  if (turnNum >= 3) {
+    const ack     = _pick(ACK_DEEP, sp, nm);
+    const reflect = kebutuhan.length
+      ? ` Sepertinya ${sp} sangat membutuhkan ${kebutuhan[0]} saat ini.`
+      : '';
+    return ack + reflect;
+  }
 
+  // Bangun respons 3 bagian:
+  // [1] Mirror summary (jika ada)
+  // [2] Validasi emosi dari RESP pool
+  // [3] Akui kekuatan user + penutup empati
+
+  // Bagian 1: mirror summary
+  let part1 = '';
+  if (summary) {
+    part1 = `Terima kasih telah berbagi cerita. Saya menangkap bahwa ${summary}.`;
+  }
+
+  // Bagian 2: validasi emosi dari pool
   const pool = RESP[emo];
-  if (!pool) return _pick(RESP.netral, sp, nm);
+  let part2  = '';
+  if (pool) {
+    const subpool = Array.isArray(pool)
+      ? pool
+      : pool[intensitas] || pool['sedang'] || pool['rendah'] || RESP.netral;
+    part2 = _pick(subpool, sp, nm);
+  } else {
+    part2 = _pick(RESP.netral, sp, nm);
+  }
 
-  // Pool bisa berupa object {tinggi,sedang,rendah} atau array langsung
-  if (Array.isArray(pool)) return _pick(pool, sp, nm);
+  // Bagian 3: kekuatan user + penutup
+  let part3 = '';
+  if (kekuatan.length > 0) {
+    const kStr = kekuatan.join(' dan ');
+    part3 = `Saya juga melihat adanya ${kStr} dalam diri ${sp} dari cara ${sp} menceritakan ini. Terima kasih telah mempercayakan cerita ini kepada saya.`;
+  } else {
+    part3 = `Terima kasih telah mempercayakan cerita ini kepada saya.`;
+  }
 
-  const subpool = pool[intensitas] || pool['sedang'] || pool['rendah'] || RESP.netral;
-  return _pick(subpool, sp, nm);
+  // Gabungkan — filter bagian kosong
+  return [part1, part2, part3].filter(p => p.trim()).join(' ');
 }
 
 /* Alias */
