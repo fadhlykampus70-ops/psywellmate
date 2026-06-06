@@ -1345,12 +1345,11 @@ const EMO_LEX = {
 };
 
 /* ── Kata Negasi ── */
-const NEGASI = ['tidak','bukan','belum','jangan','tanpa','tak','ga ','gak ','nggak','enggak','nda ','ndak ','durung ','ora ','yo nggak','kok nggak','kagak','gak mau','tidak','bukan','belum','jangan','tanpa','tak','ga ','gak ','nggak','enggak','nda ','ndak '];
-
+const NEGASI = ['tidak','bukan','belum','jangan','tanpa','tak','ga ','gak ','nggak','enggak','nda ','ndak ','durung ','ora ','yo nggak','kok nggak','kagak','gak mau'];
 /* ── Kata Intensifier ── */
 const INTENSIFIER = {
-  tinggi: ['beneran','beneran-beneran','parah','habis','mampus','bgt','bngt','banget sih','luar biasa','teramat','sungguh-sungguh','benar-benar','sangat','amat','sekali','banget','benar-benar','sungguh','terlalu','betul-betul','luar biasa','teramat','paling','super','ekstrem'],
-  rendah: ['sedikit','agak','lumayan','cukup','kurang','rada','hampir','yo ','sedikit','agak','lumayan','cukup','kurang','rada','hampir'],
+  tinggi: ['beneran','beneran-beneran','parah','habis','mampus','bgt','bngt','banget sih','sangat','amat','sekali','banget','benar-benar','sungguh','terlalu','betul-betul','luar biasa','teramat','paling','super','ekstrem','sungguh-sungguh'],
+  rendah: ['sedikit','agak','lumayan','cukup','kurang','rada','hampir','yo '],
 };
 
 /* ── Analisis Emosi Utama dari Teks ── */
@@ -1806,16 +1805,23 @@ const FLIP_POSITIF = {
     'Dari semua yang {sp} ceritakan, adakah satu momen kecil yang terasa indah atau hangat dari masa kecil itu?',
     'Di tengah masa kecil yang berat itu, apakah ada orang atau momen yang membuat {sp} merasa aman atau senang?',
     'Kalau ada satu kenangan menyenangkan dari waktu kecil {sp}, kira-kira apa yang paling {sp} ingat?',
+    'Ceritakan — siapa orang yang paling membuat {sp} merasa aman saat masih kecil?',
+    'Dari semua pengalaman masa kecil itu — permainan atau aktivitas apa yang paling {sp} rindukan?',
+    'Kalau ada satu bau, suara, atau pemandangan yang langsung membawa {sp} ke masa kecil yang indah — apa itu?',
   ],
   'keluarga': [
     'Dari cerita {sp} tentang keluarga, adakah momen bersama keluarga yang terasa hangat atau berarti bagi {sp}?',
     'Kalau ada satu hal baik yang {sp} ingat dari keluarga, hal apa itu?',
     'Di antara semua cerita itu, adakah anggota keluarga yang pernah membuat {sp} merasa benar-benar dicintai?',
+    'Adakah warisan nilai atau kebiasaan dari keluarga yang masih {sp} bawa hingga hari ini?',
+    'Di antara semua anggota keluarga — siapa yang paling membuat {sp} tertawa?',
   ],
   'pekerjaan': [
     'Dari perjalanan kerja {sp}, adakah momen atau pencapaian kecil yang pernah terasa menyenangkan atau membanggakan?',
     'Kalau ada satu hal baik atau momen menyenangkan di tempat kerja {sp}, ceritakan?',
     'Apakah ada rekan atau momen di tempat kerja yang pernah membuat {sp} merasa dihargai?',
+    'Kalau murid-murid {sp} bisa berbicara sekarang — kira-kira apa yang paling mereka ingat tentang {sp}?',
+    'Adakah momen di mana {sp} merasa bahwa pekerjaan itu benar-benar membuat perbedaan nyata?',
   ],
   'percintaan': [
     'Di tengah cerita itu, adakah momen dalam hubungan yang pernah terasa indah atau membahagiakan bagi {sp}?',
@@ -1836,10 +1842,14 @@ const FLIP_POSITIF = {
   'spiritualitas': [
     'Apakah ada momen dalam perjalanan spiritual {sp} yang pernah terasa sangat damai atau bermakna?',
     'Kalau ada satu momen di mana {sp} merasa dekat dengan Tuhan atau merasa tenang secara batin, seperti apa itu?',
+    'Adakah momen di mana doa atau ibadah {sp} terasa benar-benar dijawab?',
+    'Apa yang paling membuat {sp} merasa dekat dengan Tuhan — apakah itu tempat, waktu, atau situasi tertentu?',
   ],
   'kehilangan': [
     'Di antara rasa duka itu, adakah kenangan indah bersama orang yang {sp} rindukan yang masih {sp} ingat dengan hangat?',
     'Kalau ada satu momen bersama orang yang telah pergi itu yang paling berarti, apa yang {sp} ingat?',
+    'Apa hal yang paling lucu atau menyenangkan yang pernah terjadi bersama orang itu — yang masih membuat {sp} tersenyum?',
+    'Kalau {sp} bisa berbagi satu kenangan terbaik bersama mereka — kenangan mana yang paling {sp} pilih?',
   ],
   'masa lalu': [
     'Dari semua kenangan masa lalu itu, adakah satu momen yang masih terasa hangat atau menyenangkan bagi {sp}?',
@@ -1853,9 +1863,70 @@ const FLIP_POSITIF = {
     'Dari semua yang {sp} ceritakan, adakah satu momen baik atau indah yang masih {sp} ingat?',
     'Kalau ada hal baik atau momen menyenangkan yang pernah {sp} alami dalam cerita ini, boleh diceritakan?',
     'Di tengah cerita yang berat itu, adakah secercah hal yang masih bisa {sp} syukuri?',
+    'Cerita {sp} sangat bermakna. Di tengah semua itu — adakah satu orang yang selalu membuat {sp} merasa tidak sendirian?',
+    'Kalau {sp} boleh bersyukur untuk satu hal hari ini — hal apa itu?',
   ],
 };
 
+/* Pool pertanyaan konkret/aksi — untuk turn 3+ variant 1 */
+const CONCRETE_Q = {
+  'masa kecil': [
+    'Dari kenangan masa kecil yang {sp} ceritakan — adakah satu hal yang {sp} ingin sampaikan ke diri {sp} yang masih kecil dulu?',
+    'Bagaimana cara {sp} mengingat kekuatan dari masa kecil itu yang bisa diterapkan hari ini?',
+    'Kalau {sp} bisa balik sebentar ke masa kecil itu — apa yang paling ingin {sp} rasakan lagi?',
+  ],
+  'keluarga': [
+    'Dari semua cerita tentang keluarga tadi — adakah satu orang yang {sp} belum sempat bilang terima kasih?',
+    'Kalau ada satu hal yang ingin {sp} sampaikan ke anggota keluarga hari ini, apa itu?',
+    'Bagaimana hubungan {sp} dengan mereka sekarang — apakah ada yang {sp} ingin perbaiki atau pererat?',
+  ],
+  'pekerjaan': [
+    'Dari perjalanan kerja {sp} yang panjang itu — kemampuan apa yang paling berharga dan masih bisa {sp} pakai hari ini?',
+    'Bagaimana cara {sp} mengingat pencapaian-pencapaian itu ketika hari terasa berat?',
+    'Apakah ada hal dari pekerjaan dulu yang {sp} masih bisa teruskan dalam bentuk lain sekarang?',
+  ],
+  'spiritualitas': [
+    'Apakah ada doa atau ayat yang sering {sp} pegang di saat-saat sulit?',
+    'Bagaimana ibadah {sp} sekarang — apakah masih terasa sedekat dulu?',
+    'Kapan terakhir kali {sp} merasakan ketenangan yang beneran dari ibadah?',
+  ],
+  'kehilangan': [
+    'Kalau ada satu hal yang ingin {sp} sampaikan kepada orang yang telah pergi itu — apa yang paling ingin {sp} katakan?',
+    'Bagaimana {sp} melewati masa sulit itu — dan apa hikmah yang {sp} rasakan?',
+    'Adakah ritual kecil yang {sp} lakukan untuk tetap merasa terhubung dengan mereka?',
+  ],
+  '_default': [
+    'Dari semua yang {sp} ceritakan — apa satu langkah kecil yang paling ingin {sp} ambil ke depannya?',
+    'Adakah seseorang yang bisa {sp} hubungi hari ini untuk berbagi cerita ini?',
+    'Kalau ada satu hal kecil yang bisa {sp} lakukan hari ini untuk diri sendiri — apa itu?',
+  ],
+};
+
+/* Pool pertanyaan syukur/kekuatan — untuk turn 3+ variant 2 */
+const SYUKUR_Q = {
+  'masa kecil': [
+    'Di tengah semua cerita itu — adakah satu hal kecil dari masa kecil yang masih {sp} syukuri hingga hari ini?',
+    'Apa yang paling {sp} bawa dari masa kecil itu sampai sekarang — nilai, kebiasaan, atau cara pandang?',
+  ],
+  'keluarga': [
+    'Di antara semua cerita tentang keluarga — adakah momen bersama mereka yang masih {sp} rasakan hangatnya?',
+    'Apa yang paling {sp} syukuri dari keluarga yang {sp} miliki, seberapapun tidak sempurnanya?',
+  ],
+  'pekerjaan': [
+    'Dari puluhan tahun mengabdi — apa yang paling {sp} syukuri dari perjalanan kerja itu?',
+    'Adakah murid atau rekan yang masih {sp} ingat namanya hingga hari ini?',
+  ],
+  'kehilangan': [
+    'Di tengah rasa kehilangan itu — adakah sesuatu dari kebersamaan dulu yang masih terasa seperti hadiah?',
+    'Apa yang paling {sp} syukuri pernah memiliki orang itu dalam hidup {sp}?',
+  ],
+  '_default': [
+    'Di tengah cerita yang berat itu — adakah secercah hal yang masih bisa {sp} syukuri?',
+    'Dari semua itu — apa satu hal yang membuat {sp} merasa bahwa hidup ini layak dijalani?',
+    'Kalau ada satu kekuatan dalam diri {sp} yang paling {sp} andalkan selama ini — apa itu?',
+  ],
+};
+  
 /* Ambil topik dari teks pertanyaan sesi yang sedang aktif */
 function getTopikDariPertanyaan() {
   const qs = getSesiQuestions(S.currentSesiNum) || [];
@@ -1881,6 +1952,29 @@ function sudahCeritaPositif(nlp) {
           ['senang','harapan'].includes(nlp._deep.dominant));
 }
 
+/* Anti-duplikasi ACK — pilih index yang belum dipakai */
+function _pickUnique(arr, sp, nm, usedArr) {
+  const available = arr.filter((_, i) => !usedArr.includes(i));
+  if (available.length === 0) {
+    usedArr.length = 0;
+    return _pick(arr, sp, nm);
+  }
+  const item = available[Math.floor(Math.random() * available.length)];
+  usedArr.push(arr.indexOf(item));
+  return item.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm || sp);
+}
+
+/* Anti-duplikasi FLIP per topik — kembalikan null jika pool habis */
+function _pickFlipUnique(pool, topik, sp, nm) {
+  if (!_usedFlip[topik]) _usedFlip[topik] = [];
+  const used = _usedFlip[topik];
+  const available = pool.filter((_, i) => !used.includes(i));
+  if (available.length === 0) return null;
+  const item = available[Math.floor(Math.random() * available.length)];
+  used.push(pool.indexOf(item));
+  return item.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm || sp);
+}
+  
 /* ── Fungsi respons utama ── */
 function getMultiTurnResponse(turnNum, nlp, rawText) {
   const sp = getSapaan();
@@ -1888,23 +1982,23 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
   const text = rawText || '';
   const wordCount = text.trim().split(/\s+/).length;
 
-  // Jawaban sangat pendek → pancing cerita lebih dulu
   if (wordCount <= 6) return _pick(PEMANCING, sp, nm);
 
-  // Ambil semua lapisan NLP
   const deep       = nlp._deep || analyzeEmotionDeep(text);
   const emo        = nlp.emotion    || deep.dominant;
   const intensitas = nlp.intensitas || deep.intensitas;
   const summary    = nlp.summary    || '';
   const kekuatan   = nlp.kekuatan   || [];
   const kebutuhan  = nlp.kebutuhan  || [];
-
-  // Topik konteks dari pertanyaan sesi yang sedang aktif
   const topikSesi  = getTopikDariPertanyaan();
 
-  // ── TURN 1: user cerita pertama kali ──
+  // Simpan konteks turn ini
+  if (text.length > 30) {
+    _sessionContext.push({ emo, topik: topikSesi, turn: turnNum });
+  }
+
+  // ── TURN 1 ──
   if (turnNum === 1) {
-    // Jika user langsung cerita positif → validasi positif + transisi
     if (sudahCeritaPositif(nlp)) {
       const pool    = RESP[emo];
       const subpool = pool
@@ -1914,28 +2008,20 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
       const penutup  = `Terima kasih sudah berbagi cerita yang indah itu, ${sp}.`;
       return [validasi, penutup].join(' ');
     }
-
-    // User cerita negatif/berat → mirror + validasi + flip ke positif
     let part1 = '';
-    if (summary) {
-      part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
-    }
+    if (summary) part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
     const pool    = RESP[emo];
     const subpool = pool
       ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
       : RESP.netral;
     const part2 = _pick(subpool, sp, nm);
-
-    // Flip positif sesuai topik sesi
     const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
-    const part3    = _pick(flipPool, sp, nm);
-
+    const part3    = _pickFlipUnique(flipPool, topikSesi, sp, nm) || '';
     return [part1, part2, part3].filter(p => p.trim()).join(' ');
   }
 
-  // ── TURN 2: user merespons setelah flip ──
+  // ── TURN 2 ──
   if (turnNum === 2) {
-    // User sudah cerita positif → validasi positif + dorong ke pertanyaan berikutnya
     if (sudahCeritaPositif(nlp)) {
       const pool    = RESP[emo];
       const subpool = pool
@@ -1946,26 +2032,40 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
       const transisi = ` Terima kasih sudah berbagi — cerita ${sp} sangat bermakna.`;
       return validasi + kStr + transisi;
     }
-
-    // Masih negatif → acknowledge + coba flip sekali lagi dengan cara berbeda
-    const ack      = _pick(ACK_DEEP, sp, nm);
+    const ack      = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
     const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
-    // Pilih item berbeda dari turn 1 jika bisa (shuffle sederhana)
-    const flipped  = flipPool[Math.floor(Math.random() * flipPool.length)]
-                       .replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm);
+    const flipped  = _pickFlipUnique(flipPool, topikSesi, sp, nm);
+    if (!flipped) {
+      const pool    = RESP[emo];
+      const subpool = pool
+        ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
+        : RESP.netral;
+      return ack + ' ' + _pick(subpool, sp, nm);
+    }
     return ack + ' ' + flipped;
   }
 
-  // ── TURN 3+: user sudah banyak bercerita → penutup empati ──
-  const ack      = _pick(ACK_DEEP, sp, nm);
-  const reflect  = kebutuhan.length
-    ? ` Sepertinya ${sp} sangat membutuhkan ${kebutuhan[0]} saat ini.`
-    : '';
-  const kStr     = kekuatan.length > 0
-    ? ` Saya melihat adanya ${kekuatan.join(' dan ')} dalam diri ${sp}.`
-    : '';
-  const penutup  = ` Terima kasih sudah mempercayakan cerita ini kepada saya, ${sp}.`;
-  return ack + reflect + kStr + penutup;
+  // ── TURN 3+: rotasi 3 jenis respons ──
+  const ack = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
+  const turnVariant = turnNum % 3;
+
+  if (turnVariant === 0) {
+    const reflect = kebutuhan.length
+      ? ` Sepertinya ${sp} sangat membutuhkan ${kebutuhan[0]} saat ini.` : '';
+    const kStr = kekuatan.length > 0
+      ? ` Saya melihat adanya ${kekuatan.join(' dan ')} dalam diri ${sp}.` : '';
+    const penutup = ` Terima kasih sudah mempercayakan cerita ini kepada saya, ${sp}.`;
+    return ack + reflect + kStr + penutup;
+  }
+
+  if (turnVariant === 1) {
+    const concretePool = CONCRETE_Q[topikSesi] || CONCRETE_Q['_default'];
+    return ack + ' ' + _pick(concretePool, sp, nm);
+  }
+
+  // turnVariant === 2
+  const syukurPool = SYUKUR_Q[topikSesi] || SYUKUR_Q['_default'];
+  return ack + ' ' + _pick(syukurPool, sp, nm);
 }
 
 /* Alias */
