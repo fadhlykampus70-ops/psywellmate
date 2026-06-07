@@ -1227,6 +1227,9 @@ const EMO_LEX = {
 'tugasku udah selesai':3, 'cermin itu pecah':3,
 'nggak tau lagi siapa aku':3, 'saiki nggo opo':3,
 'luka lama':2, 'luka lama ditutup rapet':3,
+      'yatim piatu rasane sama aja':3,
+'masing-masing punya capeknya sendiri':2,
+'kenalan yang kebetulan satu bapak satu ibu':3,
     }
   },
   marah: {
@@ -1244,6 +1247,8 @@ const EMO_LEX = {
       'gugup':1,'ngeri':3,'trauma':3,'fobia':3,'gentar':2,'ketakutan':3,
       'teror':3,'gemetar':2,'menggigil':2,'waswas':2,'resah':2,'risau':2,
       'khawatirkan':2,'ketakutan':3,'merasa tidak aman':3,'tidak tenang':2,
+      'takut dunia bisa runtuh':3, 'nggak berani masuk':1,
+'takut kehilangan':3, 'bahu naik turun':2,
     }
   },
   senang: {
@@ -1255,7 +1260,9 @@ const EMO_LEX = {
       'sukses':2,'hebat':2,'luar biasa':2,'alhamdulillah':2,'nikmat':2,'ngerasa genap':3, 'ngerasa lengkap':2, 'guyub':2,
 'petrichor':2, 'bau tanah abis hujan':2,
 'lincak':1, 'ngerasa aman':3, 'anget di dada':2,
-'apik ndhuk':2, 'lega':2,
+'apik ndhuk':2, 'lega':2,'caranya bilang bangga':2, 'caranya bilang sayang':2,
+'digendong bapak lihat bintang':2, 'gulali bentuk kupu-kupu':1,
+'kesempurnaan nggak butuh banyak':2,
     }
   },
   rindu: {
@@ -1264,6 +1271,9 @@ const EMO_LEX = {
       'savahan':2,'mengenang':2,'teringat':2,'ingat terus':2,'tidak bisa lupa':2,
       'selalu teringat':3,'merasa kehilangan':2,'ingin kembali':2,'kangen':3, 'kangen banget':3, 'kangenan':2,
       'masih inget':2, 'nggak bisa lupa':2, 'perih':2,'seneng tapi perih':3, 'campur aduk':1,
+      'pengen bisa nelpon ibu':3,
+'tangan kasar tapi kompres kepalaku':3,
+'Pak Sardi cermin aku':3,
     }
   },
   malu: {
@@ -1272,7 +1282,8 @@ const EMO_LEX = {
       'sungkan':1,'insecure':2,'malu-malu':1,'tidak pantas':2,'tidak layak':2,
       'merasa jelek':2,'tidak cukup baik':2,'tidak mampu':2,'gagal':2,'nggak tau lagi siapa aku':3, 'peran udah habis':3,
 'saiki nggo opo':3, 'nggo opo':2, 'aku ini siapa':3,
-'janda yang nunggu':2, 'pensiunan yang tinggal sendiri':2,
+'janda yang nunggu':2, 'pensiunan yang tinggal sendiri':2,'nggak tau bayangan apa yang aku lihat':3,
+'pensiunan yang tinggal sendiri':2,
     }
   },
   kesepian: {
@@ -1300,6 +1311,13 @@ const EMO_LEX = {
 'nggak sepenuhnya hadir':2,
 'muter-muter pertanyaan':2, 'kaset yang diulang':2,
 'bukan minta disembuhkan':2,
+      'nggak ada yang lihat isinya':3,
+'foto lama yang kusayang lirik sebentar':3,
+'cuma minta diinget':2, 'ceritaku nggak ada bekasnya':3,
+'beneran baca ceritaku nggak':3,
+'belum siap beneran nemenin':3,
+'capek ngerasa nggak beneran didengar':3,
+'muter-muter ke situ terus':2,
     }
   },
   trauma: {
@@ -1310,6 +1328,9 @@ const EMO_LEX = {
       'membekas':2,'luka lama':3,'luka batin':3,'mati rasa':3, 'luka lama':2, 'luka lama ditutup rapet':3,
 'belum beneran ikhlas':2, 'belum ilang-ilang':2,
 'bayangan nggak pernah ilang':3,
+      'pergi tanpa pamit':2,
+'umur tiga belas udah belajar kehilangan':3,
+'pertama kalinya aku ngerti orang bisa pergi':3,
     }
   },
   burnout: {
@@ -1323,6 +1344,8 @@ const EMO_LEX = {
 'lemari penuh tapi berantakan':2, 'mager':1,
 'nglakoni aja':1, 'mutar terus tapi gak kemana-mana':3,
 'literally capek':2, 'hamster di roda':3,
+      'ngeluarin dengan susah payah':2,
+'capek protes':2,
     }
   },
   harapan: {
@@ -1340,6 +1363,11 @@ const EMO_LEX = {
 'ojo neng omah wae':1, 'inna maal usri yusra':2,
 'kenapa nunggu nanti':2, 'berani duluan':2,
 'mati dalam keadaan diinget':2, 'warisan':2,
+      'cukup ada aja':2, 'masih mau dicoba dimengerti':3,
+'nulis surat tangan buat murid':2,
+'bukan kemana-mana yang jauh tapi balik':2,
+'rasa punya tempat di dunia':3,
+'kesempurnaan nggak butuh banyak':2,
     }
   },
 };
@@ -1404,17 +1432,17 @@ function analyzeEmotionDeep(text) {
 function detectTopic(text) {
   const t = text.toLowerCase();
   const topikMap = {
-    'keluarga':     ['bapak','bokap','nyokap','ortu','mbah','mbah putri','cucu','menantu','mas ','mbak ','pak ','bu ','kondangan','hajatan','mertua','ipar','keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan',],
-    'pekerjaan':    ['guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
+    'keluarga':     ['tulang punggung','anak tengah','anak sulung','anak bungsu','kumpul lengkap','meja makan','rebutan lauk','satu bapak satu ibu','bapak','bokap','nyokap','ortu','mbah','mbah putri','cucu','menantu','mas ','mbak ','pak ','bu ','kondangan','hajatan','mertua','ipar','keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan',],
+    'pekerjaan':    ['buruh tani','jualan jajan pasar','tulang punggung keluarga','guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
     'kesehatan':    ['posyandu','senam lansia','pengapuran','tensi','puskesmas','kacamata','kontrol','obat rutin','lutut nyeri','tekanan darah','sakit','sehat','dokter','rumah sakit','obat','penyakit','fisik','tubuh'],
     'percintaan':   ['pacar','kekasih','cinta','hubungan','putus','selingkuh','menikah','pernikahan'],
-    'pertemanan':   ['teman','sahabat','bestie','circle','persahabatan','dikucilkan'],
+    'pertemanan':   ['teman sebangku','sahabat kecil','tipes','gendong ngos-ngosan','pergi tanpa pamit','jagain yang penakut','teman','sahabat','bestie','circle','persahabatan','dikucilkan'],
     'pendidikan':   ['sekolah','kuliah','kampus','ujian','tugas','skripsi','nilai','belajar'],
     'keuangan':     ['uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
     'kehilangan':   ['duka','janda','almarhum','almarhumah','ditinggal meninggal','tiga tahun lalu','wafat','berpulang','makam','ziarah','meninggal','wafat','berpulang','kehilangan','berpisah','ditinggal'],
-    'masa lalu':    ['kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
+    'masa lalu':    ['pasar malem','alun-alun','gulali','digendong bapak','lihat bintang','kaki nggak nyampe tanah','kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
     'spiritualitas':['ngaji','pengajian','al-quran','quran','sholat','salat','rebana','remaja masjid','tahlil','yasinan','maulidan','subuh','isya','ashar','zuhur','magrib','inna mal usri','insyaallah','alhamdulillah','matur suwun','sesok isih ono dino','ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
-    'identitas':    ['peran udah habis','aku ini siapa','jati diri','nggo opo','saiki nggo opo','tugasku udah selesai','warisan','bekasnya aku','mau ngapain lagi','bekas yang ditinggalkan','jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
+    'identitas':    ['rasa punya tempat di dunia','nulis surat tangan','nulis surat buat murid','cermin yang pecah','nggak tau siapa diri sendiri','peran udah habis','aku ini siapa','jati diri','nggo opo','saiki nggo opo','tugasku udah selesai','warisan','bekasnya aku','mau ngapain lagi','bekas yang ditinggalkan','jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
   };
   const found = [];
   for (const [topik, kata] of Object.entries(topikMap)) {
@@ -1952,6 +1980,164 @@ function sudahCeritaPositif(nlp) {
           ['senang','harapan'].includes(nlp._deep.dominant));
 }
 
+/* ══════════════════════════════════════════
+   SESSION LOG — Memori jawaban pasien dalam satu pertanyaan
+   Mencegah Elina menanyakan hal yang sudah dijawab pasien.
+══════════════════════════════════════════ */
+
+/* Ekstrak kata kunci penting dari teks jawaban pasien */
+function _extractKeywords(text) {
+  const t = text.toLowerCase();
+  const keywords = [];
+
+  // Nama tokoh yang disebut
+  for (const [tokoh, kataList] of Object.entries(TOKOH_LEX)) {
+    if (kataList.some(k => t.includes(k))) keywords.push('tokoh:' + tokoh);
+  }
+
+  // Topik yang terdeteksi
+  const topik = detectTopic(t);
+  topik.forEach(tp => keywords.push('topik:' + tp));
+
+  // Kata kunci tematik spesifik — yang sering jadi bahan pertanyaan berulang
+  const TEMA_KUNCI = [
+    // Kenangan positif
+    ['kenangan indah','kenangan baik','momen menyenangkan','momen indah','momen hangat'],
+    // Orang yang paling diingat
+    ['paling ingat','paling diingat','paling berkesan','paling berarti','paling aku inget'],
+    // Pencapaian
+    ['pencapaian','prestasi','bangga','berhasil','piagam','penghargaan','wali kelas terbaik'],
+    // Rasa aman masa kecil
+    ['ngerasa aman','rasa aman','merasa aman','bikin aman'],
+    // Orang yang dekat
+    ['orang yang dekat','paling dekat','sangat dekat','sahabat','teman dekat'],
+    // Momen menyedihkan
+    ['paling sedih','paling berat','paling menderita','pengalaman berat','pengalaman sedih'],
+    // Kehilangan
+    ['meninggal','kehilangan','pergi','wafat','ditinggal'],
+    // Impian masa depan
+    ['impian','harapan ke depan','ingin ke depan','cita-cita'],
+    // Syukur
+    ['bersyukur','masih bisa syukuri','hal baik','hal kecil yang baik'],
+  ];
+
+  TEMA_KUNCI.forEach((group, i) => {
+    if (group.some(k => t.includes(k))) keywords.push('tema:' + i);
+  });
+
+  return keywords;
+}
+
+/* Catat jawaban pasien ke sessionLog */
+function _logAnswer(text, nlp) {
+  const keywords = _extractKeywords(text);
+  _sessionLog.push({
+    turn: _mtTurn,
+    text: text.slice(0, 200), // simpan 200 karakter pertama saja
+    emo: nlp.emotion || 'netral',
+    keywords,
+  });
+}
+
+/* Cek apakah suatu tema/kata kunci sudah pernah dijawab pasien */
+function _sudahDijawab(checkKeywords) {
+  return checkKeywords.some(ck =>
+    _sessionLog.some(log => log.keywords.includes(ck))
+  );
+}
+
+/* Pilih flip yang belum pernah menyentuh tema yang sudah dijawab */
+function _pickFlipSmart(pool, topik, sp, nm) {
+  if (!_usedFlip[topik]) _usedFlip[topik] = [];
+  const used = _usedFlip[topik];
+
+  // Tentukan kata kunci yang sudah dibahas dari sessionLog
+  const sudahDibahas = _sessionLog.flatMap(log => log.keywords);
+
+  // Pemetaan flip ke tema yang mungkin sudah dijawab
+  const FLIP_TEMA_MAP = {
+    'siapa orang yang paling membuat': ['tokoh:ibu','tokoh:ayah','tokoh:kakak','tema:3'],
+    'momen kecil yang terasa indah': ['tema:0'],
+    'momen yang terasa hangat': ['tema:0'],
+    'permainan atau aktivitas': ['tema:0'],
+    'bau, suara, atau pemandangan': ['tema:0'],
+    'kenangan menyenangkan': ['tema:0'],
+    'orang atau momen yang membuat': ['tema:3'],
+    'kenangan indah bersama': ['tema:6','tema:0'],
+    'kenangan terbaik bersama': ['tema:6','tema:0'],
+    'pencapaian kecil': ['tema:2'],
+    'momen membanggakan': ['tema:2'],
+    'dihargai': ['tema:2'],
+    'siapa yang paling': ['tema:1'],
+    'paling diingat': ['tema:1'],
+    'yang paling diingat': ['tema:1'],
+    'hal baik yang': ['tema:8'],
+    'bersyukur': ['tema:8'],
+    'syukuri': ['tema:8'],
+    'impikan': ['tema:7'],
+    'harapan': ['tema:7'],
+  };
+
+  // Filter pool: ambil yang belum dipakai DAN tidak menyentuh tema yang sudah dijawab
+  const available = pool.filter((item, i) => {
+    if (used.includes(i)) return false; // sudah dipakai sebelumnya
+    const itemLower = item.toLowerCase();
+    // Cek apakah item ini menyentuh tema yang sudah dijawab
+    for (const [frase, temaKeys] of Object.entries(FLIP_TEMA_MAP)) {
+      if (itemLower.includes(frase)) {
+        if (temaKeys.some(tk => sudahDibahas.includes(tk))) return false;
+      }
+    }
+    return true;
+  });
+
+  // Kalau semua sudah terpakai/dijawab, gunakan yang belum dipakai saja (tanpa filter tema)
+  const fallback = pool.filter((_, i) => !used.includes(i));
+  const chosen = available.length > 0 ? available : fallback;
+  if (chosen.length === 0) return null;
+
+  const item = chosen[Math.floor(Math.random() * chosen.length)];
+  used.push(pool.indexOf(item));
+  return item.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm || sp);
+}
+
+/* Pilih CONCRETE_Q atau SYUKUR_Q yang tidak menyentuh tema yang sudah dijawab */
+function _pickContextAware(pool, sp, nm) {
+  const sudahDibahas = _sessionLog.flatMap(log => log.keywords);
+
+  const POOL_TEMA_MAP = {
+    'ingin sampaikan ke diri': ['tema:0'],
+    'kekuatan dari masa kecil': ['tema:0','tema:3'],
+    'bisa balik sebentar ke masa kecil': ['tema:0'],
+    'belum sempat bilang terima kasih': ['tokoh:ibu','tokoh:ayah','tokoh:kakak'],
+    'ingin sampaikan ke anggota keluarga': ['tokoh:ibu','tokoh:ayah'],
+    'kemampuan apa yang paling berharga': ['tema:2'],
+    'pencapaian-pencapaian': ['tema:2'],
+    'hal dari pekerjaan dulu': ['tema:2'],
+    'doa atau ayat': ['topik:spiritualitas'],
+    'ibadah': ['topik:spiritualitas'],
+    'ingin sampaikan kepada orang yang telah pergi': ['tema:6'],
+    'ritual kecil': ['tema:6'],
+    'hal yang ingin': ['tema:7'],
+    'satu langkah kecil': ['tema:7'],
+    'syukuri': ['tema:8'],
+    'kekuatan dalam diri': ['tema:8'],
+  };
+
+  // Filter pool berdasarkan tema yang sudah dibahas
+  const available = pool.filter(item => {
+    const itemLower = item.toLowerCase();
+    for (const [frase, temaKeys] of Object.entries(POOL_TEMA_MAP)) {
+      if (itemLower.includes(frase) && temaKeys.some(tk => sudahDibahas.includes(tk))) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const chosen = available.length > 0 ? available : pool;
+  return _pick(chosen, sp, nm);
+}
 /* Anti-duplikasi ACK — pilih index yang belum dipakai */
 function _pickUnique(arr, sp, nm, usedArr) {
   const available = arr.filter((_, i) => !usedArr.includes(i));
@@ -2016,7 +2202,7 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
       : RESP.netral;
     const part2 = _pick(subpool, sp, nm);
     const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
-    const part3    = _pickFlipUnique(flipPool, topikSesi, sp, nm) || '';
+    const part3    = _pickFlipSmart(flipPool, topikSesi, sp, nm) || '';
     return [part1, part2, part3].filter(p => p.trim()).join(' ');
   }
 
@@ -2034,7 +2220,7 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
     }
     const ack      = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
     const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
-    const flipped  = _pickFlipUnique(flipPool, topikSesi, sp, nm);
+    const flipped  = _pickFlipSmart(flipPool, topikSesi, sp, nm);
     if (!flipped) {
       const pool    = RESP[emo];
       const subpool = pool
@@ -2060,12 +2246,12 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
 
   if (turnVariant === 1) {
     const concretePool = CONCRETE_Q[topikSesi] || CONCRETE_Q['_default'];
-    return ack + ' ' + _pick(concretePool, sp, nm);
+    return ack + ' ' + _pickContextAware(concretePool, sp, nm);
   }
 
   // turnVariant === 2
   const syukurPool = SYUKUR_Q[topikSesi] || SYUKUR_Q['_default'];
-  return ack + ' ' + _pick(syukurPool, sp, nm);
+  return ack + ' ' + _pickContextAware(syukurPool, sp, nm);
 }
 
 /* Alias */
@@ -3122,6 +3308,7 @@ let _usedAckDeep = [];        // BARU: tracking ACK yang sudah dipakai
 let _usedFlip = {};           // BARU: tracking flip per topik yang sudah dipakai
 let _sessionContext = [];     // BARU: ringkasan konteks yang sudah diceritakan
 let _topikSudahDigali = [];   // BARU: topik yang sudah dapat flip positif
+let _sessionLog = [];         // MEMORI: log semua jawaban pasien dalam satu sesi pertanyaan
 // Cek dukungan mic saat load
 _micSupported = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
@@ -3142,10 +3329,14 @@ function loadSesiQuestion(){
   document.getElementById('sq-prog').textContent=`Pertanyaan ${n+1} dari ${tot}`;
   document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
-  // Reset multi-turn state untuk pertanyaan baru
   _mtTurn = 0;
   _mtFirstSaved = false;
   _mtNlpFirst = null;
+  _usedAckDeep = [];
+  _usedFlip = {};
+  _sessionContext = [];
+  _topikSudahDigali = [];
+  _sessionLog = [];
   // Reset crisis alert ID per pertanyaan
   window._lastCrisisAlertId = null;
 
@@ -3209,6 +3400,7 @@ async function sendSesiAnswer(){
 
 // Analisis NLP lokal (gratis, tanpa API)
   const nlp = analyzeNLP(txt);
+  _logAnswer(txt, nlp);  // catat ke memori sesi
   // Tampilkan emotion badge langsung dari NLP lokal
   _appendEmotionBadge(nlp);
   // Deteksi bahaya — non-blocking
