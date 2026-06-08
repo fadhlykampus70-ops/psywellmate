@@ -1905,7 +1905,28 @@ const ACK_DEEP = [
   'Apa yang {sp} rasakan itu valid sepenuhnya.',
   'Saya mengerti ini tidak mudah untuk diceritakan, {sp}.',
 ];
+/* Pool tawaran pindah pertanyaan — 3 varian */
+const TAWARAN_PINDAH_NETRAL = [
+  'Terima kasih sudah mau berbagi cerita ini, {sp}. Bolehkah kita pindah ke pertanyaan berikutnya?',
+  'Saya sangat menghargai kepercayaan {sp}. Boleh kita lanjut ke pertanyaan selanjutnya?',
+  'Cerita {sp} sangat bermakna bagi saya. Kalau sudah siap, boleh kita lanjut bersama?',
+  'Saya di sini selalu mendengarkan {sp}. Bolehkah kita perlahan melanjutkan ke pertanyaan berikutnya?',
+  'Terima kasih telah mempercayakan cerita ini, {sp}. Boleh kita lanjutkan perjalanan ini bersama?',
+];
 
+const TAWARAN_PINDAH_POSITIF = [
+  'Senang sekali mendengar cerita itu, {sp}. Boleh kita lanjut ke pertanyaan berikutnya?',
+  'Cerita {sp} tadi sungguh menghangatkan hati. Bolehkah kita lanjutkan bersama?',
+  'Terima kasih sudah berbagi momen indah itu, {sp}. Siap untuk pertanyaan selanjutnya?',
+  'Luar biasa mendengar cerita {sp}. Boleh kita teruskan perjalanan ini?',
+];
+
+const TAWARAN_PINDAH_LEMBUT = [
+  'Tidak apa-apa jika belum ingin cerita lebih, {sp}. Boleh kita lanjut ke pertanyaan berikutnya?',
+  'Saya di sini kapan pun {sp} ingin berbagi. Boleh kita lanjut pelan-pelan?',
+  'Tidak ada yang terburu-buru di sini. Kalau {sp} sudah siap, boleh kita lanjut bersama?',
+  'Tidak perlu tergesa, {sp}. Bolehkah kita pindah ke pertanyaan berikutnya sekarang?',
+];
 function _pick(arr, sp, nm) {
   const s = arr[Math.floor(Math.random() * arr.length)];
   return s.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm || sp);
@@ -2258,8 +2279,8 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
   const text = rawText || '';
   const wordCount = text.trim().split(/\s+/).length;
 
-  if (wordCount <= 6) return _pick(PEMANCING, sp, nm);
-
+  // ── Variabel penentu kondisi ──
+  const ceritaPanjang = wordCount >= 50;
   const deep       = nlp._deep || analyzeEmotionDeep(text);
   const emo        = nlp.emotion    || deep.dominant;
   const intensitas = nlp.intensitas || deep.intensitas;
@@ -2267,81 +2288,133 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
   const kekuatan   = nlp.kekuatan   || [];
   const kebutuhan  = nlp.kebutuhan  || [];
   const topikSesi  = getTopikDariPertanyaan();
+  const emoTerbuka = emo && emo !== 'netral';
+  const ceritaBerat = ['sedih','trauma','burnout','kesepian'].includes(emo) && intensitas === 'tinggi';
+  const krisisAktif = (_crisisLevel !== null);
 
   // Simpan konteks turn ini
   if (text.length > 30) {
     _sessionContext.push({ emo, topik: topikSesi, turn: turnNum });
   }
 
-  // ── TURN 1 ──
-  if (turnNum === 1) {
-    if (sudahCeritaPositif(nlp)) {
-      const pool    = RESP[emo];
-      const subpool = pool
-        ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
-        : RESP.netral;
-      const validasi = _pick(subpool, sp, nm);
-      const penutup  = `Terima kasih sudah berbagi cerita yang indah itu, ${sp}.`;
-      return [validasi, penutup].join(' ');
-    }
-    let part1 = '';
-    if (summary) part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
-    const pool    = RESP[emo];
+  // ── Helper internal: ambil respons emosi ──
+  function _getRespEmo() {
+    const pool = RESP[emo];
     const subpool = pool
       ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
       : RESP.netral;
-    const part2 = _pick(subpool, sp, nm);
-    const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
-    const part3    = _pickFlipSmart(flipPool, topikSesi, sp, nm) || '';
-    return [part1, part2, part3].filter(p => p.trim()).join(' ');
+    return _pick(subpool, sp, nm);
   }
 
-  // ── TURN 2 ──
-  if (turnNum === 2) {
+  // ── TURN 1 — Selalu: Deteksi + Gali ──
+  if (turnNum === 1) {
+    // Jawaban terlalu pendek
+    if (wordCount <= 6) return _pick(PEMANCING, sp, nm);
+
+    // Emosi positif
     if (sudahCeritaPositif(nlp)) {
-      const pool    = RESP[emo];
-      const subpool = pool
-        ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
-        : RESP.netral;
-      const validasi = _pick(subpool, sp, nm);
-      const kStr     = kekuatan.length > 0 ? ` Saya melihat adanya ${kekuatan.join(' dan ')} dalam diri ${sp}.` : '';
-      const transisi = ` Terima kasih sudah berbagi — cerita ${sp} sangat bermakna.`;
-      return validasi + kStr + transisi;
+      const validasi = _getRespEmo();
+      return validasi;
     }
-    const ack      = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
+
+    // Emosi berat tinggi — mirror + empati, tanpa flip dulu
+    if (ceritaBerat) {
+      let part1 = '';
+      if (summary) part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
+      const part2 = _getRespEmo();
+      return [part1, part2].filter(p => p.trim()).join(' ');
+    }
+
+    // Emosi ada tapi tidak berat — mirror + gali + flip
+    if (emoTerbuka) {
+      let part1 = '';
+      if (summary) part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
+      const part2 = _getRespEmo();
+      const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
+      const part3 = _pickFlipSmart(flipPool, topikSesi, sp, nm) || '';
+      return [part1, part2, part3].filter(p => p.trim()).join(' ');
+    }
+
+    // Emosi netral — gali saja
+    return _pick(PEMANCING, sp, nm);
+  }
+
+  // ── TURN 2 — Kondisional: Gali ATAU Tawarkan ──
+  if (turnNum === 2) {
+    const ack = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
+
+    // Krisis aktif — hadir, jangan tawarkan pindah
+    if (krisisAktif) {
+      const reflect = kebutuhan.length
+        ? ` Sepertinya ${sp} sangat membutuhkan ${kebutuhan[0]} saat ini.` : '';
+      return ack + reflect;
+    }
+
+    // Cerita berat + masih singkat — dampingi dulu
+    if (ceritaBerat && !ceritaPanjang) {
+      const empati = _getRespEmo();
+      return ack + ' ' + empati;
+    }
+
+    // Sudah panjang + emosi positif — tawaran positif
+    if (ceritaPanjang && sudahCeritaPositif(nlp)) {
+      return ack + ' ' + _pick(TAWARAN_PINDAH_POSITIF, sp, nm);
+    }
+
+    // Sudah panjang + emosi terbuka — tawaran netral
+    if (ceritaPanjang && emoTerbuka) {
+      return ack + ' ' + _pick(TAWARAN_PINDAH_NETRAL, sp, nm);
+    }
+
+    // Masih singkat — gali lebih dalam dengan flip
     const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
     const flipped  = _pickFlipSmart(flipPool, topikSesi, sp, nm);
-    if (!flipped) {
-      const pool    = RESP[emo];
-      const subpool = pool
-        ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
-        : RESP.netral;
-      return ack + ' ' + _pick(subpool, sp, nm);
-    }
+    if (!flipped) return ack + ' ' + _getRespEmo();
     return ack + ' ' + flipped;
   }
 
-  // ── TURN 3+: rotasi 3 jenis respons ──
-  const ack = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
-  const turnVariant = turnNum % 3;
+  // ── TURN 3 — Tawaran lembut (hampir selalu) ──
+  if (turnNum === 3) {
+    const ack = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
 
-  if (turnVariant === 0) {
+    // Krisis aktif — tetap hadir
+    if (krisisAktif) {
+      const reflect = kebutuhan.length
+        ? ` Sepertinya ${sp} sangat membutuhkan ${kebutuhan[0]} saat ini.` : '';
+      return ack + reflect;
+    }
+
+    // Cerita berat + masih singkat — tawaran lembut
+    if (ceritaBerat && !ceritaPanjang) {
+      return ack + ' ' + _pick(TAWARAN_PINDAH_LEMBUT, sp, nm);
+    }
+
+    // Emosi positif — tawaran positif
+    if (sudahCeritaPositif(nlp)) {
+      return ack + ' ' + _pick(TAWARAN_PINDAH_POSITIF, sp, nm);
+    }
+
+    // Kondisi lain — tawaran lembut
+    return ack + ' ' + _pick(TAWARAN_PINDAH_LEMBUT, sp, nm);
+  }
+
+  // ── TURN 4+ — Selalu tawarkan kecuali krisis ──
+  const ack = _pickUnique(ACK_DEEP, sp, nm, _usedAckDeep);
+
+  // Krisis aktif — tetap hadir
+  if (krisisAktif) {
     const reflect = kebutuhan.length
       ? ` Sepertinya ${sp} sangat membutuhkan ${kebutuhan[0]} saat ini.` : '';
     const kStr = kekuatan.length > 0
       ? ` Saya melihat adanya ${kekuatan.join(' dan ')} dalam diri ${sp}.` : '';
-    const penutup = ` Terima kasih sudah mempercayakan cerita ini kepada saya, ${sp}.`;
-    return ack + reflect + kStr + penutup;
+    return ack + reflect + kStr;
   }
 
-  if (turnVariant === 1) {
-    const concretePool = CONCRETE_Q[topikSesi] || CONCRETE_Q['_default'];
-    return ack + ' ' + _pickContextAware(concretePool, sp, nm);
-  }
-
-  // turnVariant === 2
-  const syukurPool = SYUKUR_Q[topikSesi] || SYUKUR_Q['_default'];
-  return ack + ' ' + _pickContextAware(syukurPool, sp, nm);
+  // Rotasi varian tawaran agar tidak monoton
+  const turnVariant = turnNum % 3;
+  if (turnVariant === 0) return ack + ' ' + _pick(TAWARAN_PINDAH_NETRAL, sp, nm);
+  if (turnVariant === 1) return ack + ' ' + _pick(TAWARAN_PINDAH_LEMBUT, sp, nm);
+  return ack + ' ' + _pick(sudahCeritaPositif(nlp) ? TAWARAN_PINDAH_POSITIF : TAWARAN_PINDAH_NETRAL, sp, nm);
 }
 
 /* Alias */
