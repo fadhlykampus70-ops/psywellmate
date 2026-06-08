@@ -1234,12 +1234,25 @@ const EMO_LEX = {
   },
   marah: {
     words: {
-      'marah':2,'kesal':2,'frustrasi':2,'jengkel':2,'dongkol':2,'murka':3,
-      'benci':3,'dendam':3,'emosi':2,'amarah':3,'meledak':3,'mengamuk':3,
-      'geram':2,'gondok':2,'sebal':2,'jijik':2,'muak':2,'tidak tahan':2,
-      'tidak sabar':1,'kesal sekali':3,'marah besar':3,'naik darah':3,
-      'darah mendidih':3,'tidak adil':2,'dikhianati':3,'disakiti':2,
-    }
+      // Ekspresif langsung
+      'marah':3, 'kesal':2, 'kesel':2, 'sebel':1, 'benci':3,
+      'dongkol':2, 'geram':2, 'berang':2, 'murka':3,
+      // Rasa tidak adil
+      'nggak adil':2, 'tidak adil':2, 'nggak fair':2, 'unfair':2,
+      'diperlakukan tidak adil':3, 'nggak seharusnya begini':2,
+      // Marah pada situasi
+      'kenapa harus aku':2, 'kenapa selalu aku':2,
+      'nggak ada yang mau':1, 'dipaksa':2,
+      // Marah pada diri sendiri
+      'marah sama diri sendiri':3, 'nyalahin diri sendiri':2,
+      'benci diri sendiri':3, 'kesal sama diri sendiri':2,
+      // Frustrasi
+      'frustrasi':2, 'capek protes':2, 'capek ngeluh':1,
+      'udah bilang berkali-kali':2,
+      // Bahasa Jawa
+      'ngamuk':2, 'nesu':2, 'rungkad':1,
+    },
+    weight: 1,
   },
   takut: {
     words: {
@@ -1262,7 +1275,10 @@ const EMO_LEX = {
 'lincak':1, 'ngerasa aman':3, 'anget di dada':2,
 'apik ndhuk':2, 'lega':2,'caranya bilang bangga':2, 'caranya bilang sayang':2,
 'digendong bapak lihat bintang':2, 'gulali bentuk kupu-kupu':1,
-'kesempurnaan nggak butuh banyak':2,
+'kesempurnaan nggak butuh banyak':2,'ngerasa aman duduk di teras':3,
+'cuma aku dan bokap dan hujan':2,
+'dunia sekecil itu':2, 'literally ringan':2,
+'nggak ada yang perlu dikhawatirin':2,
     }
   },
   rindu: {
@@ -1273,7 +1289,9 @@ const EMO_LEX = {
       'masih inget':2, 'nggak bisa lupa':2, 'perih':2,'seneng tapi perih':3, 'campur aduk':1,
       'pengen bisa nelpon ibu':3,
 'tangan kasar tapi kompres kepalaku':3,
-'Pak Sardi cermin aku':3,
+'Pak Sardi cermin aku':3,'kangen Raffi':3, 'kangen versi aku waktu sama dia':3,
+'bau minyak kayu putih':2, 'tangan ibu yang hangat':3,
+'bokap gendong aku waktu hujan':3,
     }
   },
   malu: {
@@ -1283,7 +1301,10 @@ const EMO_LEX = {
       'merasa jelek':2,'tidak cukup baik':2,'tidak mampu':2,'gagal':2,'nggak tau lagi siapa aku':3, 'peran udah habis':3,
 'saiki nggo opo':3, 'nggo opo':2, 'aku ini siapa':3,
 'janda yang nunggu':2, 'pensiunan yang tinggal sendiri':2,'nggak tau bayangan apa yang aku lihat':3,
-'pensiunan yang tinggal sendiri':2,
+'pensiunan yang tinggal sendiri':2,'gagal jadi anak yang cukup baik':3,
+'gagal jadi pacar yang diprioritasin':3,
+'gagal jadi mahasiswi yang bener':3,
+'hampir DO':2, 'malu banget waktu itu':2,
     }
   },
   kesepian: {
@@ -1297,7 +1318,13 @@ const EMO_LEX = {
 'simpen dewe':2, 'nunggu tanpa tujuan':2,
 'rame sebentar sepi lagi':2, 'nggak ada yang nemenin':2,
 'nggak ada yang menemani':2, 'lingkaran makin kecil':2,
-'nggo sopo':2, 'nggo opo':2,
+'nggo sopo':2, 'nggo opo':2,'nggak ada yang nanya kabar aku beneran':3,
+'semua orang butuh aku tapi nggak ada yang tanya':3,
+'yang ada cuma fungsi aku':3,
+'ngumpet di balik baik-baik aja':2,
+'nggak ada yang nyariin':3,
+'dipeluk tapi dari jarak jauh':2,
+'ngerasa invisible':3, 'invisible':3,
     }
   },
   kecewa: {
@@ -1346,6 +1373,16 @@ const EMO_LEX = {
 'literally capek':2, 'hamster di roda':3,
       'ngeluarin dengan susah payah':2,
 'capek protes':2,
+      'baik-baik aja':2, 'biasa aja':1, 'nggak apa-apa kok':2,
+'ya udah sih':1, 'emang harus gitu':2, 'nggak ada pilihan':2,
+'titik jenuh':3, 'udah di titik jenuh':3,
+'kayak robot':3, 'jalan tapi nggak hidup':3,
+'cuma bertahan':2, 'nggak ada energi':2, 'energi habis duluan':3,
+'overwhelmed':2, 'crushing':2, 'survive hari ini':2,
+'perform kuat':2, 'earn the right to be tired':3,
+'earn the right to be here':3, 'nggak ngerasa berhak capek':3,
+'harusnya harusnya harusnya':2, 'nggak boleh capek':2,
+'nggak boleh nyerah':2,
     }
   },
   harapan: {
@@ -1367,7 +1404,15 @@ const EMO_LEX = {
 'nulis surat tangan buat murid':2,
 'bukan kemana-mana yang jauh tapi balik':2,
 'rasa punya tempat di dunia':3,
-'kesempurnaan nggak butuh banyak':2,
+'kesempurnaan nggak butuh banyak':2,'ngerasa keberadaan aku diakui':3,
+'masih mau coba':3, 'satu kalimat jujur ke ibu':2,
+'aku bukan siapapun aku Nadia':3, 'aku berharga':3,
+'aku layak':3, 'cukup ada':2,
+'membiarkan yang indah tetap indah':2,
+'rasa aman dari dalam':2, 'tanpa nunggu siapapun':2,
+'ngomongnya sendiri yang menyembuhkan':3,
+'nggak ngumpet':2,
+'inget siapa aku sebelum dunia ngajarin aku untuk kecil':3,
     }
   },
 };
@@ -1433,14 +1478,14 @@ function detectTopic(text) {
   const t = text.toLowerCase();
   const topikMap = {
     'keluarga':     ['tulang punggung','anak tengah','anak sulung','anak bungsu','kumpul lengkap','meja makan','rebutan lauk','satu bapak satu ibu','bapak','bokap','nyokap','ortu','mbah','mbah putri','cucu','menantu','mas ','mbak ','pak ','bu ','kondangan','hajatan','mertua','ipar','keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan',],
-    'pekerjaan':    ['buruh tani','jualan jajan pasar','tulang punggung keluarga','guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
+    'pekerjaan':    ['shift malam','shift sore','kasir','minimarket','gajian','buruh tani','jualan jajan pasar','tulang punggung keluarga','guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
     'kesehatan':    ['posyandu','senam lansia','pengapuran','tensi','puskesmas','kacamata','kontrol','obat rutin','lutut nyeri','tekanan darah','sakit','sehat','dokter','rumah sakit','obat','penyakit','fisik','tubuh'],
-    'percintaan':   ['pacar','kekasih','cinta','hubungan','putus','selingkuh','menikah','pernikahan'],
+    'percintaan':   ['Raffi','mantan','putus','nggak bisa move on','pacar','kekasih','cinta','hubungan','putus','selingkuh','menikah','pernikahan'],
     'pertemanan':   ['teman sebangku','sahabat kecil','tipes','gendong ngos-ngosan','pergi tanpa pamit','jagain yang penakut','teman','sahabat','bestie','circle','persahabatan','dikucilkan'],
-    'pendidikan':   ['sekolah','kuliah','kampus','ujian','tugas','skripsi','nilai','belajar'],
-    'keuangan':     ['uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
+    'pendidikan':   ['lomba debat','nilai terbaik','IPA','IPS','passion','organisasi kampus','sekolah','kuliah','kampus','ujian','tugas','skripsi','nilai','belajar'],
+    'keuangan':     ['UKT','hampir DO','DO administrasi','kirimin uang','bayar kos','uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
     'kehilangan':   ['duka','janda','almarhum','almarhumah','ditinggal meninggal','tiga tahun lalu','wafat','berpulang','makam','ziarah','meninggal','wafat','berpulang','kehilangan','berpisah','ditinggal'],
-    'masa lalu':    ['pasar malem','alun-alun','gulali','digendong bapak','lihat bintang','kaki nggak nyampe tanah','kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
+    'masa lalu':    ['gang','gang depan rumah','Cicaheum','petak umpet','es mambo','pasar malem','alun-alun','gulali','digendong bapak','lihat bintang','kaki nggak nyampe tanah','kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
     'spiritualitas':['ngaji','pengajian','al-quran','quran','sholat','salat','rebana','remaja masjid','tahlil','yasinan','maulidan','subuh','isya','ashar','zuhur','magrib','inna mal usri','insyaallah','alhamdulillah','matur suwun','sesok isih ono dino','ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
     'identitas':    ['rasa punya tempat di dunia','nulis surat tangan','nulis surat buat murid','cermin yang pecah','nggak tau siapa diri sendiri','peran udah habis','aku ini siapa','jati diri','nggo opo','saiki nggo opo','tugasku udah selesai','warisan','bekasnya aku','mau ngapain lagi','bekas yang ditinggalkan','jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
   };
@@ -1464,7 +1509,7 @@ const TOKOH_LEX = {
   'ayah':         ['ayah','papa','bapak','abah','abi','papi','pak'],
   'kakak':        ['kakak','kak','abang','bang','mbak'],
   'adik':         ['adik','dik','adek'],
-  'suami':        ['suami','pak suami','mas','kang'],
+  'suami':        ['suami','pak suami','mas','kang','suamiku','suami saya'],
   'istri':        ['istri','istriku','bini','isteri'],
   'anak':         ['anak','anakku','anak saya','si kecil','putra','putri'],
   'sahabat':      ['sahabat','teman dekat','bestie','sobat','kawan lama'],
@@ -1499,6 +1544,9 @@ const KEBUTUHAN_RULES = [
   { emosi:['senang','harapan'],         topik:[],                          need:'pengakuan dan apresiasi' },
   { emosi:['kecewa'],                   topik:['percintaan','pertemanan'], need:'kepercayaan kembali' },
   { emosi:['marah'],                    topik:['keluarga'],                need:'didengar dan dipahami' },
+  { emosi:['marah'],                    topik:['percintaan','pertemanan'],  need:'ruang untuk marah dan divalidasi' },
+  { emosi:['marah'],                    topik:['identitas'],                need:'diakui sebagai individu yang berharga' },
+  { emosi:['marah'],                    topik:[],                           need:'didengar dan dipahami' },
 ];
 
 function detectKebutuhan(emotion, topics, tokoh) {
@@ -1534,18 +1582,20 @@ function detectKekuatan(text) {
 /* ── Template Summary Kalimat Mirror ── */
 const SUMMARY_TPL = {
   sedih: {
-    'ibu':      'Anda kehilangan sosok ibu yang sangat berarti {waktu}',
-    'ayah':     'Anda kehilangan sosok ayah yang sangat berharga {waktu}',
-    'suami':    'Anda menghadapi kehilangan suami yang meninggalkan duka mendalam',
-    'istri':    'Anda menghadapi kehilangan istri yang masih terasa hingga kini',
-    'anak':     'Kehilangan anak adalah duka yang sulit diungkapkan dengan kata-kata',
-    'sahabat':  'Anda kehilangan sahabat yang memiliki tempat istimewa dalam hidup Anda',
+    'ibu':      'Anda menyimpan kerinduan mendalam pada sosok ibu {waktu}',
+    'ayah':     'Anda menyimpan kerinduan mendalam pada sosok ayah {waktu}',
+    'suami':    'Ada kesedihan yang dalam terkait hubungan yang sangat berarti bagi Anda',
+    'istri':    'Ada kesedihan yang dalam terkait hubungan yang sangat berarti bagi Anda',
+    'anak':     'Kehilangan atau kekhawatiran tentang anak meninggalkan beban yang sulit diungkapkan',
+    'sahabat':  'Anda menyimpan kerinduan pada sahabat yang memiliki tempat istimewa dalam hidup Anda',
     '_default': 'Anda sedang menanggung kesedihan yang cukup berat dalam hidup',
   },
   marah: {
     'atasan':   'Anda mengalami situasi di tempat kerja yang terasa tidak adil',
-    'suami':    'Ada ketegangan dalam hubungan pernikahan yang membebani Anda',
-    'istri':    'Ada ketegangan dalam hubungan pernikahan yang membebani Anda',
+    'suami':    'Ada ketegangan dalam hubungan yang membebani Anda',
+    'istri':    'Ada ketegangan dalam hubungan yang membebani Anda',
+    'pasangan': 'Ada rasa kecewa dan marah pada hubungan yang tidak berjalan seperti yang diharapkan',
+    'diri sendiri': 'Ada rasa marah pada diri sendiri yang sedang Anda tanggung',
     '_default': 'Ada rasa marah atau frustrasi yang sedang Anda tanggung saat ini',
   },
   takut: {
@@ -1595,13 +1645,54 @@ function detectWaktu(text) {
 }
 
 /* ── Build Summary Kalimat Mirror ── */
+/* Kata-kata yang menandakan tokoh MASIH HIDUP / HADIR — bukan wafat */
+const TOKOH_HADIR = [
+  'masih ada','masih hidup','masih sehat','masih kerja','masih di rumah',
+  'masih jahit','masih masak','masih bisa','masih telepon','masih nelpon',
+  'masih kontak','masih baik','ibu jahit','ibu masak','ibu masih',
+  'bokap masih','bapak masih','ayah masih',
+];
+
+/* Kata-kata yang menandakan kehilangan NYATA (meninggal/pergi selamanya) */
+const KONTEKS_KEHILANGAN = [
+  'meninggal','wafat','berpulang','almarhum','almarhumah',
+  'sudah pergi','telah pergi','nggak ada lagi','sudah tiada',
+  'ditinggal pergi','kepergiannya','sejak dia pergi','sejak meninggal',
+];
+
 function buildSummary(emotion, tokoh, text) {
   const emo  = emotion || 'netral';
   const pool = SUMMARY_TPL[emo] || SUMMARY_TPL['netral'];
-  let tpl    = pool['_default'];
-  for (const t of tokoh) {
-    if (pool[t]) { tpl = pool[t]; break; }
+  const t    = text.toLowerCase();
+
+  // ── GUARD: jangan pakai template "kehilangan sosok" jika tokoh masih hidup ──
+  const tokohHadir   = TOKOH_HADIR.some(k => t.includes(k));
+  const adaKehilangan = KONTEKS_KEHILANGAN.some(k => t.includes(k));
+
+  let tpl = pool['_default'];
+
+  for (const tokohKey of tokoh) {
+    if (pool[tokohKey]) {
+      // Template ini berisi kata "kehilangan sosok" / "duka" — cek dulu konteksnya
+      const templateBerisiKehilangan =
+        pool[tokohKey].includes('kehilangan') ||
+        pool[tokohKey].includes('duka') ||
+        pool[tokohKey].includes('meninggal');
+
+      if (templateBerisiKehilangan) {
+        // Hanya pakai jika ada kata kehilangan nyata DAN tokoh tidak terdeteksi masih hadir
+        if (adaKehilangan && !tokohHadir) {
+          tpl = pool[tokohKey];
+        }
+        // Jika tidak ada konteks kehilangan nyata → pakai _default
+      } else {
+        // Template tidak berisi kata kehilangan — aman dipakai langsung
+        tpl = pool[tokohKey];
+      }
+      break;
+    }
   }
+
   const waktu = detectWaktu(text);
   return tpl.replace('{waktu}', waktu ? waktu : '').replace(/\s+/g, ' ').trim();
 }
@@ -1654,20 +1745,19 @@ const RESP = {
 
   marah: {
     tinggi: [
-      'Kemarahan yang {sp} rasakan itu sepenuhnya valid. Kadang kemarahan muncul karena ada sesuatu yang tidak adil atau menyakitkan. Apa yang paling membuat {sp} merasa seperti ini?',
-      'Ada amarah yang kuat di sini, dan saya mengerti. Sudah berapa lama {sp} menyimpan perasaan ini? Apakah ada seseorang yang tahu seberapa besarnya?',
-      'Rasa marah itu nyata dan punya alasan. Dari semua yang {sp} ceritakan — apa yang terasa paling tidak adil?',
+      'Rasa marah yang {sp} rasakan itu valid — ini bukan hal kecil. Boleh ceritakan, apa yang paling terasa tidak adil?',
+      'Saya mendengar ada kemarahan di sana. Kemarahan itu seringkali muncul ketika kita peduli tapi merasa tidak didengar. Apa yang sebetulnya paling {sp} inginkan dari situasi ini?',
+      'Perasaan marah itu nyata, dan {sp} berhak merasakannya. Apa yang paling membuat {sp} merasa seharusnya tidak seperti ini?',
     ],
     sedang: [
-      'Ada rasa kesal atau frustrasi di cerita {sp}. Itu sangat bisa dipahami. Boleh ceritakan — apa yang paling menguras energi {sp} saat ini?',
-      'Saya mendengar kekesalan {sp}, dan itu wajar. Apakah ada orang di sekitar {sp} yang tahu tentang perasaan ini?',
+      'Sepertinya ada sesuatu yang terasa tidak adil bagi {sp}. Boleh ceritakan lebih — apa yang sebenarnya {sp} harapkan?',
+      'Saya menangkap ada rasa kesal di cerita {sp}. Wajar sekali. Apa yang paling membebani perasaan {sp} saat ini?',
     ],
     rendah: [
-      'Sepertinya ada sesuatu yang membuat {sp} kurang nyaman. Boleh ceritakan lebih?',
-      'Saya mendengar sedikit kekesalan di cerita {sp}. Apa yang sebenarnya sedang terjadi?',
+      'Ada sedikit rasa tidak puas di cerita {sp}. Ceritakan lebih — apa yang {sp} rasakan?',
+      'Sepertinya ada sesuatu yang mengganjal bagi {sp}. Apa itu?',
     ],
   },
-
   takut: {
     tinggi: [
       'Rasa takut dan cemas yang {sp} rasakan itu nyata dan bisa dipahami. Berbagi rasa takut seperti ini sudah merupakan langkah yang berani. Apa yang paling sering mengusik pikiran {sp} akhir-akhir ini?',
