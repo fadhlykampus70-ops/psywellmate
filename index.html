@@ -2327,22 +2327,25 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
       return validasi;
     }
 
-    // Emosi berat tinggi — mirror + empati, tanpa flip dulu
+    // Emosi berat tinggi — pilih SALAH SATU: summary ATAU respons emosi
     if (ceritaBerat) {
-      let part1 = '';
-      if (summary) part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
-      const part2 = _getRespEmo();
-      return [part1, part2].filter(p => p.trim()).join(' ');
+      // Jika ada summary yang bermakna → pakai summary saja, sudah cukup dalam
+      if (summary) return `Saya menangkap bahwa ${summary}. ${_getRespEmo()}`.trim();
+      // Jika tidak ada summary → langsung respons emosi
+      return _getRespEmo();
     }
 
-    // Emosi ada tapi tidak berat — mirror + gali + flip
+    // Emosi ada tapi tidak berat — pilih SALAH SATU: summary+mirror ATAU flip
     if (emoTerbuka) {
-      let part1 = '';
-      if (summary) part1 = `Terima kasih telah berbagi. Saya menangkap bahwa ${summary}.`;
-      const part2 = _getRespEmo();
       const flipPool = FLIP_POSITIF[topikSesi] || FLIP_POSITIF['_default'];
-      const part3 = _pickFlipSmart(flipPool, topikSesi, sp, nm) || '';
-      return [part1, part2, part3].filter(p => p.trim()).join(' ');
+      const flip = _pickFlipSmart(flipPool, topikSesi, sp, nm);
+      // Jika ada flip yang relevan → pakai flip saja (lebih kaya konteks)
+      if (flip) return flip;
+      // Jika tidak ada flip → pakai summary mirror + respons emosi
+      let part1 = '';
+      if (summary) part1 = `Saya menangkap bahwa ${summary}.`;
+      const part2 = _getRespEmo();
+      return [part1, part2].filter(p => p.trim()).join(' ');
     }
 
     // Emosi netral — gali saja
