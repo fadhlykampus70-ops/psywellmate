@@ -549,16 +549,26 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
 
     <!-- SC: SESI INTRO -->
-    <div id="sc-sesi-intro" class="card" style="display:none">
-      <div class="sesi-intro">
-        <span class="sesi-icon" id="si-icon">🌿</span>
-        <div class="sesi-num" id="si-num">Sesi 1</div>
-        <div class="sesi-title" id="si-title">Life Review Therapy</div>
-        <p class="sesi-desc" id="si-desc">Deskripsi sesi.</p>
-        <div class="sess-prog" id="sess-prog-intro" style="justify-content:center"></div>
-        <button class="btn-sm bp" onclick="beginSesiQuestions()">Mulai Sesi Ini →</button>
-      </div>
+    <!-- SC: SESI INTRO -->
+<div id="sc-sesi-intro" class="card" style="display:none">
+  <div class="sesi-intro">
+    <span class="sesi-icon" id="si-icon">🌿</span>
+    <div class="sesi-num" id="si-num">Sesi 1</div>
+    <div class="sesi-title" id="si-title">Life Review Therapy</div>
+    <p class="sesi-desc" id="si-desc">Deskripsi sesi.</p>
+
+    <!-- Audio perkenalan Elina (Sesi 1 saja) -->
+    <div id="elina-intro-audio-wrap" style="display:none;margin:.8rem 0;">
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem;">🎙️ Elina menyapamu…</p>
+      <audio id="elina-intro-audio" controls style="width:100%;max-width:320px;border-radius:8px;">
+        <source id="elina-intro-src" src="" type="audio/ogg">
+      </audio>
     </div>
+
+    <div class="sess-prog" id="sess-prog-intro" style="justify-content:center"></div>
+    <button class="btn-sm bp" id="btn-mulai-sesi" onclick="beginSesiQuestions()" disabled style="opacity:.5;cursor:not-allowed;">Mulai Sesi Ini →</button>
+  </div>
+</div>
 
     <!-- SC: KESIMPULAN SESI (menggantikan ringkasan) -->
     <div id="sc-ringkasan" class="card" style="display:none">
@@ -3401,6 +3411,35 @@ function showSesiIntro(sesiNum){
   }).join('');
 
   showSc('sc-sesi-intro');
+
+  // Auto-play suara perkenalan Elina hanya untuk Sesi 1
+  const audioWrap = document.getElementById('elina-intro-audio-wrap');
+  const audioEl   = document.getElementById('elina-intro-audio');
+  const btnMulai  = document.getElementById('btn-mulai-sesi');
+
+  if(sesiNum === 1){
+    // Ganti path berikut dengan path/URL file rekaman kamu
+    document.getElementById('elina-intro-src').src = 'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/elina-audio/elina-intro.ogg';
+    audioEl.load();
+    audioWrap.style.display = 'block';
+    btnMulai.disabled = true;
+    btnMulai.style.opacity = '.5';
+    btnMulai.style.cursor = 'not-allowed';
+
+    audioEl.play().catch(()=>{ /* autoplay blocked — biarkan user tekan play manual */ });
+
+    audioEl.onended = () => {
+      btnMulai.disabled = false;
+      btnMulai.style.opacity = '1';
+      btnMulai.style.cursor = 'pointer';
+    };
+  } else {
+    audioWrap.style.display = 'none';
+    btnMulai.disabled = false;
+    btnMulai.style.opacity = '1';
+    btnMulai.style.cursor = 'pointer';
+  }
+}
 }
 
 function beginSesiQuestions(){
@@ -4905,7 +4944,7 @@ const MUSIK_LIST = [
     title: 'Sungai Hutan',
     sub:   'Alam · Air mengalir · 4 mnt',
     icon:  '🌿',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/nature_animal'
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/nature_animal.mp3'
   },
   {
     title: 'Piano Meditasi',
@@ -4917,7 +4956,7 @@ const MUSIK_LIST = [
     title: 'Burung & Embun',
     sub:   'Alam pagi · Ambient · 3 mnt',
     icon:  '🐦',
-    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi_2'
+    url:   'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/musik-terapi/piano_meditasi_2.mp3'
   },
   {
     title: 'Angin & Dedaunan',
