@@ -181,6 +181,24 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .sesi-title{font-family:'Lora',serif;font-size:1.5rem;color:var(--white);margin-bottom:.75rem}
 .sesi-desc{color:var(--muted);line-height:1.8;font-size:.9rem;margin-bottom:1.4rem;max-width:480px;margin-inline:auto}
 .sesi-icon{font-size:2.5rem;margin-bottom:.75rem;display:block}
+.elina-avatar-block{display:flex;flex-direction:column;align-items:center;gap:.6rem;margin-bottom:1.4rem}
+.elina-avatar-ring{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center}
+.elina-ripple{position:absolute;border-radius:50%;border:2px solid var(--primary);opacity:0;width:96px;height:96px;top:0;left:0;display:none;animation:elina-ripple-anim 1.8s ease-out infinite}
+.elina-ripple:nth-child(2){animation-delay:.6s}
+.elina-ripple:nth-child(3){animation-delay:1.2s}
+@keyframes elina-ripple-anim{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.55);opacity:0}}
+.elina-circle{width:88px;height:88px;border-radius:50%;background:var(--primary-soft);border:3px solid var(--primary);overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.elina-eq{display:flex;align-items:flex-end;gap:2px;height:12px}
+.elina-eq span{width:3px;border-radius:2px;background:var(--primary);animation:elina-eq-anim .8s ease-in-out infinite}
+.elina-eq span:nth-child(1){height:4px;animation-delay:0s}
+.elina-eq span:nth-child(2){height:9px;animation-delay:.15s}
+.elina-eq span:nth-child(3){height:6px;animation-delay:.3s}
+.elina-eq span:nth-child(4){height:11px;animation-delay:.1s}
+.elina-eq.paused span{animation-play-state:paused;opacity:.3}
+@keyframes elina-eq-anim{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+.elina-status-row{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.elina-svg.talking #elina-mouth{animation:elina-mouth-anim .3s ease-in-out infinite alternate}
+@keyframes elina-mouth-anim{from{d:path("M34 49 Q44 52 54 49")}to{d:path("M34 49 Q44 57 54 49")}}
 
 /* RINGKASAN CARD */
 .ringkasan-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.65rem}
@@ -552,21 +570,52 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <!-- SC: SESI INTRO -->
 <div id="sc-sesi-intro" class="card" style="display:none">
   <div class="sesi-intro">
-    <span class="sesi-icon" id="si-icon">🌿</span>
     <div class="sesi-num" id="si-num">Sesi 1</div>
     <div class="sesi-title" id="si-title">Life Review Therapy</div>
     <p class="sesi-desc" id="si-desc">Deskripsi sesi.</p>
 
-    <!-- Audio perkenalan Elina (Sesi 1 saja) -->
-    <div id="elina-intro-audio-wrap" style="display:none;margin:.8rem 0;">
-      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem;">🎙️ Elina menyapamu…</p>
-      <audio id="elina-intro-audio" controls style="width:100%;max-width:320px;border-radius:8px;">
-        <source id="elina-intro-src" src="" type="audio/ogg">
-      </audio>
+    <!-- Avatar Elina (tampil hanya Sesi 1) -->
+    <div class="elina-avatar-block" id="elina-avatar-block" style="display:none">
+      <div class="elina-avatar-ring">
+        <div class="elina-ripple" id="elina-rp1"></div>
+        <div class="elina-ripple" id="elina-rp2"></div>
+        <div class="elina-ripple" id="elina-rp3"></div>
+        <div class="elina-circle">
+          <svg class="elina-svg" id="elinaSvg" width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="62" width="48" height="26" rx="12" fill="#5c8a6e"/>
+            <polygon points="44,62 37,76 51,76" fill="#fff" opacity=".65"/>
+            <ellipse cx="44" cy="68" rx="26" ry="15" fill="#3a6b52"/>
+            <ellipse cx="44" cy="34" rx="22" ry="24" fill="#3a6b52"/>
+            <ellipse cx="44" cy="40" rx="16" ry="18" fill="#f5c9a0"/>
+            <path d="M32 32 Q36 30 40 32" stroke="#6b4226" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            <path d="M48 32 Q52 30 56 32" stroke="#6b4226" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            <ellipse cx="37" cy="38" rx="3.2" ry="3.6" fill="#2e1a0e"/>
+            <ellipse cx="51" cy="38" rx="3.2" ry="3.6" fill="#2e1a0e"/>
+            <circle cx="38.3" cy="36.3" r="1.1" fill="white"/>
+            <circle cx="52.3" cy="36.3" r="1.1" fill="white"/>
+            <path d="M41 45 Q44 48 47 45" stroke="#c4956a" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="31" cy="44" rx="5.5" ry="3.5" fill="#f4a0a0" opacity=".28"/>
+            <ellipse cx="57" cy="44" rx="5.5" ry="3.5" fill="#f4a0a0" opacity=".28"/>
+            <path id="elina-mouth" d="M34 49 Q44 52 54 49" stroke="#c4845a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="elina-status-row">
+        <div class="elina-eq" id="elina-eq">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span id="elina-status-text">Elina sedang berbicara…</span>
+      </div>
     </div>
+
+    <!-- Audio hidden (Sesi 1 saja) -->
+    <audio id="elina-intro-audio" style="display:none">
+      <source id="elina-intro-src" src="" type="audio/ogg">
+    </audio>
 
     <div class="sess-prog" id="sess-prog-intro" style="justify-content:center"></div>
     <button class="btn-sm bp" id="btn-mulai-sesi" onclick="beginSesiQuestions()" disabled style="opacity:.5;cursor:not-allowed;">Mulai Sesi Ini →</button>
+    <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem;" id="elina-hint-text"></p>
   </div>
 </div>
 
@@ -3413,37 +3462,63 @@ function showSesiIntro(sesiNum){
     return`<div class="sess-dot ${isDone?'done':isAct?'active':'locked'}" title="Sesi ${n}">${n}</div>`;
   }).join('');
 
-  showSc('sc-sesi-intro');
+showSc('sc-sesi-intro');
 
-  // Auto-play suara perkenalan Elina hanya untuk Sesi 1
-  const audioWrap = document.getElementById('elina-intro-audio-wrap');
-  const audioEl   = document.getElementById('elina-intro-audio');
-  const btnMulai  = document.getElementById('btn-mulai-sesi');
+  const avatarBlock = document.getElementById('elina-avatar-block');
+  const audioEl     = document.getElementById('elina-intro-audio');
+  const btnMulai    = document.getElementById('btn-mulai-sesi');
+  const hintText    = document.getElementById('elina-hint-text');
+  const elinaSvg    = document.getElementById('elinaSvg');
+  const eqEl        = document.getElementById('elina-eq');
+  const statusText  = document.getElementById('elina-status-text');
+  const rp1 = document.getElementById('elina-rp1');
+  const rp2 = document.getElementById('elina-rp2');
+  const rp3 = document.getElementById('elina-rp3');
 
-  if(sesiNum === 1){
-    // Ganti path berikut dengan path/URL file rekaman kamu
-    document.getElementById('elina-intro-src').src = 'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/elina-audio/elina-intro.ogg';
-    audioEl.load();
-    audioWrap.style.display = 'block';
-    btnMulai.disabled = true;
-    btnMulai.style.opacity = '.5';
-    btnMulai.style.cursor = 'not-allowed';
+  function _elinaSetTalking(on){
+    elinaSvg.classList.toggle('talking', on);
+    eqEl.classList.toggle('paused', !on);
+    [rp1,rp2,rp3].forEach(r => r.style.display = on ? 'block' : 'none');
+  }
 
-    audioEl.play().catch(()=>{ /* autoplay blocked — biarkan user tekan play manual */ });
-
-    audioEl.onended = () => {
-      btnMulai.disabled = false;
-      btnMulai.style.opacity = '1';
-      btnMulai.style.cursor = 'pointer';
-    };
-  } else {
-    audioWrap.style.display = 'none';
+  function _elinaOnDone(){
+    _elinaSetTalking(false);
+    statusText.textContent = 'Elina selesai menyapa kamu';
     btnMulai.disabled = false;
     btnMulai.style.opacity = '1';
     btnMulai.style.cursor = 'pointer';
+    hintText.textContent = 'Siap! Kamu bisa mulai sesi sekarang.';
+    hintText.style.color = 'var(--primary)';
+  }
+
+  if(sesiNum === 1){
+    document.getElementById('elina-intro-src').src = 'https://xxcxygdssveddjonwxat.supabase.co/storage/v1/object/public/elina-audio/elina-intro.ogg';
+    audioEl.load();
+    avatarBlock.style.display = 'flex';
+    btnMulai.disabled = true;
+    btnMulai.style.opacity = '.5';
+    btnMulai.style.cursor = 'not-allowed';
+    hintText.textContent = 'Tunggu Elina selesai menyapa kamu…';
+    hintText.style.color = 'var(--muted)';
+    _elinaSetTalking(true);
+
+    audioEl.play().catch(()=>{
+      // Autoplay diblokir browser — tetap tampil avatar, tunggu onended
+    });
+
+    audioEl.onended = () => { _elinaOnDone(); };
+
+    // Fallback: jika audio gagal load sama sekali, buka tombol setelah 10 detik
+    audioEl.onerror = () => { _elinaOnDone(); };
+
+  } else {
+    avatarBlock.style.display = 'none';
+    btnMulai.disabled = false;
+    btnMulai.style.opacity = '1';
+    btnMulai.style.cursor = 'pointer';
+    hintText.textContent = '';
   }
 }
-
 
 function beginSesiQuestions(){
   S.currentQIdx=0;
