@@ -562,7 +562,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <p style="color:var(--muted);font-size:.86rem;line-height:1.7;margin-top:.4rem;max-width:400px;margin-inline:auto" id="sev-pre-d"></p>
       </div>
       <div class="brow" style="justify-content:center">
-        <button class="btn-sm bp" onclick="startLifeReview()">Mulai Life Review Therapy 🌿</button>
+        <button class="btn-sm bp" onclick="startLifeReview()">Mulai Life Review Therapy </button>
       </div>
     </div>
 
@@ -622,7 +622,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <!-- SC: KESIMPULAN SESI (menggantikan ringkasan) -->
     <div id="sc-ringkasan" class="card" style="display:none">
       <div class="ks-header">
-        <div class="ks-icon" id="ks-icon">🌿</div>
+        <div class="ks-icon" id="ks-icon"><svg width="52" height="44" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><text x="0" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#6a9e7f" letter-spacing="-2">P</text><text x="22" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="31" fill="#c4845a">W</text></svg></div>
         <div>
           <div class="ks-label">Kesimpulan Sesi</div>
           <div class="ks-sesi" id="ks-sesi-title">Sesi 1</div>
@@ -656,7 +656,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
             <span id="jeda-btn-label">Lanjutkan Sesi →</span>
           </button>
           <div class="jeda-warning" id="jeda-warning" style="display:none">
-            Sesi ini dirancang untuk dimulai setelah istirahat 3 hari agar proses refleksi bisa berjalan lebih baik. Waktu jeda ini adalah bagian dari terapimu. 🌿
+            Sesi ini dirancang untuk dimulai setelah istirahat 3 hari agar proses refleksi bisa berjalan lebih baik. Waktu jeda ini adalah bagian dari terapimu.
           </div>
         </div>
       </div>
@@ -763,14 +763,14 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
       <div class="brow">
         <button class="btn-sm bp" onclick="restartApp()">Mulai Sesi Baru</button>
-        <button class="btn-sm bp" onclick="showPsikologPage()" style="background:var(--accent)">🌿 Lanjut ke Psikolog</button>
+        <button class="btn-sm bp" onclick="showPsikologPage()" style="background:var(--accent)">Lanjut ke Psikolog</button>
         <button class="btn-sm bo" onclick="goPage('riwayat')">Lihat Riwayat</button>
         <button class="btn-sm bo" onclick="goPage('beranda')">Beranda</button>
       </div>
     </div>
   <!-- SC: PILIH PSIKOLOG -->
     <div id="sc-psikolog" class="card" style="display:none">
-      <h2>Lanjutkan ke Psikolog 🌿</h2>
+      <h2>Lanjutkan ke Psikolog </h2>
       <p class="sub" id="psi-sub">Berdasarkan perjalanan terapimu, berikut psikolog yang dapat membantu lebih lanjut.</p>
       <div class="ibox" id="psi-rekomendasi-info" style="display:none"></div>
       <div class="psi-grid" id="psi-grid">
@@ -800,7 +800,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 <!-- MODAL: Resume atau Mulai Baru -->
 <div id="modal-resume" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:1.5rem">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.15)">
-    <div style="font-size:2rem;text-align:center;margin-bottom:.75rem">🌿</div>
+    <div style="text-align:center;margin-bottom:.75rem"><svg width="52" height="44" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><text x="0" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#6a9e7f" letter-spacing="-2">P</text><text x="22" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="31" fill="#c4845a">W</text></svg></div>
     <h3 style="font-family:'Lora',serif;font-size:1.25rem;color:var(--white);text-align:center;margin-bottom:.5rem">Selamat Datang Kembali</h3>
     <p style="font-size:.85rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:.4rem">Ditemukan sesi yang belum selesai:</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;text-align:center">
@@ -827,7 +827,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="ch-label">Bantuan Tersedia Sekarang</div>
         <div class="ch-item">📞 <span>Hotline Kemenkes RI: <a href="tel:119">119 ext 8</a> (24 jam)</span></div>
         <div class="ch-item">💬 <span>Chat: <a href="https://sejiwa.or.id" target="_blank">sejiwa.or.id</a></span></div>
-        <div class="ch-item">🌿 <span>Psikolog PsyWellMate siap membantu</span></div>
+        <div class="ch-item"> <span>Psikolog PsyWellMate siap membantu</span></div>
       </div>
       <div class="crisis-btn-wrap" id="crisis-btn-wrap"></div>
     </div>
@@ -836,7 +836,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 <!-- BANNER WASPADA -->
 <div class="crisis-banner" id="crisis-banner-waspada">
-  🌿 <span id="crisis-banner-txt">Elina memperhatikanmu.</span>
+  <span id="crisis-banner-txt">Elina memperhatikanmu.</span>
 </div>
 <script>
 /* ══════════════════════════════════════════
@@ -1337,7 +1337,13 @@ const EMO_LEX = {
 'kesempurnaan nggak butuh banyak':2,'ngerasa aman duduk di teras':3,
 'cuma aku dan bokap dan hujan':2,
 'dunia sekecil itu':2, 'literally ringan':2,
-'nggak ada yang perlu dikhawatirin':2,
+'nggak ada yang perlu dikhawatirin':2, // ── Dari sesi Rian ──
+'ngerasa penuh':3, 'ngerasa di tempat yang benar':3,
+'ngerasa cukup':3, 'dunia terasa aman':3,
+'lingkaran itu terasa lagi':3,
+'ringan yang beneran':3,
+'ketawa beneran':2,
+'semua baik-baik aja':2,
     }
   },
   rindu: {
@@ -1350,7 +1356,17 @@ const EMO_LEX = {
 'tangan kasar tapi kompres kepalaku':3,
 'Pak Sardi cermin aku':3,'kangen Raffi':3, 'kangen versi aku waktu sama dia':3,
 'bau minyak kayu putih':2, 'tangan ibu yang hangat':3,
-'bokap gendong aku waktu hujan':3,
+'bokap gendong aku waktu hujan':3, // ── Dari sesi Rian ──
+'pagi diam sama bapak':3,
+'tangan di kepala awak':3,
+'kalau bapak masih ada':3,
+'nggak ada yang seperti itu lagi':3,
+'bau masakan ibu dari dapur':3,
+'awak rindu istri awak sendiri':3,
+'rindu Maya':3,
+'nggak ada yang seperti bapak':3,
+'bagus Rian':2, 'jago Rian':2,
+'dua kata tapi awak simpan':2,
     }
   },
   malu: {
@@ -1363,7 +1379,15 @@ const EMO_LEX = {
 'pensiunan yang tinggal sendiri':2,'gagal jadi anak yang cukup baik':3,
 'gagal jadi pacar yang diprioritasin':3,
 'gagal jadi mahasiswi yang bener':3,
-'hampir DO':2, 'malu banget waktu itu':2,
+'hampir DO':2, 'malu banget waktu itu':2, // ── Dari sesi Rian — rasa bersalah moral ──
+'jalan yang nggak seharusnya':3,
+'berani ambil jalan yang nggak seharusnya':3,
+'ada yang nggak seharusnya':3,
+'itu salah awak':3, 'awak yang salah':3,
+'kalau bapak bangga atau nggak':3,
+'alasan tetap alasan bukan pembenaran':2,
+'nggak tau salah siapa':2,
+'kalau awak nulis karangan bapak nggak mau baca':3,
     }
   },
   kesepian: {
@@ -1383,7 +1407,16 @@ const EMO_LEX = {
 'ngumpet di balik baik-baik aja':2,
 'nggak ada yang nyariin':3,
 'dipeluk tapi dari jarak jauh':2,
-'ngerasa invisible':3, 'invisible':3,
+'ngerasa invisible':3, 'invisible':3, // ── Dari sesi Rian ──
+'awak raso ndak ado nan paham':3,
+'ndak ado nan paham':3,
+'ngerasa sendiri padahal ada orang':3,
+'dua rel kereta':3,
+'ngobrol seperlunya':2,
+'nggak ada yang betul-betul nanya':2,
+'cari rasa itu ke mana-mana':2,
+'kapal yang hanyut dari dermaga':3,
+'nggak ada tempatnya':3,
     }
   },
   kecewa: {
@@ -1416,7 +1449,12 @@ const EMO_LEX = {
 'bayangan nggak pernah ilang':3,
       'pergi tanpa pamit':2,
 'umur tiga belas udah belajar kehilangan':3,
-'pertama kalinya aku ngerti orang bisa pergi':3,
+'pertama kalinya aku ngerti orang bisa pergi':3, // ── Dari sesi Rian ──
+'belum selesai berduka':3,
+'tujuh tahun tapi terasa baru kemarin':3,
+'nggak nangis padahal takut':2,
+'sudah terbentuk dari kecil':2,
+'nggak ada pilihan yang betul-betul benar':2,
     }
   },
   burnout: {
@@ -1441,7 +1479,26 @@ const EMO_LEX = {
 'perform kuat':2, 'earn the right to be tired':3,
 'earn the right to be here':3, 'nggak ngerasa berhak capek':3,
 'harusnya harusnya harusnya':2, 'nggak boleh capek':2,
-'nggak boleh nyerah':2,
+'nggak boleh nyerah':2, // ── Dari sesi Rian ──
+'den capek maagak-agak':3, 'maagak-agak':2,
+'terlalu biasa nanggung sendiri':3,
+'capek pura-pura semuanya cukup':3,
+'jaga tampilan':2, 'pasang muka yang sama':2,
+'nggak ada tempatnya':3,
+'lelah berbohong sama diri sendiri':3,
+'awak lelah berbohong':3,
+'nggak naik-naik':1, 'nggak berkembang':2,
+'ngerasa stagnan':2, 'tenggelam dalam kerjaan':2,
+'pendam sendiri':2, 'handle sendiri':1,
+'nggak tau cara minta tolong':2,
+'capek yang lain':2, 'di dalam itu capek':3,
+'laki-laki harus kuat':2,
+'nggak boleh kelihatan lemah':2,
+'hidup dengan diri sendiri':2,
+'muter di tempat':2, 'pintu yang nggak berani diketuk':2,
+'api unggun yang nggak dijaga':2,
+'jarang tambahkan kayu':2,
+'gitu-gitu aja':2,
     }
   },
   harapan: {
@@ -1471,14 +1528,30 @@ const EMO_LEX = {
 'rasa aman dari dalam':2, 'tanpa nunggu siapapun':2,
 'ngomongnya sendiri yang menyembuhkan':3,
 'nggak ngumpet':2,
-'inget siapa aku sebelum dunia ngajarin aku untuk kecil':3,
+'inget siapa aku sebelum dunia ngajarin aku untuk kecil':3, // ── Dari sesi Rian ──
+'awak mau coba':3, 'awak mau usaha':3,
+'awak mau pulang':3, 'mau pulang beneran pulang':3,
+'layak ditunggu':3, 'masih ada waktu':3,
+'semoga belum terlambat':3,
+'mulai berani lihat':2, 'nggak lari dulu':2,
+'duduk dulu hadapi dulu':2,
+'pena di tangan sendiri':3,
+'hidup belum selesai ditulis':3,
+'ang lah nan ka jago':2, 'jago keluarga ang':2,
+'awak mau jadi layak':2,
+'ringan yang beneran':2,
     }
   },
 };
 
 /* ── Kata Negasi ── */
-const NEGASI = ['tidak','bukan','belum','jangan','tanpa','tak','ga ','gak ','nggak','enggak','nda ','ndak ','durung ','ora ','yo nggak','kok nggak','kagak','gak mau'];
-/* ── Kata Intensifier ── */
+const NEGASI = [
+  'tidak','bukan','belum','jangan','tanpa','tak',
+  'ga ','gak ','nggak','enggak',
+  'nda ','ndak ','durung ','ora ',
+  'yo nggak','kok nggak','kagak','gak mau',
+  'ndak ado','indak','indak ado',
+];/* ── Kata Intensifier ── */
 const INTENSIFIER = {
   tinggi: ['beneran','beneran-beneran','parah','habis','mampus','bgt','bngt','banget sih','sangat','amat','sekali','banget','benar-benar','sungguh','terlalu','betul-betul','luar biasa','teramat','paling','super','ekstrem','sungguh-sungguh'],
   rendah: ['sedikit','agak','lumayan','cukup','kurang','rada','hampir','yo '],
@@ -1537,15 +1610,15 @@ function detectTopic(text) {
   const t = text.toLowerCase();
   const topikMap = {
     'keluarga':     ['tulang punggung','anak tengah','anak sulung','anak bungsu','kumpul lengkap','meja makan','rebutan lauk','satu bapak satu ibu','bapak','bokap','nyokap','ortu','mbah','mbah putri','cucu','menantu','mas ','mbak ','pak ','bu ','kondangan','hajatan','mertua','ipar','keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan',],
-    'pekerjaan':    ['shift malam','shift sore','kasir','minimarket','gajian','buruh tani','jualan jajan pasar','tulang punggung keluarga','guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
+    'pekerjaan':    ['supervisor','dealer','sales','target','lembur','bengkel','showroom','fresh graduate','komisi','shift malam','shift sore','kasir','minimarket','gajian','buruh tani','jualan jajan pasar','tulang punggung keluarga','guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
     'kesehatan':    ['posyandu','senam lansia','pengapuran','tensi','puskesmas','kacamata','kontrol','obat rutin','lutut nyeri','tekanan darah','sakit','sehat','dokter','rumah sakit','obat','penyakit','fisik','tubuh'],
     'percintaan':   ['Raffi','mantan','putus','nggak bisa move on','pacar','kekasih','cinta','hubungan','putus','selingkuh','menikah','pernikahan'],
     'pertemanan':   ['teman sebangku','sahabat kecil','tipes','gendong ngos-ngosan','pergi tanpa pamit','jagain yang penakut','teman','sahabat','bestie','circle','persahabatan','dikucilkan'],
     'pendidikan':   ['lomba debat','nilai terbaik','IPA','IPS','passion','organisasi kampus','sekolah','kuliah','kampus','ujian','tugas','skripsi','nilai','belajar'],
-    'keuangan':     ['UKT','hampir DO','DO administrasi','kirimin uang','bayar kos','uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
+    'keuangan':     ['cicilan rumah','cicilan','kredit','UKT','hampir DO','DO administrasi','kirimin uang','bayar kos','uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
     'kehilangan':   ['duka','janda','almarhum','almarhumah','ditinggal meninggal','tiga tahun lalu','wafat','berpulang','makam','ziarah','meninggal','wafat','berpulang','kehilangan','berpisah','ditinggal'],
-    'masa lalu':    ['gang','gang depan rumah','Cicaheum','petak umpet','es mambo','pasar malem','alun-alun','gulali','digendong bapak','lihat bintang','kaki nggak nyampe tanah','kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
-    'spiritualitas':['ngaji','pengajian','al-quran','quran','sholat','salat','rebana','remaja masjid','tahlil','yasinan','maulidan','subuh','isya','ashar','zuhur','magrib','inna mal usri','insyaallah','alhamdulillah','matur suwun','sesok isih ono dino','ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
+    'masa lalu':    ['Siteba','kursi rotan','garasi','angkot','Pantai Padang','kontrakan','gang','gang depan rumah','Cicaheum','petak umpet','es mambo','pasar malem','alun-alun','gulali','digendong bapak','lihat bintang','kaki nggak nyampe tanah','kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
+    'spiritualitas':['jumatan','raso jo pareso','ngaji','pengajian','al-quran','quran','sholat','salat','rebana','remaja masjid','tahlil','yasinan','maulidan','subuh','isya','ashar','zuhur','magrib','inna mal usri','insyaallah','alhamdulillah','matur suwun','sesok isih ono dino','ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
     'identitas':    ['rasa punya tempat di dunia','nulis surat tangan','nulis surat buat murid','cermin yang pecah','nggak tau siapa diri sendiri','peran udah habis','aku ini siapa','jati diri','nggo opo','saiki nggo opo','tugasku udah selesai','warisan','bekasnya aku','mau ngapain lagi','bekas yang ditinggalkan','jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
   };
   const found = [];
@@ -1568,7 +1641,7 @@ const TOKOH_LEX = {
   'ayah':         ['ayah','papa','bapak','abah','abi','papi','pak'],
   'kakak':        ['kakak','kak','abang','bang','mbak'],
   'adik':         ['adik','dik','adek'],
-  'suami':        ['suami','pak suami','mas','kang','suamiku','suami saya'],
+  'suami':        ['suami','pak suami','suamiku','suami saya'],
   'istri':        ['istri','istriku','bini','isteri'],
   'anak':         ['anak','anakku','anak saya','si kecil','putra','putri'],
   'sahabat':      ['sahabat','teman dekat','bestie','sobat','kawan lama'],
@@ -2124,6 +2197,63 @@ const SYUKUR_Q = {
     'Kalau ada satu kekuatan dalam diri {sp} yang paling {sp} andalkan selama ini — apa itu?',
   ],
 };
+
+/* ══════════════════════════════════════════
+   DETEKSI & RESPONS FRUSTRASI TERHADAP SESI
+   Ketika pasien mengeluh soal Elina / respons template
+══════════════════════════════════════════ */
+
+/* Kata/frasa yang menandakan pasien frustrasi terhadap Elina */
+const FRUSTRASI_SESI_LEX = [
+  // Keluhan langsung tentang pertanyaan berulang
+  'tadi sudah ditanya','tadi kayak pernah ditanya','sudah awak cerita',
+  'udah aku cerita','udah cerita tadi','aku udah jawab',
+  'pertanyaannya sama','pertanyaan yang sama','ditanya lagi',
+  // Keluhan tentang respons template
+  'kaset yang diulang','muter-muter terus','pertanyaannya muter',
+  'tembok yang sopan','angguk-angguk tapi tembok',
+  'nggak beneran didengar','nggak sepenuhnya hadir',
+  'masuk kuping kiri keluar kuping kanan',
+  'divalidasi tapi nggak disentuh',
+  'capek ngerasa nggak beneran didengar',
+  'ceritaku nggak ada bekasnya',
+  'beneran baca ceritaku nggak',
+  'belum siap beneran nemenin',
+  'kayak ngomong sama robot',
+  'nggak nyambung','tidak nyambung',
+  'jawaban yang sama terus',
+  // Keluhan implisit (muncul di sesi Rian)
+  'tadi kayak pernah','kayak pernah ditanya',
+  'sudah awak jawab','sudah aku jawab',
+];
+
+/* Deteksi apakah teks mengandung frustrasi terhadap sesi */
+if (detectFrustrasiSesi(text)) {
+    _frustrasiCount++;
+
+    // Frustrasi pertama: minta maaf dan sesuaikan
+    if (_frustrasiCount === 1) {
+      return _pick(RESP_FRUSTRASI_SESI, sp, nm)
+        .replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm);
+    }
+
+    // Frustrasi berulang (2+): tawarkan transisi ke pertanyaan lain
+    const eskalasi = [
+      `Saya dengar {sp} — dan saya benar-benar minta maaf. Sepertinya pendekatan saya belum pas untuk {sp} saat ini. Mau kita coba dengan cara yang lebih bebas? {sp} bisa cerita apa saja yang terasa penting, tanpa saya arahkan.`,
+      `Terima kasih sudah bersabar, {sp}. Saya ingin lebih baik dalam mendengarkan {sp}. Boleh kita mulai ulang sebentar — apa yang paling ingin {sp} ceritakan hari ini, tanpa batasan pertanyaan dari saya?`,
+    ];
+    return _pick(eskalasi, sp, nm)
+      .replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm);
+  }
+
+/* Pool respons Elina ketika frustrasi terdeteksi */
+const RESP_FRUSTRASI_SESI = [
+  'Maaf, {sp} — saya dengar kamu sudah menceritakan ini sebelumnya. Itu kesalahan saya, dan saya minta maaf. Cerita {sp} terlalu berharga untuk diabaikan. Boleh {sp} ceritakan lagi dari sudut yang berbeda, atau kita lanjut ke hal lain?',
+  'Terima kasih sudah jujur, {sp}. Kamu benar — saya seharusnya lebih mendengarkan dengan sungguh-sungguh. Mari kita coba lagi dengan cara yang berbeda. Apa yang paling ingin {sp} sampaikan sekarang?',
+  'Saya mendengar kamu, {sp}. Dan saya minta maaf kalau terasa seperti saya tidak benar-benar hadir. Cerita {sp} nyata dan penting. Apa yang paling ingin {sp} agar saya pahami dari semua yang sudah diceritakan?',
+  'Kamu benar, {sp} — dan saya hargai kejujuran itu. Saya ingin mendengarkan lebih baik. Dari semua yang sudah {sp} ceritakan hari ini, bagian mana yang paling ingin {sp} saya pegang betul-betul?',
+  'Maaf sudah membuat {sp} merasa tidak didengar. Itu bukan yang saya inginkan. Boleh {sp} bantu saya dengan memberitahu — apa satu hal yang paling penting dari cerita {sp} yang ingin {sp} pastikan saya mengerti?',
+];
   
 /* Ambil topik dari teks pertanyaan sesi yang sedang aktif */
 function getTopikDariPertanyaan() {
@@ -2338,6 +2468,14 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
   const text = rawText || '';
   const wordCount = text.trim().split(/\s+/).length;
 
+   if (wordCount <= 6) return _pick(PEMANCING, sp, nm);
+
+  // ── BARU: Deteksi frustrasi terhadap sesi — prioritas tertinggi ──
+  if (detectFrustrasiSesi(text)) {
+    return _pick(RESP_FRUSTRASI_SESI, sp, nm)
+      .replace(/\{sp\}/g, sp)
+      .replace(/\{nm\}/g, nm);
+  }
   // ── Variabel penentu kondisi ──
   const ceritaPanjang = wordCount >= 50;
   const deep       = nlp._deep || analyzeEmotionDeep(text);
@@ -2621,7 +2759,7 @@ function showCrisisModal(level, needsConfirmation, onConfirm, onDeny){
       btnWrap.innerHTML = `<button class="crisis-btn-help" onclick="_crisisUserConfirm()">Saya butuh bantuan segera</button><button class="crisis-btn-ok" onclick="_crisisUserDeny()">Saya baik-baik saja</button>`;
     }
   } else {
-    icon.textContent = '🌿';
+    icon.innerHTML = '<svg width="52" height="44" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><text x="0" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#6a9e7f" letter-spacing="-2">P</text><text x="22" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="31" fill="#c4845a">W</text></svg>';
     title.textContent = 'Elina Memperhatikanmu';
     body.textContent = 'Dari cerita yang baru disampaikan, Elina ingin memastikan kamu baik-baik saja. Apakah perasaan ini tentang dirimu sendiri?';
     hotline.style.display = 'none';
@@ -2640,7 +2778,7 @@ function _showCrisisBanner(pesan){
   const banner = document.getElementById('crisis-banner-waspada');
   const txt    = document.getElementById('crisis-banner-txt');
   if(!banner) return;
-  txt.innerHTML = `🌿 ${pesan} Hubungi <strong><a href="tel:119" style="color:var(--amber)">119 ext 8</a></strong> jika butuh bantuan segera.`;
+  txt.innerHTML = ${pesan} Hubungi <strong><a href="tel:119" style="color:var(--amber)">119 ext 8</a></strong> jika butuh bantuan segera.`;
   banner.classList.add('show');
   const chatArea = document.getElementById('sq-chat-area');
   if(chatArea) chatArea.parentNode.insertBefore(banner, chatArea.nextSibling);
@@ -2818,7 +2956,7 @@ function getSev(score, tahap){
 ══════════════════════════════════════════ */
 const SESI_META = {
   1: {
-    icon:'🌿', title:'Life Review — Kondisi Saat Ini',
+    icon:'', title:'Life Review — Kondisi Saat Ini',
     desc:'Sesi pembuka ini mengajak kita untuk mengenali kondisi psikologis, lingkungan, dan kehidupan sehari-hari yang sedang dijalani saat ini.',
     qs_anak:[
       'Ceritakanlah bagaimana perasaan dan kondisi psikologi kamu saat ini.',
@@ -3589,6 +3727,7 @@ let _usedFlip = {};           // BARU: tracking flip per topik yang sudah dipaka
 let _sessionContext = [];     // BARU: ringkasan konteks yang sudah diceritakan
 let _topikSudahDigali = [];   // BARU: topik yang sudah dapat flip positif
 let _sessionLog = [];         // MEMORI: log semua jawaban pasien dalam satu sesi pertanyaan
+let _frustrasiCount = 0;  // hitung berapa kali frustrasi muncul dalam satu sesi
 // Cek dukungan mic saat load
 _micSupported = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
@@ -3610,6 +3749,7 @@ function loadSesiQuestion(){
   document.getElementById('pb-sesi').style.width=((n/tot)*100)+'%';
 
   _mtTurn = 0;
+  _frustrasiCount = 0;
   _mtFirstSaved = false;
   _mtNlpFirst = null;
   _usedAckDeep = [];
@@ -3617,6 +3757,7 @@ function loadSesiQuestion(){
   _sessionContext = [];
   _topikSudahDigali = [];
   _sessionLog = [];
+  
   // Reset crisis alert ID per pertanyaan
   window._lastCrisisAlertId = null;
 
@@ -4078,7 +4219,7 @@ function showRingkasanSesi(sesiNum, progressData){
   const isLastSesi = (S.sesiList.indexOf(sesiNum) === S.sesiList.length - 1);
 
   // Update ikon dan judul sesi
-  document.getElementById('ks-icon').textContent = meta.icon || '🌿';
+  document.getElementById('ks-icon').innerHTML = meta.icon || '<svg width="52" height="44" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><text x="0" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#6a9e7f" letter-spacing="-2">P</text><text x="22" y="34" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="31" fill="#c4845a">W</text></svg>';
   document.getElementById('ks-sesi-title').textContent = `Sesi ${sesiNum} — ${meta.title}`;
 
   // Update label tombol lanjut
@@ -4211,7 +4352,7 @@ function updateCountdownUI(){
     document.getElementById('jeda-btn-label').textContent = 'Mulai Sesi Sekarang →';
     document.getElementById('jeda-cd-wrap').style.display = 'none';
     document.getElementById('jeda-tanggal').style.display = 'none';
-    document.getElementById('jeda-sub').textContent = 'Waktu istirahat sudah selesai. Kamu siap melanjutkan sesi berikutnya! 🌿';
+    document.getElementById('jeda-sub').textContent = 'Waktu istirahat sudah selesai. Kamu siap melanjutkan sesi berikutnya! ';
   }
 }
 
@@ -4500,7 +4641,7 @@ async function kirimRujukan(){
 
     document.getElementById('psi-sending').style.display='none';
     const sEl = document.getElementById('psi-success');
-    sEl.innerHTML = `✅ Rujukan berhasil dikirim ke <strong>${psi.full_name}</strong> (${psi.email}).<br>Psikolog akan menghubungimu dalam waktu dekat. Terima kasih sudah mempercayakan perjalanan ini kepada PsyWellMate. 🌿`;
+    sEl.innerHTML = `✅ Rujukan berhasil dikirim ke <strong>${psi.full_name}</strong> (${psi.email}).<br>Psikolog akan menghubungimu dalam waktu dekat. Terima kasih sudah mempercayakan perjalanan ini kepada PsyWellMate. `;
     sEl.style.display = 'block';
   }catch(e){
     document.getElementById('psi-sending').style.display='none';
@@ -4514,7 +4655,7 @@ async function _kirimEmailRujukan(psi, data){
 
   const htmlBody = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
     <div style="background:#6a9e7f;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
-      <h2 style="margin:0">🌿 Rujukan Pasien Baru — PsyWellMate</h2>
+      <h2 style="margin:0"> Rujukan Pasien Baru — PsyWellMate</h2>
     </div>
     <div style="background:#fff;border:1px solid #eee;padding:24px;border-radius:0 0 8px 8px">
       <p style="font-size:15px;color:#333;margin-bottom:16px">Yth. <strong>${psi.full_name}</strong>,</p>
@@ -4544,7 +4685,7 @@ async function _kirimEmailRujukan(psi, data){
       },
       body: JSON.stringify({
         to:      psi.email,
-        subject: `🌿 Rujukan Pasien — ${data.nama}, ${data.usia} thn — PsyWellMate`,
+        subject: ` Rujukan Pasien — ${data.nama}, ${data.usia} thn — PsyWellMate`,
         html:    htmlBody,
       }),
     });
