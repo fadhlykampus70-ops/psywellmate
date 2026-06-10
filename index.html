@@ -2778,7 +2778,7 @@ function _showCrisisBanner(pesan){
   const banner = document.getElementById('crisis-banner-waspada');
   const txt    = document.getElementById('crisis-banner-txt');
   if(!banner) return;
-  txt.innerHTML = ${pesan} Hubungi <strong><a href="tel:119" style="color:var(--amber)">119 ext 8</a></strong> jika butuh bantuan segera.`;
+  txt.innerHTML = `🌿 ${pesan} Hubungi <strong><a href="tel:119" style="color:var(--amber)">119 ext 8</a></strong> jika butuh bantuan segera.`;
   banner.classList.add('show');
   const chatArea = document.getElementById('sq-chat-area');
   if(chatArea) chatArea.parentNode.insertBefore(banner, chatArea.nextSibling);
