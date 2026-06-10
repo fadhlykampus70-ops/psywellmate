@@ -2228,6 +2228,7 @@ const FRUSTRASI_SESI_LEX = [
 ];
 
 /* Deteksi apakah teks mengandung frustrasi terhadap sesi */
+/* Deteksi apakah teks mengandung frustrasi terhadap sesi */
 if (detectFrustrasiSesi(text)) {
     _frustrasiCount++;
 
@@ -2245,7 +2246,6 @@ if (detectFrustrasiSesi(text)) {
     return _pick(eskalasi, sp, nm)
       .replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm);
   }
-
 /* Pool respons Elina ketika frustrasi terdeteksi */
 const RESP_FRUSTRASI_SESI = [
   'Maaf, {sp} — saya dengar kamu sudah menceritakan ini sebelumnya. Itu kesalahan saya, dan saya minta maaf. Cerita {sp} terlalu berharga untuk diabaikan. Boleh {sp} ceritakan lagi dari sudut yang berbeda, atau kita lanjut ke hal lain?',
