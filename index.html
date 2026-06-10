@@ -2228,24 +2228,7 @@ const FRUSTRASI_SESI_LEX = [
 ];
 
 /* Deteksi apakah teks mengandung frustrasi terhadap sesi */
-/* Deteksi apakah teks mengandung frustrasi terhadap sesi */
-if (detectFrustrasiSesi(text)) {
-    _frustrasiCount++;
 
-    // Frustrasi pertama: minta maaf dan sesuaikan
-    if (_frustrasiCount === 1) {
-      return _pick(RESP_FRUSTRASI_SESI, sp, nm)
-        .replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm);
-    }
-
-    // Frustrasi berulang (2+): tawarkan transisi ke pertanyaan lain
-    const eskalasi = [
-      `Saya dengar {sp} — dan saya benar-benar minta maaf. Sepertinya pendekatan saya belum pas untuk {sp} saat ini. Mau kita coba dengan cara yang lebih bebas? {sp} bisa cerita apa saja yang terasa penting, tanpa saya arahkan.`,
-      `Terima kasih sudah bersabar, {sp}. Saya ingin lebih baik dalam mendengarkan {sp}. Boleh kita mulai ulang sebentar — apa yang paling ingin {sp} ceritakan hari ini, tanpa batasan pertanyaan dari saya?`,
-    ];
-    return _pick(eskalasi, sp, nm)
-      .replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm);
-  }
 /* Pool respons Elina ketika frustrasi terdeteksi */
 const RESP_FRUSTRASI_SESI = [
   'Maaf, {sp} — saya dengar kamu sudah menceritakan ini sebelumnya. Itu kesalahan saya, dan saya minta maaf. Cerita {sp} terlalu berharga untuk diabaikan. Boleh {sp} ceritakan lagi dari sudut yang berbeda, atau kita lanjut ke hal lain?',
