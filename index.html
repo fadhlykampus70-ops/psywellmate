@@ -3761,12 +3761,6 @@ function loadSesiQuestion(){
   bt.innerHTML='<span class="tdots"><span></span><span></span><span></span></span>';
   setTimeout(()=>{
     bt.textContent=qs[n];
-    if(_ttsUnlocked && _ttsEnabled){
-      musicForceStop();
-      musicShow(true);
-      // Jeda 200ms agar browser tidak race condition
-      setTimeout(()=>{
-    bt.textContent=qs[n];
     // Pilih track random setiap pertanyaan baru
     _musPickRandom();
     if(_ttsUnlocked && _ttsEnabled){
@@ -3784,7 +3778,6 @@ function loadSesiQuestion(){
     }
   },800);
 }
-
 // Callback setelah Elina selesai bicara pertanyaan → aktifkan mic
 // Dipanggil dari onend utterance di elinaBicara
 function _afterElinaQuestion(){
