@@ -2228,7 +2228,11 @@ const FRUSTRASI_SESI_LEX = [
 ];
 
 /* Deteksi apakah teks mengandung frustrasi terhadap sesi */
-
+/* Deteksi apakah teks mengandung frustrasi terhadap sesi */
+function detectFrustrasiSesi(text) {
+  const t = text.toLowerCase();
+  return FRUSTRASI_SESI_LEX.some(frasa => t.includes(frasa));
+}
 /* Pool respons Elina ketika frustrasi terdeteksi */
 const RESP_FRUSTRASI_SESI = [
   'Maaf, {sp} — saya dengar kamu sudah menceritakan ini sebelumnya. Itu kesalahan saya, dan saya minta maaf. Cerita {sp} terlalu berharga untuk diabaikan. Boleh {sp} ceritakan lagi dari sudut yang berbeda, atau kita lanjut ke hal lain?',
