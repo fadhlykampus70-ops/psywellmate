@@ -3766,6 +3766,14 @@ function loadSesiQuestion(){
       musicShow(true);
       // Jeda 200ms agar browser tidak race condition
       setTimeout(()=>{
+    bt.textContent=qs[n];
+    // Pilih track random setiap pertanyaan baru
+    _musPickRandom();
+    if(_ttsUnlocked && _ttsEnabled){
+      musicForceStop();
+      musicShow(true);
+      // Jeda 200ms agar browser tidak race condition
+      setTimeout(()=>{
         elinaBicara(qs[n], 'pertanyaan', 'tts-wave-q');
       }, 200);
     } else {
@@ -5189,7 +5197,19 @@ const MUS_VOL_NORMAL = 0.28;
 const MUS_VOL_DUCK   = 0.07;  // kecil saat Elina bicara
 
 let _musIdx=0, _musPlaying=false, _musInited=false, _musVolume=MUS_VOL_NORMAL, _musDucked=false, _musFadeTimer=null, _musPausedForTTS=false;
+let _musHistory=[];  // riwayat index yang sudah diputar (untuk shuffle anti-repeat)
 
+function _musPickRandom(){
+  // Jika semua track sudah pernah diputar, reset riwayat (kecuali track terakhir)
+  if(_musHistory.length >= MUSIK_LIST.length - 1){
+    _musHistory = _musIdx >= 0 ? [_musIdx] : [];
+  }
+  // Pilih dari track yang belum ada di riwayat
+  const available = MUSIK_LIST.map((_,i)=>i).filter(i => !_musHistory.includes(i));
+  const pick = available[Math.floor(Math.random() * available.length)];
+  _musHistory.push(pick);
+  _musIdx = pick;
+}
 function _musAudio(){ return document.getElementById('music-audio'); }
 function _musPlayer(){ return document.getElementById('music-player'); }
 
