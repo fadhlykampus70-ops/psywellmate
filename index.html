@@ -1275,7 +1275,11 @@ function analyzeNLP(text){
 const EMO_LEX = {
   sedih: {
     words: {
-      'sedih':2,'menangis':3,'duka':2,'pilu':3,'nestapa':3,'merana':2,'kepedihan':3,
+      'dada sesak':3, 'kepala berat':2, 'jantung berdebar':2,
+'susah tidur':2, 'mudah lelah':2, 'dada sesak sungguhan':3,
+'dada tiba-tiba sesak':3, 'sesak di dada':3,
+'ada yang tidak pas di dalam dada':3,
+'ada yang mengganjal':2, 'rasanya ada yang mengganjal':2,'sedih':2,'menangis':3,'duka':2,'pilu':3,'nestapa':3,'merana':2,'kepedihan':3,
       'air mata':2,'muram':2,'murung':2,'sendu':2,'pilu':3,'tersayat':3,'hancur hati':3,
       'patah hati':3,'berduka':3,'terluka':2,'perih':2,'sakit hati':2,'kecewa':2,
       'hampa':2,'kosong':2,'sia-sia':2,'tidak berharga':3,'tidak berarti':3,
@@ -1371,7 +1375,11 @@ const EMO_LEX = {
   },
   malu: {
     words: {
-      'malu':2,'rendah diri':2,'minder':2,'tidak percaya diri':2,'canggung':1,
+      'tidak pernah merasa cukup di matanya':3,
+'tidak pernah merasa cukup':3,
+'tidak biasa dipuji':2, 'tidak biasa dihargai':2,
+'tidak mengharapkan penghargaan':1,
+'kerja yang baik tidak perlu tepuk tangan':2,'malu':2,'rendah diri':2,'minder':2,'tidak percaya diri':2,'canggung':1,
       'sungkan':1,'insecure':2,'malu-malu':1,'tidak pantas':2,'tidak layak':2,
       'merasa jelek':2,'tidak cukup baik':2,'tidak mampu':2,'gagal':2,'nggak tau lagi siapa aku':3, 'peran udah habis':3,
 'saiki nggo opo':3, 'nggo opo':2, 'aku ini siapa':3,
@@ -1392,7 +1400,18 @@ const EMO_LEX = {
   },
   kesepian: {
     words: {
-      'kesepian':3,'sendirian':2,'terisolasi':3,'dikucilkan':3,'tidak ada teman':3,
+      'sendiri di tengah keramaian keluarga':3,
+'ngerasa sendiri di tengah keramaian':3,
+'siang sampai sore saya banyak sendiri':2,
+'sendiri di siang hari berat':3,
+'jarang ada yang mau mendengarkan':3,
+'saya yang mendengarkan':2,
+'sudah biasa di posisi itu':2,
+'tidak dekat juga sih':2,
+'tidak pernah tahu caranya dekat':3,
+'bicara tapi tidak didengar':3,
+'merasa tapi tidak boleh merasa':3,
+'tidak dilihat':3,'kesepian':3,'sendirian':2,'terisolasi':3,'dikucilkan':3,'tidak ada teman':3,
       'sendiri':1,'sunyi':2,'sepi':2,'hampa':2,'tidak ada yang peduli':3,
       'tidak ada yang mengerti':3,'tidak ada yang memahami':3,'merasa asing':2,
       'tidak ditemani':2,'tidak ada yang menemani':2,'tidak diperhatikan':2,'sepi itu nyata':3, 'ada tapi kayak nggak ada':3,
@@ -1421,7 +1440,9 @@ const EMO_LEX = {
   },
   kecewa: {
     words: {
-      'kecewa':2,'mengecewakan':2,'tidak sesuai harapan':3,'merasa dikhianati':3,
+      'ibu tidak pernah salah':2,
+'tidak pernah merasa cukup di matanya':3,
+'iri sama adik':2, 'tidak pernah tahu caranya':3,'kecewa':2,'mengecewakan':2,'tidak sesuai harapan':3,'merasa dikhianati':3,
       'harapan tidak terwujud':3,'sudah berusaha tapi':2,'gagal lagi':3,
       'tidak dihargai':2,'tidak diapresiasi':2,'tidak dipedulikan':2,
       'diabaikan':2,'tidak didengar':2,'dicuekin':2,'tembok yang sopan':3, 'nggak beneran didengar':3,
@@ -1441,7 +1462,17 @@ const EMO_LEX = {
   },
   trauma: {
     words: {
-      'trauma':3,'traumatis':3,'kekerasan':3,'pelecehan':3,'penganiayaan':3,
+      'tidak pernah dipeluk':3,
+'tidak pernah denger bilang sayang':3,
+'tidak pernah bilang sayang':3,
+'tidak sempat lihat terakhir kali':3,
+'tidak sempat pegang tangannya':3,
+'pulang tapi sudah terlambat':3,
+'sudah dimakamkan':2,
+'bicara tapi tidak ada yang benar-benar di sana':3,
+'dari kecil bicara tapi tidak didengar':3,
+'sudah lama saya pendam':3,
+'tidak tahu apa yang saya pendam':2,'trauma':3,'traumatis':3,'kekerasan':3,'pelecehan':3,'penganiayaan':3,
       'dibully':3,'bullying':3,'ancaman':2,'pengalaman buruk':2,'mimpi buruk':2,
       'kilas balik':3,'flashback':3,'tidak bisa melupakan':2,'masih ingat':1,
       'membekas':2,'luka lama':3,'luka batin':3,'mati rasa':3, 'luka lama':2, 'luka lama ditutup rapet':3,
@@ -1459,7 +1490,11 @@ const EMO_LEX = {
   },
   burnout: {
     words: {
-      'burnout':3,'kelelahan':2,'lelah':1,'capek':1,'exhausted':2,'habis tenaga':3,
+      'sudah biasa':2, 'harus terbiasa':2, 'mau bagaimana lagi':2,
+'tidak boleh terlalu dipikir':2, 'tidak perlu dipikir':2,
+'capek yang nggak hilang walau sudah istirahat':3,
+'bukan capek yang bisa hilang dengan tidur':3,
+'lelah yang tidak hilang walau sudah istirahat':3,'burnout':3,'kelelahan':2,'lelah':1,'capek':1,'exhausted':2,'habis tenaga':3,
       'tidak kuat lagi':3,'sudah tidak sanggup':3,'tidak ada semangat':3,
       'kehilangan motivasi':3,'malas':1,'tidak bergairah':2,'jenuh':2,
       'bosan':1,'mumet':2,'pusing':1,'stres':2,'tertekan':2,'beban':2,'muter-muter di kepala':2, 'kayak kaset lama':2,
@@ -1503,7 +1538,10 @@ const EMO_LEX = {
   },
   harapan: {
     words: {
-      'harapan':2,'optimis':2,'semangat':2,'berharap':2,'impian':2,'cita-cita':2,
+      'insya Allah sabar':1, 'mungkin memang begitu':1,
+'sudah ikhlas sudah lama':2,
+'ada sesuatu yang mau keluar':2,
+'ada sesuatu yang belum pernah saya sentuh':2,'harapan':2,'optimis':2,'semangat':2,'berharap':2,'impian':2,'cita-cita':2,
       'rencana':1,'target':1,'tujuan':2,'bangkit':3,'pulih':2,'maju':2,
       'berkembang':2,'bersemangat':2,'ingin berubah':2,'mau mencoba':2,
       'percaya':2,'yakin':2,'kuat':2,'tabah':2,'sabar':2,'ikhlas':2,'kangen':1, 'nopang':1, 'nglakoni':1, 'yo wis':1,
@@ -1560,7 +1598,6 @@ const INTENSIFIER = {
 /* ── Analisis Emosi Utama dari Teks ── */
 function analyzeEmotionDeep(text) {
   const t = text.toLowerCase();
-  const words = t.split(/\s+/);
   const scores = {};
 
   for (const [emo, data] of Object.entries(EMO_LEX)) {
@@ -1568,58 +1605,102 @@ function analyzeEmotionDeep(text) {
     for (const [word, weight] of Object.entries(data.words)) {
       const idx = t.indexOf(word);
       if (idx === -1) continue;
-
-      // Cek negasi (3 kata sebelum kemunculan kata emosi)
       const before = t.substring(Math.max(0, idx - 30), idx);
       const isNegated = NEGASI.some(n => before.endsWith(n) || before.includes(n + ' '));
       if (isNegated) { score -= weight; continue; }
-
-      // Cek intensifier (3 kata sebelum)
       let mult = 1;
       if (INTENSIFIER.tinggi.some(i => before.includes(i))) mult = 1.8;
       else if (INTENSIFIER.rendah.some(i => before.includes(i))) mult = 0.5;
-
       score += weight * mult;
     }
     if (score > 0) scores[emo] = score;
   }
 
-  // Urutkan emosi berdasarkan skor
+  // ── BARU: Hierarki emosi berbasis risiko klinis ──
+  // Emosi berat ini diprioritaskan meskipun skornya kalah dari emosi positif
+  const EMO_PRIORITAS = ['trauma','sedih','kesepian','burnout','kecewa','marah','takut','malu','rindu'];
+  const EMO_POSITIF   = ['senang','harapan'];
+
+  // ── BARU: Deteksi topik berat — naikkan bobot emosi negatif ──
+  const TOPIK_BERAT = [
+    'meninggal','wafat','berpulang','almarhum','almarhumah',
+    'tidak sempat','ditinggal','kehilangan','tidak pernah dipeluk',
+    'tidak pernah bilang sayang','tidak pernah merasa cukup',
+    'dari kecil bicara tapi tidak didengar',
+    'sudah lama saya pendam','dada sesak','tiba-tiba nangis',
+    'nangis sendiri','menangis sendiri','belum selesai berduka',
+  ];
+  const adaTopikBerat = TOPIK_BERAT.some(k => t.includes(k));
+
+  // Jika ada topik berat → kalikan skor emosi negatif x1.5, emosi positif x0.4
+  if (adaTopikBerat) {
+    EMO_PRIORITAS.forEach(emo => {
+      if (scores[emo]) scores[emo] *= 1.5;
+    });
+    EMO_POSITIF.forEach(emo => {
+      if (scores[emo]) scores[emo] *= 0.4;
+    });
+  }
+
+  // ── BARU: Deteksi defense mechanism — "penutup syukur" ──
+  // Jika teks diakhiri dengan kata syukur/ikhlas TAPI sebelumnya ada kata berat
+  const DEFENSE_CLOSING = [
+    'tidak apa-apa','sudah ikhlas','alhamdulillah','insya allah',
+    'sudah biasa','mungkin memang begitu','ya sudah',
+    'tidak boleh terlalu dipikir','sabar','mau bagaimana lagi',
+  ];
+  const KATA_BERAT_PIVOT = [
+    'nangis','menangis','sesak','berat','sendiri','tidak didengar',
+    'tidak pernah','tidak sempat','pendam','tidak tahu',
+    'capek','lelah','sakit','duka','kehilangan',
+  ];
+  const adaDefenseClosing = DEFENSE_CLOSING.some(k => t.includes(k));
+  const adaKataBerat     = KATA_BERAT_PIVOT.some(k => t.includes(k));
+
+  if (adaDefenseClosing && adaKataBerat) {
+    // Pola defense — turunkan emosi positif, naikkan emosi negatif yang ada
+    EMO_POSITIF.forEach(emo => {
+      if (scores[emo]) scores[emo] *= 0.3;
+    });
+    EMO_PRIORITAS.forEach(emo => {
+      if (scores[emo]) scores[emo] *= 1.3;
+    });
+  }
+
+  // Urutkan setelah penyesuaian
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const dominant = sorted[0]?.[0] || 'netral';
-  const secondary = sorted[1]?.[0] || null;
+  const dominant      = sorted[0]?.[0] || 'netral';
+  const secondary     = sorted[1]?.[0] || null;
   const dominantScore = sorted[0]?.[1] || 0;
 
-  // Intensitas
   let intensitas = 'rendah';
   if (dominantScore >= 6) intensitas = 'tinggi';
   else if (dominantScore >= 3) intensitas = 'sedang';
 
-  // Sentimen
-  const posiEmo = ['senang','harapan','bangga'];
+  const posiEmo = ['senang','harapan'];
   const negaEmo = ['sedih','marah','takut','kesepian','kecewa','trauma','burnout','malu','rindu'];
   let sentiment = 'netral';
   if (posiEmo.includes(dominant)) sentiment = 'positif';
   else if (negaEmo.includes(dominant)) sentiment = 'negatif';
 
-  return { dominant, secondary, intensitas, sentiment, scores };
+  return { dominant, secondary, intensitas, sentiment, scores, adaTopikBerat, adaDefenseClosing };
 }
 
 /* ── Deteksi Topik ── */
 function detectTopic(text) {
   const t = text.toLowerCase();
   const topikMap = {
-    'keluarga':     ['tulang punggung','anak tengah','anak sulung','anak bungsu','kumpul lengkap','meja makan','rebutan lauk','satu bapak satu ibu','bapak','bokap','nyokap','ortu','mbah','mbah putri','cucu','menantu','mas ','mbak ','pak ','bu ','kondangan','hajatan','mertua','ipar','keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan',],
+    'keluarga':     ['pesantren','pondok','dikirim ke pesantren','anak pertama harus kuat','harus jadi contoh','tidak boleh terlalu banyak main','tulang punggung','anak tengah','anak sulung','anak bungsu','kumpul lengkap','meja makan','rebutan lauk','satu bapak satu ibu','bapak','bokap','nyokap','ortu','mbah','mbah putri','cucu','menantu','mas ','mbak ','pak ','bu ','kondangan','hajatan','mertua','ipar','keluarga','orang tua','ayah','ibu','kakak','adik','anak','suami','istri','saudara','mertua','pasangan',],
     'pekerjaan':    ['supervisor','dealer','sales','target','lembur','bengkel','showroom','fresh graduate','komisi','shift malam','shift sore','kasir','minimarket','gajian','buruh tani','jualan jajan pasar','tulang punggung keluarga','guru','murid','mengajar','ngajar','kelas','pensiunan','pensiun','sekolah','wali kelas','piagam','rapor','gaji pertama','hari pertama ngajar','kerja','kantor','karir','atasan','bos','karyawan','usaha','bisnis','gaji','dipecat','phk','resign'],
     'kesehatan':    ['posyandu','senam lansia','pengapuran','tensi','puskesmas','kacamata','kontrol','obat rutin','lutut nyeri','tekanan darah','sakit','sehat','dokter','rumah sakit','obat','penyakit','fisik','tubuh'],
     'percintaan':   ['Raffi','mantan','putus','nggak bisa move on','pacar','kekasih','cinta','hubungan','putus','selingkuh','menikah','pernikahan'],
     'pertemanan':   ['teman sebangku','sahabat kecil','tipes','gendong ngos-ngosan','pergi tanpa pamit','jagain yang penakut','teman','sahabat','bestie','circle','persahabatan','dikucilkan'],
     'pendidikan':   ['lomba debat','nilai terbaik','IPA','IPS','passion','organisasi kampus','sekolah','kuliah','kampus','ujian','tugas','skripsi','nilai','belajar'],
     'keuangan':     ['cicilan rumah','cicilan','kredit','UKT','hampir DO','DO administrasi','kirimin uang','bayar kos','uang','hutang','utang','cicilan','finansial','bangkrut','tabungan'],
-    'kehilangan':   ['duka','janda','almarhum','almarhumah','ditinggal meninggal','tiga tahun lalu','wafat','berpulang','makam','ziarah','meninggal','wafat','berpulang','kehilangan','berpisah','ditinggal'],
+    'kehilangan':   ['tidak sempat','tidak sempat melihat','tidak sempat pegang','sudah dimakamkan','pulang terlambat','duka','janda','almarhum','almarhumah','ditinggal meninggal','tiga tahun lalu','wafat','berpulang','makam','ziarah','meninggal','wafat','berpulang','kehilangan','berpisah','ditinggal'],
     'masa lalu':    ['Siteba','kursi rotan','garasi','angkot','Pantai Padang','kontrakan','gang','gang depan rumah','Cicaheum','petak umpet','es mambo','pasar malem','alun-alun','gulali','digendong bapak','lihat bintang','kaki nggak nyampe tanah','kenangan','nostalgia','kampung halaman','desa','sawah','kos','gobak sodor','othok-othok','nglencer','umbul',  'masa kecil','waktu kecil','dulu banget','dulu','dahulu','masa kecil','masa lalu','kenangan','waktu kecil'],
-    'spiritualitas':['jumatan','raso jo pareso','ngaji','pengajian','al-quran','quran','sholat','salat','rebana','remaja masjid','tahlil','yasinan','maulidan','subuh','isya','ashar','zuhur','magrib','inna mal usri','insyaallah','alhamdulillah','matur suwun','sesok isih ono dino','ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
-    'identitas':    ['rasa punya tempat di dunia','nulis surat tangan','nulis surat buat murid','cermin yang pecah','nggak tau siapa diri sendiri','peran udah habis','aku ini siapa','jati diri','nggo opo','saiki nggo opo','tugasku udah selesai','warisan','bekasnya aku','mau ngapain lagi','bekas yang ditinggalkan','jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
+    'spiritualitas':['madrasah','pesantren','pondok','jumatan','raso jo pareso','ngaji','pengajian','al-quran','quran','sholat','salat','rebana','remaja masjid','tahlil','yasinan','maulidan','subuh','isya','ashar','zuhur','magrib','inna mal usri','insyaallah','alhamdulillah','matur suwun','sesok isih ono dino','ibadah','shalat','doa','agama','tuhan','iman','bersyukur','masjid'],
+    'identitas':    ['ada sesuatu yang mengganjal tapi tidak tahu apa','sesuatu yang sudah lama ada','tidak pernah melihatnya','rasa punya tempat di dunia','nulis surat tangan','nulis surat buat murid','cermin yang pecah','nggak tau siapa diri sendiri','peran udah habis','aku ini siapa','jati diri','nggo opo','saiki nggo opo','tugasku udah selesai','warisan','bekasnya aku','mau ngapain lagi','bekas yang ditinggalkan','jati diri','siapa saya','tujuan hidup','makna hidup','nilai hidup'],
   };
   const found = [];
   for (const [topik, kata] of Object.entries(topikMap)) {
@@ -1861,12 +1942,12 @@ const RESP = {
   sedih: {
     tinggi: [
       'Saya mendengar betapa beratnya yang {sp} rasakan saat ini. Perasaan itu nyata, dan {sp} tidak perlu menanggungnya sendiri. Boleh ceritakan, apa yang paling terasa menyakitkan?',
-      'Ini terdengar sangat berat, {nm}. Terima kasih sudah mau berbagi — saya di sini, sepenuhnya mendengarkan. Apakah ada momen tertentu yang membuat rasa sedih ini terasa paling kuat?',
+      'Ini terdengar sangat berat. Terima kasih sudah mau berbagi — saya di sini, sepenuhnya mendengarkan. Apakah ada momen tertentu yang membuat rasa sedih ini terasa paling kuat?',
       'Ada duka yang dalam di cerita {sp}. Wajar sekali jika {sp} merasa seperti ini. Sudah berapa lama perasaan ini menemani {sp}?',
     ],
     sedang: [
       'Saya merasakan ada kesedihan di balik cerita {sp}. Tidak apa-apa untuk merasa seperti ini. Boleh {sp} ceritakan lebih tentang apa yang sedang dirasakan?',
-      'Terima kasih sudah mau berbagi, {nm}. Ada rasa sedih yang {sp} bawa — apa yang biasanya membantu {sp} sedikit merasa lebih ringan?',
+      'Terima kasih sudah mau berbagi. Ada rasa sedih yang {sp} bawa — apa yang biasanya membantu {sp} sedikit merasa lebih ringan?',
       'Ada sesuatu yang terasa berat di cerita {sp}. Apakah perasaan ini sudah lama ada, atau baru-baru ini muncul?',
     ],
     rendah: [
@@ -1908,7 +1989,7 @@ const RESP = {
   senang: {
     tinggi: [
       'Sungguh menyenangkan mendengar cerita {sp}! Ada energi positif yang nyata di sana. Apa yang membuat momen itu terasa begitu bermakna bagi {sp}?',
-      'Terdengar indah sekali, {nm}! Perasaan seperti itu berharga untuk disimpan. Ceritakan lebih — apa yang membuat {sp} paling bersyukur saat itu?',
+      'Terdengar indah sekali! Perasaan seperti itu berharga untuk disimpan. Ceritakan lebih — apa yang membuat {sp} paling bersyukur saat itu?',
     ],
     sedang: [
       'Ada kehangatan di cerita {sp}, dan itu menyenangkan untuk didengar. Apa yang biasanya membuat {sp} merasa seperti ini?',
@@ -2061,7 +2142,8 @@ const TAWARAN_PINDAH_LEMBUT = [
 ];
 function _pick(arr, sp, nm) {
   const s = arr[Math.floor(Math.random() * arr.length)];
-  return s.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, nm || sp);
+  // {nm} dihilangkan — hanya sapaan {sp} yang dipakai
+  return s.replace(/\{sp\}/g, sp).replace(/\{nm\}/g, sp);
 }
 
 /* ── Fungsi respons utama ── */
@@ -2225,6 +2307,21 @@ const FRUSTRASI_SESI_LEX = [
   // Keluhan implisit (muncul di sesi Rian)
   'tadi kayak pernah','kayak pernah ditanya',
   'sudah awak jawab','sudah aku jawab',
+  // Dari sesi Sri
+'senang mendengar apa',
+'menghangatkan hati apa',
+'tidak menghangatkan hati saya',
+'apakah mbak benar-benar membaca',
+'apakah benar-benar membaca',
+'ada sesuatu yang tidak berjalan',
+'tidak tahu apakah didengar',
+'ini yang ketiga kalinya',
+'ini yang keempat kalinya',
+'tidak dilihat di sini',
+'tempat yang katanya aman',
+'tidak tahu mau lanjut atau tidak',
+'jawabannya hampir sama',
+'dari tadi jawabannya',
 ];
 
 /* Deteksi apakah teks mengandung frustrasi terhadap sesi */
@@ -2240,6 +2337,10 @@ const RESP_FRUSTRASI_SESI = [
   'Saya mendengar kamu, {sp}. Dan saya minta maaf kalau terasa seperti saya tidak benar-benar hadir. Cerita {sp} nyata dan penting. Apa yang paling ingin {sp} agar saya pahami dari semua yang sudah diceritakan?',
   'Kamu benar, {sp} — dan saya hargai kejujuran itu. Saya ingin mendengarkan lebih baik. Dari semua yang sudah {sp} ceritakan hari ini, bagian mana yang paling ingin {sp} saya pegang betul-betul?',
   'Maaf sudah membuat {sp} merasa tidak didengar. Itu bukan yang saya inginkan. Boleh {sp} bantu saya dengan memberitahu — apa satu hal yang paling penting dari cerita {sp} yang ingin {sp} pastikan saya mengerti?',
+  // Tambahkan ke RESP_FRUSTRASI_SESI
+'Ibu baru saja berkata sesuatu yang sangat penting — dan saya ingin memastikan saya benar-benar mendengarnya. Ibu bilang ada yang sudah lama dipendam, yang belum pernah dibuka ke siapa-siapa. Itu sesuatu yang sangat berani. Saya di sini, dan saya tidak kemana-mana.',
+'Sebelum apapun — saya dengar Ibu. Ibu baru bilang sesuatu yang berat, dan saya tidak ingin melewatinya begitu saja. Boleh Ibu ceritakan lebih tentang apa yang baru Ibu rasakan?',
+'Ibu benar untuk menyampaikan itu. Dan saya minta maaf jika sebelumnya terasa seperti cerita Ibu tidak benar-benar sampai. Apa yang Ibu rasakan tadi — sesak di dada itu — boleh kita duduki sebentar bersama?',
 ];
   
 /* Ambil topik dari teks pertanyaan sesi yang sedang aktif */
