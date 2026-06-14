@@ -530,6 +530,12 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="field"><label>Apakah memiliki penyakit kronis?</label><input type="text" id="d-pk" placeholder="Contoh: Hipertensi, Diabetes (kosongkan jika tidak ada)"></div>
       <div class="field"><label>Apakah memiliki pasangan yang tinggal serumah?</label><input type="text" id="d-ps" placeholder="Contoh: Ada / Tidak ada"></div>
       <div class="field"><label>Jumlah anak yang tinggal serumah</label><input type="text" id="d-as" placeholder="Contoh: 2 (kosongkan jika belum ada)"></div>
+      <div class="field"><label>No. HP / WhatsApp</label><input type="tel" id="d-hp" placeholder="Contoh: 08123456789"></div>
+      <div class="field">
+        <label>No. HP / WhatsApp Wali <span style="font-size:.78rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <input type="tel" id="d-wali" placeholder="Contoh: 08123456789">
+        <p style="font-size:.74rem;color:var(--muted);margin-top:.35rem;line-height:1.6">Nomor wali membantu kami menghubungi orang terdekat jika sewaktu-waktu kamu membutuhkan dukungan ekstra.</p>
+      </div>
       <div class="brow"><button class="btn-sm bp" onclick="submitData()">Lanjutkan →</button></div>
       
     </div>
@@ -2936,6 +2942,8 @@ async function _kirimEmailCrisis(answerText, level, words){
         <tr><td style="padding:6px 0;color:#888;width:140px">Nama</td><td style="font-weight:600">${S.nama||'—'}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Usia</td><td>${S.usia||'—'} tahun</td></tr>
         <tr><td style="padding:6px 0;color:#888">Jenis Kelamin</td><td>${S.jk||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">No. HP Pasien</td><td>${S.phonePatient||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">No. HP Wali</td><td>${S.phoneGuardian||'—'}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Skor PHQ Awal</td><td>${S.preScore||'—'}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Sesi Saat Ini</td><td>Sesi ${S.currentSesiNum}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Level Alert</td><td><strong style="color:#c95c5c">${level.toUpperCase()}</strong></td></tr>
@@ -3054,6 +3062,8 @@ const SESI_META = {
     qs_dewasa:[
       'Ceritakanlah bagaimana keadaan psikologi Anda saat ini — apa yang sedang Anda rasakan dan pikirkan.',
       'Ceritakanlah seperti apa lingkungan Anda saat ini — di rumah, di tempat kerja, dan di komunitas sekitar Anda.',
+      'Ceritakanlah seperti apa kehidupan Anda saat ini, pola dan kebiasaan harian?',
+      'Ceritakanlah bagaimana kemampuan fungsional, medikasi yang dijalani, komunikasi, kondisi pendengaran dan penglihatan, serta penyakit kronis yang mungkin Anda hadapi?'
       'Ceritakanlah seperti apa kehidupan Anda saat ini — pola dan kebiasaan harian, kemampuan fungsional, medikasi yang dijalani, komunikasi, kondisi pendengaran dan penglihatan, serta penyakit kronis yang mungkin Anda hadapi.'
     ]
   },
@@ -3470,12 +3480,16 @@ function submitData(){
   const nm=document.getElementById('d-nm').value.trim();
   const us=parseInt(document.getElementById('d-us').value);
   const jk=document.getElementById('d-jk').value;
+  const hp=document.getElementById('d-hp').value.trim();
   if(!nm||!us||!jk){toast('⚠️ Lengkapi semua data');return;}
+  if(!hp){toast('⚠️ No. HP/WA wajib diisi');return;}
   if(us<1||us>120){toast('⚠️ Usia tidak valid');return;}
   S.nama=nm; S.usia=us; S.jk=jk;
   S.penyakit=document.getElementById('d-pk').value.trim()||'-';
   S.pasangan=document.getElementById('d-ps').value.trim()||'-';
   S.jumlahAnak=document.getElementById('d-as').value.trim()||'-';
+  S.phonePatient=hp;
+  S.phoneGuardian=document.getElementById('d-wali').value.trim()||'';
   buildTahap();
 }
 
@@ -3608,6 +3622,7 @@ async function finishPHQ(){
       await sb.from('patient_profiles').upsert({
         user_id:_cu.id, nickname:S.nama, age:S.usia, gender:S.jk,
         chronic_disease:S.penyakit, has_partner:S.pasangan, children_count:S.jumlahAnak,
+        phone_patient:S.phonePatient||'', phone_guardian:S.phoneGuardian||'',
         updated_at:new Date().toISOString()
       },{onConflict:'user_id'});
 
@@ -4054,7 +4069,32 @@ function _showNextBtn(){
 
 function completeSesi(){
   document.getElementById('sq-input').style.display='none';
-  document.getElementById('sq-done').style.display='block';
+
+  const sesiNum = S.currentSesiNum;
+  const isLastSesi = (S.sesiList.indexOf(sesiNum) === S.sesiList.length - 1);
+  const angka = ['','pertama','kedua','ketiga','keempat','kelima','keenam'];
+  const angkaBerikutnya = ['','kedua','ketiga','keempat','kelima','keenam','ketujuh'];
+  const nextIdx = S.sesiList.indexOf(sesiNum) + 1;
+  const nextSesiNum = S.sesiList[nextIdx] || null;
+
+  const doneEl = document.getElementById('sq-done');
+
+  if(sesiNum >= 2 && !isLastSesi){
+    const kalimatSesi = angka[sesiNum] || `ke-${sesiNum}`;
+    const kalimatNext = nextSesiNum ? (angkaBerikutnya[nextSesiNum] || `ke-${nextSesiNum}`) : '';
+    doneEl.innerHTML = `
+      <div style="text-align:center;padding:1rem 0">
+        <div style="font-size:1.7rem;margin-bottom:.6rem">🌿</div>
+        <p style="font-family:'Lora',serif;font-size:1.05rem;color:var(--text);line-height:1.8;margin-bottom:.5rem">
+          Kita telah sampai di penghujung sesi ${kalimatSesi}, dengan demikian kita akhiri sesi ini dan sampai jumpa di sesi ${kalimatNext}.
+        </p>
+        <p style="font-size:.9rem;color:var(--muted);line-height:1.7">
+          Hari ini kamu sudah luar biasa telah berbagi cerita kepada Elina 💚
+        </p>
+      </div>`;
+  }
+
+  doneEl.style.display='block';
 }
 
 async function finishSesi(){
@@ -4335,7 +4375,12 @@ function showRingkasanSesi(sesiNum, progressData){
     const ks = buatKesimpulan(sesiNum, progressData);
 
     // Render narasi 3 paragraf
-    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${ks.p3}</p>`;
+    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${kconst jedaHint = (sesiNum === 1)
+      ? `<div style="margin-top:1.25rem;padding:.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:.82rem;color:var(--muted);line-height:1.7">
+          💡 <strong style="color:var(--text)">Saran:</strong> Sesi berikutnya akan lebih bermakna jika kamu memberi diri sendiri waktu untuk beristirahat beberapa hari terlebih dahulu sebelum melanjutkan.
+         </div>`
+      : '';
+    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${ks.p3}</p>${jedaHint}`;s.p3}</p>`;
 
     // Render topik pills
     if(ks.topikDominan.length > 0){
