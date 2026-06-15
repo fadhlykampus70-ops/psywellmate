@@ -4375,12 +4375,12 @@ function showRingkasanSesi(sesiNum, progressData){
     const ks = buatKesimpulan(sesiNum, progressData);
 
     // Render narasi 3 paragraf
-    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${kconst jedaHint = (sesiNum === 1)
+   const jedaHint = (sesiNum === 1)
       ? `<div style="margin-top:1.25rem;padding:.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:.82rem;color:var(--muted);line-height:1.7">
           💡 <strong style="color:var(--text)">Saran:</strong> Sesi berikutnya akan lebih bermakna jika kamu memberi diri sendiri waktu untuk beristirahat beberapa hari terlebih dahulu sebelum melanjutkan.
          </div>`
       : '';
-    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${ks.p3}</p>${jedaHint}`;s.p3}</p>`;
+    narasiEl.innerHTML = `<p>${ks.p1}</p><p>${ks.p2}</p><p>${ks.p3}</p>${jedaHint}`;
 
     // Render topik pills
     if(ks.topikDominan.length > 0){
