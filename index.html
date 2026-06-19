@@ -639,6 +639,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div id="ks-topik-wrap" class="ks-topik-wrap" style="display:none"></div>
       <div id="ks-quote" class="ks-quote" style="display:none"></div>
       <div class="ks-divider"></div>
+      <div id="ks-sesi1-hint" style="display:none;margin-bottom:.85rem;padding:.8rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-size:.82rem;color:var(--muted);line-height:1.7">
+        💬 Kamu boleh langsung lanjut ke Sesi 2 sekarang, atau melanjutkannya beberapa hari lagi — tidak ada yang terburu-buru. Yang terpenting, kamu sudah menyelesaikan Sesi 1!
+      </div>
       <div class="brow">
         <button class="btn-sm bp" id="ks-lanjut-btn" onclick="goToNextSesiIntro()">Lanjut ke Sesi Berikutnya →</button>
       </div>
@@ -4357,6 +4360,7 @@ function showRingkasanSesi(sesiNum, progressData){
   document.getElementById('ks-sesi-title').textContent = `Sesi ${sesiNum} — ${meta.title}`;
 
   // Update label tombol lanjut
+  // Update label tombol lanjut
   const btnLanjut = document.getElementById('ks-lanjut-btn');
   if(isLastSesi){
     btnLanjut.textContent = 'Lanjut ke Tes Akhir →';
@@ -4365,6 +4369,9 @@ function showRingkasanSesi(sesiNum, progressData){
     const nextMeta = SESI_META[nextSesiNum];
     btnLanjut.textContent = `Lanjut ke Sesi ${nextSesiNum} →`;
   }
+  // Tampilkan pengingat hanya di akhir sesi 1
+  const hintEl = document.getElementById('ks-sesi1-hint');
+  if(hintEl) hintEl.style.display = (sesiNum === 1 && !isLastSesi) ? 'block' : 'none';
 
   // Narasi area
   const narasiEl = document.getElementById('ks-narasi');
