@@ -984,7 +984,14 @@ async function doLogout(){
 function getSapaan(){
   // Anak (0-11) dan Remaja (12-19) → kamu
   if(S.usia <= 19) return 'kamu';
-  // Dewasa & Lansia → Bapak atau Ibu berdasarkan jenis kelamin
+  // Dewasa muda (20–35) → Kak
+  if(S.usia <= 35){
+    const jk = (S.jk||'').toLowerCase();
+    if(jk.includes('laki')) return 'Kak';
+    if(jk.includes('perempuan')) return 'Kak';
+    return 'Kak';
+  }
+  // Dewasa & Lansia (36+) → Bapak atau Ibu berdasarkan jenis kelamin
   const jk = (S.jk||'').toLowerCase();
   if(jk.includes('laki')) return 'Bapak';
   if(jk.includes('perempuan')) return 'Ibu';
@@ -2592,12 +2599,15 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
   }
 
   // ── Helper internal: ambil respons emosi ──
+  // ── Helper internal: ambil respons emosi (anti-repeat per emosi) ──
   function _getRespEmo() {
     const pool = RESP[emo];
     const subpool = pool
       ? (Array.isArray(pool) ? pool : pool[intensitas] || pool['sedang'] || RESP.netral)
       : RESP.netral;
-    return _pick(subpool, sp, nm);
+    const key = emo + '_' + intensitas;
+    if (!_usedRespEmo[key]) _usedRespEmo[key] = [];
+    return _pickUnique(subpool, sp, nm, _usedRespEmo[key]);
   }
 
   // ── TURN 1 — Selalu: Deteksi + Gali ──
@@ -3833,9 +3843,9 @@ let _selectedPsikologId = null;
 let _mtTurn = 0;           // turn ke-berapa dalam 1 pertanyaan (mulai dari 1)
 let _mtFirstSaved = false; // sudah simpan ke life_review_progress?
 let _mtNlpFirst = null;    // NLP jawaban pertama
-let _usedAckDeep = [];        // BARU: tracking ACK yang sudah dipakai
-let _usedFlip = {};           // BARU: tracking flip per topik yang sudah dipakai
-let _sessionContext = [];     // BARU: ringkasan konteks yang sudah diceritakan
+let _usedAckDeep = [];        // tracking ACK yang sudah dipakai
+let _usedFlip = {};           // tracking flip per topik yang sudah dipakai
+let _usedRespEmo = {};        // BARU: tracking RESP[emo] per emosi agar tidak repeatlet _sessionContext = [];     // BARU: ringkasan konteks yang sudah diceritakan
 let _topikSudahDigali = [];   // BARU: topik yang sudah dapat flip positif
 let _sessionLog = [];         // MEMORI: log semua jawaban pasien dalam satu sesi pertanyaan
 let _frustrasiCount = 0;  // hitung berapa kali frustrasi muncul dalam satu sesi
@@ -3865,6 +3875,7 @@ function loadSesiQuestion(){
   _mtNlpFirst = null;
   _usedAckDeep = [];
   _usedFlip = {};
+  _usedRespEmo = {};          // BARU: reset saat sesi/pertanyaan baru
   _sessionContext = [];
   _topikSudahDigali = [];
   _sessionLog = [];
