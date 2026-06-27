@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsyWellMate — Sedang Maintenance</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f0eb;--surface:#ffffff;--surface2:#fdf8f4;--border:#e2d9d0;
+  --primary:#6a9e7f;--primary-soft:#d6e8d8;--accent:#c4845a;
+  --text:#3d3530;--muted:#8c7e76;--white:#2a1f1a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;background:rgba(245,240,235,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:64px;display:flex;align-items:center}
+.logo-pw{font-family:'Arial Black',Arial,sans-serif;font-weight:900;line-height:1;display:flex;align-items:baseline}
+.logo-pw .lp{font-size:1.55rem;color:#6a9e7f;letter-spacing:-1px}
+.logo-pw .lw{font-size:1.35rem;color:var(--accent);margin-left:-3px}
+
+/* MAIN CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3rem 2.5rem;max-width:480px;width:100%;text-align:center;margin-top:64px}
+
+/* ICON */
+.icon-wrap{width:72px;height:72px;background:var(--primary-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.6rem;font-size:2rem}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1.2rem}
+
+h1{font-family:'Lora',serif;font-size:1.6rem;color:var(--white);margin-bottom:.7rem;line-height:1.35}
+p{color:var(--muted);font-size:.9rem;line-height:1.8;font-weight:300;margin-bottom:1.8rem}
+
+/* DIVIDER */
+.divl{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
+.divl hr{flex:1;border:none;border-top:1px solid var(--border)}
+.divl span{font-size:.7rem;color:var(--muted)}
+
+/* INFO ROW */
+.info-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:.65rem;text-align:left}
+.info-row .dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0}
+.info-row span{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* FOOTER NOTE */
+.foot{margin-top:1.8rem;font-size:.75rem;color:var(--muted)}
+.foot a{color:var(--primary);text-decoration:none;font-weight:500}
+.foot a:hover{text-decoration:underline}
+
+/* PULSE ANIMATION */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo-pw">
+    <span class="lp">Psy</span><span class="lw">Well</span><span class="lp" style="font-size:1.35rem">Mate</span>
+  </div>
+</div>
+
+<!-- Main Card -->
+<div class="card">
+  <div class="icon-wrap pulse">🛠️</div>
+
+  <div class="badge">⚙️ Maintenance Mode</div>
+
+  <h1>Sedang dalam<br>Pemeliharaan Sistem</h1>
+  <p>Kami sedang melakukan peningkatan layanan untuk pengalaman terapi yang lebih baik. PsyWellMate akan kembali tersedia dalam waktu dekat.</p>
+
+  <div class="divl">
+    <hr><span>Yang sedang kami kerjakan</span><hr>
+  </div>
+
+  <div class="info-row">
+    <div class="dot"></div>
+    <span>Pembaruan sistem dan peningkatan performa platform</span>
+  </div>
+  <div class="info-row">
+    <div class="dot" style="background:var(--accent)"></div>
+    <span>Pengujian fitur baru untuk sesi terapi digital</span>
+  </div>
+  <div class="info-row">
+    <div class="dot" style="background:#6a9e7f88"></div>
+    <span>Memastikan keamanan dan privasi data pengguna</span>
+  </div>
+
+  <div class="foot">
+    Pertanyaan? Hubungi kami di
+    <a href="mailto:support@psywellmate.com">support@psywellmate.com</a>
+  </div>
+</div>
+
+</body>
+</html>
