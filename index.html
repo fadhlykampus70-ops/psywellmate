@@ -1883,83 +1883,152 @@ function detectWaktu(text) {
    ke buildSummary() template lama (lihat buildSummaryHybrid).
 ══════════════════════════════════════════ */
 
-/* Kamus transformasi sudut pandang: orang pertama → orang kedua */
-const POV_SHIFT = {
-  'orang tua saya': 'orang tua kamu', 'orang tua aku': 'orang tua kamu',
-  'ibu saya': 'ibu kamu', 'ibu aku': 'ibu kamu',
-  'ayah saya': 'ayah kamu', 'ayah aku': 'ayah kamu',
-  'bapak saya': 'bapak kamu', 'bapak aku': 'bapak kamu',
-  'keluarga saya': 'keluarga kamu', 'keluarga aku': 'keluarga kamu',
-  'hidup saya': 'hidup kamu', 'hidup aku': 'hidup kamu',
-  'kehidupan saya': 'kehidupan kamu', 'kehidupan aku': 'kehidupan kamu',
-  'diri saya': 'diri kamu', 'diri aku': 'diri kamu',
-  'pacar saya': 'pacar kamu', 'pacar aku': 'pacar kamu',
-  'suami saya': 'suami kamu', 'istri saya': 'istri kamu',
-  'anak saya': 'anak kamu', 'anak aku': 'anak kamu',
-  'pekerjaan saya': 'pekerjaan kamu', 'pekerjaan aku': 'pekerjaan kamu',
-  'milik saya': 'milikmu', 'punya saya': 'punya kamu',
-  'saya': 'kamu', 'aku': 'kamu', 'gue': 'kamu', 'gw': 'kamu',
+/* Frasa posesif orang pertama yang perlu diganti SEBELUM kata tunggal "saya"/"aku"
+   Placeholder {SP} diganti belakangan dengan sapaan dinamis (kamu/Bapak/Ibu) */
+const POV_SHIFT_FRASA = {
+  'orang tua saya': 'orang tua {SP}', 'orang tua aku': 'orang tua {SP}',
+  'ibu saya': 'ibu {SP}', 'ibu aku': 'ibu {SP}',
+  'ayah saya': 'ayah {SP}', 'ayah aku': 'ayah {SP}',
+  'bapak saya': 'bapak {SP}', 'bapak aku': 'bapak {SP}',
+  'keluarga saya': 'keluarga {SP}', 'keluarga aku': 'keluarga {SP}',
+  'hidup saya': 'hidup {SP}', 'hidup aku': 'hidup {SP}',
+  'kehidupan saya': 'kehidupan {SP}', 'kehidupan aku': 'kehidupan {SP}',
+  'diri saya': 'diri {SP}', 'diri aku': 'diri {SP}',
+  'pacar saya': 'pacar {SP}', 'pacar aku': 'pacar {SP}',
+  'suami saya': 'suami {SP}', 'istri saya': 'istri {SP}',
+  'anak saya': 'anak {SP}', 'anak aku': 'anak {SP}',
+  'pekerjaan saya': 'pekerjaan {SP}', 'pekerjaan aku': 'pekerjaan {SP}',
+  'milik saya': 'milik {SP}', 'punya saya': 'punya {SP}',
 };
 
-/* Akhiran -ku → -mu, hanya untuk kata yang aman (hindari false positive) */
+/* Kata ganti orang pertama tunggal — diganti TERAKHIR, setelah frasa di atas */
+const POV_SHIFT_KATA = ['saya', 'aku', 'gue', 'gw'];
+
+/* Akhiran -ku → milik {SP}, hanya untuk kata yang aman (hindari false positive) */
 const _POLA_KU_AMAN = [
   'hatiku','pikiranku','perasaanku','keluargaku','hidupku','kehidupanku',
   'ibuku','ayahku','bapakku','anakku','suamiku','istriku','pacarku',
   'sahabatku','temanku','diriku','kerjaanku','pekerjaanku',
 ];
 
-function _shiftAkhiranKu(text) {
+function _shiftAkhiranKu(text, spLower) {
   let result = text;
   _POLA_KU_AMAN.forEach(kata => {
-    const pengganti = kata.replace(/ku$/, 'mu');
+    const dasar = kata.replace(/ku$/, '');
+    // "ibu" + sapaan dinamis, mis. "ibuku" -> "ibu kamu" / "ibu Ibu" dihindari (ganjil),
+    // jadi pakai bentuk posesif natural: "ibu {SP}"
+    const pengganti = dasar + ' ' + spLower;
     const regex = new RegExp('\\b' + kata + '\\b', 'gi');
     result = result.replace(regex, pengganti);
   });
   return result;
 }
 
-function _shiftPOV(text) {
+function _shiftPOV(text, sp) {
+  // sp = sapaan dinamis dari getSapaan(): 'kamu' | 'Bapak' | 'Ibu' | 'Anda'
+  // Untuk frasa posesif & kata ganti, sapaan dipakai huruf kecil kecuali di awal kalimat (diatur di luar fungsi ini)
+  const spLower = sp.toLowerCase() === 'kamu' ? 'kamu' : sp; // Bapak/Ibu tetap kapital sbg sapaan hormat
   let result = text;
-  // Urutkan dari frasa terpanjang dulu agar tidak salah potong frasa pendek di dalamnya
-  const entries = Object.entries(POV_SHIFT).sort((a, b) => b[0].length - a[0].length);
-  entries.forEach(([dari, ke]) => {
+
+  // 1) Ganti frasa posesif dulu (lebih panjang, harus didahulukan agar tidak konflik)
+  const frasaEntries = Object.entries(POV_SHIFT_FRASA).sort((a, b) => b[0].length - a[0].length);
+  frasaEntries.forEach(([dari, ke]) => {
+    const pengganti = ke.replace('{SP}', spLower);
     const regex = new RegExp('\\b' + dari + '\\b', 'gi');
-    result = result.replace(regex, ke);
+    result = result.replace(regex, pengganti);
   });
-  result = _shiftAkhiranKu(result);
+
+  // 2) Ganti kata ganti orang pertama tunggal yang tersisa
+  POV_SHIFT_KATA.forEach(kata => {
+    const regex = new RegExp('\\b' + kata + '\\b', 'gi');
+    result = result.replace(regex, spLower);
+  });
+
+  // 3) Akhiran -ku
+  result = _shiftAkhiranKu(result, spLower);
+
   return result;
 }
 
-/* Ekstraksi klausa utama dari kalimat pasien, dimulai dari kata emosi pertama yang dikenali */
+/* Bersihkan tanda kutip/karakter yang menggantung akibat pemotongan klausa */
+function _bersihkanKlausa(klausa) {
+  let k = klausa;
+  // Hapus tanda kutip tunggal/ganda yang tidak berpasangan
+  const kutipTunggal = (k.match(/'/g) || []).length;
+  const kutipGanda = (k.match(/"/g) || []).length;
+  if (kutipTunggal % 2 !== 0) k = k.replace(/'/g, '');
+  if (kutipGanda % 2 !== 0) k = k.replace(/"/g, '');
+  // Hapus tanda baca aneh di awal klausa (mis. mulai dari koma, titik dua, dash menggantung)
+  k = k.replace(/^[\s,;:\-–—'"]+/, '');
+  // Hapus spasi ganda
+  k = k.replace(/\s+/g, ' ').trim();
+  return k;
+}
+
+/* Validasi dasar: klausa harus terlihat seperti potongan kalimat yang valid,
+   bukan dimulai dari kata sambung/keterangan yang menggantung tanpa subjek jelas */
+const _AWALAN_TIDAK_VALID = [
+  'yang', 'dan', 'atau', 'tapi', 'tetapi', 'jadi', 'karena', 'soalnya',
+  'which', 'kayak', 'gitu', 'nya', 'nih', 'deh', 'sih', 'kan',
+];
+
+function _klausaValid(klausa) {
+  const kataPertama = klausa.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^\w]/g, '');
+  if (!kataPertama) return false;
+  if (_AWALAN_TIDAK_VALID.includes(kataPertama)) return false;
+  return true;
+}
+
+/* Ekstraksi klausa utama dari kalimat pasien, dimulai dari kata emosi pertama yang dikenali.
+   Mencari batas kalimat (bukan hanya tanda baca) agar tidak memotong di tengah frasa quote. */
 function _extractKlausaUtama(text, emotion) {
   if (!text || !emotion || emotion === 'netral') return null;
   const t = text.trim();
   const lex = EMO_LEX[emotion] && EMO_LEX[emotion].words ? EMO_LEX[emotion].words : null;
   if (!lex) return null;
 
-  const emoWords = Object.keys(lex);
-  let emoPos = -1;
+  // Pecah teks jadi kalimat-kalimat utuh dulu (split di . ! ?), supaya pencarian kata emosi
+  // dan ekstraksi klausa terjadi DALAM SATU KALIMAT yang sama, tidak lintas kalimat.
+  const kalimatList = t.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
 
-  for (const w of emoWords) {
-    const idx = t.toLowerCase().indexOf(w.toLowerCase());
-    if (idx !== -1 && (emoPos === -1 || idx < emoPos)) emoPos = idx;
+  for (const kalimat of kalimatList) {
+    const emoWords = Object.keys(lex);
+    let emoPos = -1;
+    for (const w of emoWords) {
+      const idx = kalimat.toLowerCase().indexOf(w.toLowerCase());
+      if (idx !== -1 && (emoPos === -1 || idx < emoPos)) emoPos = idx;
+    }
+    if (emoPos === -1) continue; // kata emosi tidak ada di kalimat ini, coba kalimat berikutnya
+
+    let klausa = kalimat.slice(emoPos);
+    klausa = klausa.replace(/[.!?]+$/, '').trim();
+
+    // Batasi panjang maksimal ~20 kata, TAPI prioritaskan potong di koma terdekat
+    // agar tidak memutus frasa di tengah (mis. "...itu nangis berhari-hari serasa...")
+    const words = klausa.split(/\s+/);
+    if (words.length > 20) {
+      const potongan20 = words.slice(0, 20).join(' ');
+      const posKomaTerakhir = potongan20.lastIndexOf(',');
+      // Pakai potongan sampai koma terakhir jika posisinya cukup jauh dari awal
+      // (minimal 6 kata sebelum koma, supaya tidak terlalu pendek)
+      if (posKomaTerakhir > 0 && potongan20.slice(0, posKomaTerakhir).split(/\s+/).length >= 6) {
+        klausa = potongan20.slice(0, posKomaTerakhir);
+      } else {
+        klausa = potongan20;
+      }
+    }
+
+    klausa = _bersihkanKlausa(klausa);
+
+    // Klausa terlalu pendek tidak layak dikutip
+    if (klausa.split(/\s+/).length < 4) continue;
+    // Klausa tidak valid secara gramatikal (mulai dari kata sambung menggantung)
+    if (!_klausaValid(klausa)) continue;
+
+    return klausa; // Ambil kecocokan pertama yang valid
   }
-  if (emoPos === -1) return null;
 
-  // Ambil dari titik kata emosi sampai tanda baca pertama, atau akhir kalimat
-  const afterEmo = t.slice(emoPos);
-  const match = afterEmo.match(/^.+?(?:[.!?]|$)/);
-  let klausa = match ? match[0] : afterEmo;
-
-  // Batasi panjang maksimal ~20 kata agar tetap ringkas
-  const words = klausa.split(/\s+/);
-  if (words.length > 20) klausa = words.slice(0, 20).join(' ') + '...';
-
-  klausa = klausa.replace(/[.!?]+$/, '').trim();
-  // Klausa terlalu pendek tidak layak dikutip
-  if (klausa.split(/\s+/).length < 4) return null;
-
-  return klausa;
+  return null; // Tidak ada kalimat yang menghasilkan klausa valid
 }
 
 /* Bentuk kalimat kutipan reflektif lengkap, siap dipakai sebagai pembuka respons Elina */
@@ -1972,7 +2041,7 @@ function buildKutipanReflektif(text, emotion, sp, nm) {
   const klausa = _extractKlausaUtama(text, emotion);
   if (!klausa) return null;
 
-  const klausaShifted = _shiftPOV(klausa);
+  const klausaShifted = _shiftPOV(klausa, sp);
   const klausaFinal = klausaShifted.charAt(0).toLowerCase() + klausaShifted.slice(1);
 
   const pembukaRaw = PEMBUKA_KUTIPAN[Math.floor(Math.random() * PEMBUKA_KUTIPAN.length)];
@@ -1983,6 +2052,8 @@ function buildKutipanReflektif(text, emotion, sp, nm) {
   if (hasil.split(/\s+/).length < 6) return null;
   return hasil;
 }
+
+
 
 /* Versi hybrid: coba kutipan dulu, fallback ke buildSummary() template jika gagal */
 function buildSummaryHybrid(emotion, tokoh, text, sp, nm) {
@@ -2243,7 +2314,7 @@ const PEMANCING = [
   'Apa yang {sp} rasakan sekarang, dengan kata-katamu sendiri?',
 ];
 
-/* Pool acknowledge untuk turn 3+ */
+/* Pool acknowledge untuk turn 3+ — netral, tidak menyiratkan berat/ringannya cerita */
 const ACK_DEEP = [
   'Saya mendengar {sp}, dan saya di sini.',
   'Saya menangkap apa yang {sp} sampaikan.',
