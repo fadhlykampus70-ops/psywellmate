@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -982,20 +983,20 @@ async function doLogout(){
    SAPAAN HELPER
 ══════════════════════════════════════════ */
 function getSapaan(){
+  // Sumber kebenaran tunggal: S.tahap (sama dengan pengelompokan sesi terapi)
   // Anak (0-11) dan Remaja (12-19) → kamu
-  if(S.usia <= 19) return 'kamu';
-  // Dewasa muda (20–35) → Kak
-  if(S.usia <= 35){
-    const jk = (S.jk||'').toLowerCase();
-    if(jk.includes('laki')) return 'Kak';
-    if(jk.includes('perempuan')) return 'Kak';
-    return 'Kak';
+  if (S.tahap === 'anak' || S.tahap === 'remaja') return 'kamu';
+
+  // Dewasa (19-44) dan Lansia (45+) → Bapak / Ibu berdasarkan jenis kelamin
+  const jk = (S.jk || '').toLowerCase();
+  if (jk.includes('laki')) return 'Bapak';
+  if (jk.includes('perempuan')) return 'Ibu';
+
+  // Fallback jika S.tahap belum ter-set (mis. sebelum buildTahap() dipanggil)
+  if (!S.tahap) {
+    if (S.usia <= 19) return 'kamu';
   }
-  // Dewasa & Lansia (36+) → Bapak atau Ibu berdasarkan jenis kelamin
-  const jk = (S.jk||'').toLowerCase();
-  if(jk.includes('laki')) return 'Bapak';
-  if(jk.includes('perempuan')) return 'Ibu';
-  return 'Anda'; // fallback jika jenis kelamin "lainnya"
+  return 'Anda';
 }
 
 function sapaanCap(){
@@ -1873,8 +1874,124 @@ function detectWaktu(text) {
   return '';
 }
 
-/* ── Build Summary Kalimat Mirror ── */
-/* Kata-kata yang menandakan tokoh MASIH HIDUP / HADIR — bukan wafat */
+
+/* ══════════════════════════════════════════
+   KUTIPAN REFLEKTIF — Mengutip sebagian jawaban pasien
+   Sepenuhnya rule-based, tanpa API.
+   Dipakai sebagai pelengkap buildSummary() di turn 1.
+   Jika ekstraksi gagal/terlalu pendek, fallback otomatis
+   ke buildSummary() template lama (lihat buildSummaryHybrid).
+══════════════════════════════════════════ */
+
+/* Kamus transformasi sudut pandang: orang pertama → orang kedua */
+const POV_SHIFT = {
+  'orang tua saya': 'orang tua kamu', 'orang tua aku': 'orang tua kamu',
+  'ibu saya': 'ibu kamu', 'ibu aku': 'ibu kamu',
+  'ayah saya': 'ayah kamu', 'ayah aku': 'ayah kamu',
+  'bapak saya': 'bapak kamu', 'bapak aku': 'bapak kamu',
+  'keluarga saya': 'keluarga kamu', 'keluarga aku': 'keluarga kamu',
+  'hidup saya': 'hidup kamu', 'hidup aku': 'hidup kamu',
+  'kehidupan saya': 'kehidupan kamu', 'kehidupan aku': 'kehidupan kamu',
+  'diri saya': 'diri kamu', 'diri aku': 'diri kamu',
+  'pacar saya': 'pacar kamu', 'pacar aku': 'pacar kamu',
+  'suami saya': 'suami kamu', 'istri saya': 'istri kamu',
+  'anak saya': 'anak kamu', 'anak aku': 'anak kamu',
+  'pekerjaan saya': 'pekerjaan kamu', 'pekerjaan aku': 'pekerjaan kamu',
+  'milik saya': 'milikmu', 'punya saya': 'punya kamu',
+  'saya': 'kamu', 'aku': 'kamu', 'gue': 'kamu', 'gw': 'kamu',
+};
+
+/* Akhiran -ku → -mu, hanya untuk kata yang aman (hindari false positive) */
+const _POLA_KU_AMAN = [
+  'hatiku','pikiranku','perasaanku','keluargaku','hidupku','kehidupanku',
+  'ibuku','ayahku','bapakku','anakku','suamiku','istriku','pacarku',
+  'sahabatku','temanku','diriku','kerjaanku','pekerjaanku',
+];
+
+function _shiftAkhiranKu(text) {
+  let result = text;
+  _POLA_KU_AMAN.forEach(kata => {
+    const pengganti = kata.replace(/ku$/, 'mu');
+    const regex = new RegExp('\\b' + kata + '\\b', 'gi');
+    result = result.replace(regex, pengganti);
+  });
+  return result;
+}
+
+function _shiftPOV(text) {
+  let result = text;
+  // Urutkan dari frasa terpanjang dulu agar tidak salah potong frasa pendek di dalamnya
+  const entries = Object.entries(POV_SHIFT).sort((a, b) => b[0].length - a[0].length);
+  entries.forEach(([dari, ke]) => {
+    const regex = new RegExp('\\b' + dari + '\\b', 'gi');
+    result = result.replace(regex, ke);
+  });
+  result = _shiftAkhiranKu(result);
+  return result;
+}
+
+/* Ekstraksi klausa utama dari kalimat pasien, dimulai dari kata emosi pertama yang dikenali */
+function _extractKlausaUtama(text, emotion) {
+  if (!text || !emotion || emotion === 'netral') return null;
+  const t = text.trim();
+  const lex = EMO_LEX[emotion] && EMO_LEX[emotion].words ? EMO_LEX[emotion].words : null;
+  if (!lex) return null;
+
+  const emoWords = Object.keys(lex);
+  let emoPos = -1;
+
+  for (const w of emoWords) {
+    const idx = t.toLowerCase().indexOf(w.toLowerCase());
+    if (idx !== -1 && (emoPos === -1 || idx < emoPos)) emoPos = idx;
+  }
+  if (emoPos === -1) return null;
+
+  // Ambil dari titik kata emosi sampai tanda baca pertama, atau akhir kalimat
+  const afterEmo = t.slice(emoPos);
+  const match = afterEmo.match(/^.+?(?:[.!?]|$)/);
+  let klausa = match ? match[0] : afterEmo;
+
+  // Batasi panjang maksimal ~20 kata agar tetap ringkas
+  const words = klausa.split(/\s+/);
+  if (words.length > 20) klausa = words.slice(0, 20).join(' ') + '...';
+
+  klausa = klausa.replace(/[.!?]+$/, '').trim();
+  // Klausa terlalu pendek tidak layak dikutip
+  if (klausa.split(/\s+/).length < 4) return null;
+
+  return klausa;
+}
+
+/* Bentuk kalimat kutipan reflektif lengkap, siap dipakai sebagai pembuka respons Elina */
+const PEMBUKA_KUTIPAN = [
+  'Jadi {sp}', 'Oh, jadi {sp}', 'Saya dengar {sp}',
+  'Kalau saya tangkap, {sp}', 'Sepertinya {sp}',
+];
+
+function buildKutipanReflektif(text, emotion, sp, nm) {
+  const klausa = _extractKlausaUtama(text, emotion);
+  if (!klausa) return null;
+
+  const klausaShifted = _shiftPOV(klausa);
+  const klausaFinal = klausaShifted.charAt(0).toLowerCase() + klausaShifted.slice(1);
+
+  const pembukaRaw = PEMBUKA_KUTIPAN[Math.floor(Math.random() * PEMBUKA_KUTIPAN.length)];
+  const pembuka = pembukaRaw.replace('{sp}', sp);
+
+  const hasil = `${pembuka} ${klausaFinal}.`;
+  // Guard akhir: hasil terlalu pendek dianggap gagal, biar fallback ke template
+  if (hasil.split(/\s+/).length < 6) return null;
+  return hasil;
+}
+
+/* Versi hybrid: coba kutipan dulu, fallback ke buildSummary() template jika gagal */
+function buildSummaryHybrid(emotion, tokoh, text, sp, nm) {
+  const kutipan = buildKutipanReflektif(text, emotion, sp, nm);
+  if (kutipan) return kutipan;
+  return buildSummary(emotion, tokoh, text);
+}
+
+
 const TOKOH_HADIR = [
   'masih ada','masih hidup','masih sehat','masih kerja','masih di rumah',
   'masih jahit','masih masak','masih bisa','masih telepon','masih nelpon',
@@ -2621,11 +2738,13 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
       return validasi;
     }
 
-    // Emosi berat tinggi — pilih SALAH SATU: summary ATAU respons emosi
+    // Emosi berat tinggi — pilih SALAH SATU: kutipan/summary ATAU respons emosi
     if (ceritaBerat) {
-      // Jika ada summary yang bermakna → pakai summary saja, sudah cukup dalam
+      // Coba kutipan reflektif dari kalimat pasien dulu; fallback ke summary template
+      const kutipan = buildKutipanReflektif(text, emo, sp, nm);
+      if (kutipan) return `${kutipan} ${_getRespEmo()}`.trim();
       if (summary) return `Saya menangkap bahwa ${summary}. ${_getRespEmo()}`.trim();
-      // Jika tidak ada summary → langsung respons emosi
+      // Jika tidak ada keduanya → langsung respons emosi
       return _getRespEmo();
     }
 
@@ -2635,9 +2754,14 @@ function getMultiTurnResponse(turnNum, nlp, rawText) {
       const flip = _pickFlipSmart(flipPool, topikSesi, sp, nm);
       // Jika ada flip yang relevan → pakai flip saja (lebih kaya konteks)
       if (flip) return flip;
-      // Jika tidak ada flip → pakai summary mirror + respons emosi
+      // Jika tidak ada flip → pakai kutipan/summary mirror + respons emosi
       let part1 = '';
-      if (summary) part1 = `Saya menangkap bahwa ${summary}.`;
+      const kutipan = buildKutipanReflektif(text, emo, sp, nm);
+      if (kutipan) {
+        part1 = kutipan;
+      } else if (summary) {
+        part1 = `Saya menangkap bahwa ${summary}.`;
+      }
       const part2 = _getRespEmo();
       return [part1, part2].filter(p => p.trim()).join(' ');
     }
