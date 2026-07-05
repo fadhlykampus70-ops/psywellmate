@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1128,12 +1127,15 @@ const NLP = {
       'merasa dikucilkan teman','teman mengkhianati saya','sulit percaya kepada teman'
     ],
     keuangan: [
-      'masalah keuangan keluarga','kesulitan memenuhi kebutuhan','ekonomi keluarga susah',
-      'penghasilan tidak mencukupi','banyak hutang yang harus dibayar',
-      'kesulitan membayar cicilan','khawatir kondisi finansial',
-      'keuangan semakin memburuk','usaha mengalami kerugian',
-      'tabungan semakin menipis','sulit mengatur keuangan','pendapatan tidak stabil'
-    ],
+  'masalah keuangan keluarga','kesulitan memenuhi kebutuhan','ekonomi keluarga susah',
+  'penghasilan tidak mencukupi','banyak hutang yang harus dibayar',
+  'kesulitan membayar cicilan','khawatir kondisi finansial',
+  'keuangan semakin memburuk','usaha mengalami kerugian',
+  'tabungan semakin menipis','sulit mengatur keuangan','pendapatan tidak stabil',
+  'ketidakcukupan kebutuhan pangan','tidak cukup makan','kelaparan waktu kecil',
+  'kekurangan di masa kecil','tidak mampu bayar sekolah','putus sekolah karena biaya',
+  'tidak ada biaya pendidikan','kesulitan kebutuhan dasar'
+],
     kehilangan: [
       'kehilangan orang yang dicintai','baru saja kehilangan',
       'ditinggalkan orang terdekat','mengalami kehilangan besar',
@@ -1141,6 +1143,29 @@ const NLP = {
       'kehilangan kesempatan penting','sulit menerima kehilangan',
       'masih berduka hingga sekarang','merasa sangat kehilangan'
     ],
+    'identitas gender': [
+  'identitas seksual saya','peran gender saya','orientasi seksual',
+  'merasa berbeda dari yang lain secara gender','bingung dengan identitas saya',
+  'tidak sesuai dengan harapan gender','merasa salah lahir','ingin menjadi diri sendiri',
+  'tidak nyaman dengan jenis kelamin saya','identitas yang sesungguhnya',
+  'gender yang saya rasakan','merasa tidak sesuai norma gender'
+],
+    'refleksi hidup': [
+  'titik balik dalam hidup','titik balik terpenting','momen yang mengubah segalanya',
+  'filosofi hidup saya','prinsip hidup yang saya pegang','pelajaran terbesar dalam hidup',
+  'jika bisa mengulang hidup','kalau bisa memilih usia','usia yang paling saya sukai',
+  'apa yang ingin saya ubah','hal yang paling saya sesali','hal terberat dalam hidup',
+  'pencapaian terbesar saya','hal yang paling membanggakan','warisan yang saya tinggalkan',
+  'ekspektasi menjadi tua','menjadi orang tua seperti apa','sudah berubah atau masih sama'
+],
+    'lansia & penuaan': [
+  'menjadi tua','ketika menjadi lansia','di usia senja','usia lanjut saya',
+  'sudah pensiun','setelah pensiun','masa pensiun','tidak lagi produktif',
+  'khawatir di usia tua','takut menjadi beban','merasa tidak berguna di usia tua',
+  'kesepian di masa tua','tidak ada yang menemani','bergantung pada orang lain',
+  'kesehatan semakin menurun di usia tua','tulang semakin lemah','daya ingat menurun',
+  'apa yang masih ingin saya capai','kekhawatiran di masa depan saya'
+],
     trauma: [
       'pengalaman yang traumatis','kejadian yang sangat menakutkan',
       'masih teringat kejadian buruk','sulit melupakan kejadian tersebut',
@@ -1214,10 +1239,14 @@ const NLP = {
       'merasa menjadi penyebab masalah','beban rasa bersalah yang berat'
     ],
     penolakan: [
-      'merasa ditolak','tidak diterima oleh orang lain',
-      'diabaikan oleh orang terdekat','tidak dipedulikan sama sekali',
-      'merasa tidak berharga di mata orang lain','selalu dikesampingkan'
-    ],
+  'merasa ditolak','tidak diterima oleh orang lain',
+  'diabaikan oleh orang terdekat','tidak dipedulikan sama sekali',
+  'merasa tidak berharga di mata orang lain','selalu dikesampingkan',
+  'merasa terbuang','pernah merasa terbuang','diasingkan dari lingkungan',
+  'diasingkan dari pertemanan','dikucilkan dari pergaulan',
+  'tidak mendapat kasih sayang','tidak mendapatkan perhatian keluarga',
+  'tidak diperlukan','merasa tidak diperlukan siapapun'
+],
     burnout: [
       'sudah tidak kuat lagi','kelelahan yang sangat dalam',
       'tidak ada semangat untuk beraktivitas','kehilangan gairah hidup',
@@ -1310,6 +1339,18 @@ const EMO_LEX = {
       'yatim piatu rasane sama aja':3,
 'masing-masing punya capeknya sendiri':2,
 'kenalan yang kebetulan satu bapak satu ibu':3,
+'tidak sempat bilang selamat jalan':3,
+'tidak sempat minta maaf':3,
+'tidak sempat ucapkan terima kasih':3,
+'penyesalan yang dibawa sampai tua':3,
+'hidup yang kurang bermakna':2,
+'merasa hidup saya sia-sia':3,
+'tidak meninggalkan apapun':2,
+'tidak ada yang mengenang saya':2,
+'sudah tidak dibutuhkan siapapun':3,
+'sudah tidak berguna':3,
+'menjadi beban orang lain':2,
+'tidak ingin merepotkan':2,
     }
   },
   marah: {
@@ -1388,6 +1429,14 @@ const EMO_LEX = {
 'nggak ada yang seperti bapak':3,
 'bagus Rian':2, 'jago Rian':2,
 'dua kata tapi awak simpan':2,
+'rindu masa mudaku':3,
+'rindu waktu masih sehat':2,
+'rindu saat anak-anak masih kecil':3,
+'rindu ketika masih bisa bekerja':2,
+'rindu ketika rumah masih ramai':3,
+'kangen suasana dulu':2,
+'zaman itu tidak akan kembali':3,
+'waktu berlalu terlalu cepat':2,
     }
   },
   malu: {
@@ -1413,6 +1462,16 @@ const EMO_LEX = {
 'alasan tetap alasan bukan pembenaran':2,
 'nggak tau salah siapa':2,
 'kalau awak nulis karangan bapak nggak mau baca':3,
+'tidak sesuai harapan gender':2,
+'tidak cocok menjadi laki-laki':2,
+'tidak cocok menjadi perempuan':2,
+'merasa salah tempat':2,
+'tidak memenuhi peran sebagai':2,
+'gagal sebagai ayah':3,
+'gagal sebagai ibu':3,
+'gagal sebagai suami':3,
+'gagal sebagai istri':3,
+'tidak bisa menjadi orang tua yang baik':3,
     }
   },
   kesepian: {
@@ -1453,6 +1512,16 @@ const EMO_LEX = {
 'cari rasa itu ke mana-mana':2,
 'kapal yang hanyut dari dermaga':3,
 'nggak ada tempatnya':3,
+'anak-anak sudah pergi semua':2,
+'tidak ada yang menjenguk':3,
+'menunggu tanpa ada yang datang':3,
+'tidak ada yang menelepon':2,
+'rumah terasa kosong':3,
+'tidak ada yang menemani di hari tua':3,
+'tidak pernah ada yang memeluk waktu kecil':3,
+'dibesarkan tanpa kasih sayang':3,
+'tidak pernah merasa disayang keluarga':3,
+'merasa asing di keluarga sendiri':3,
     }
   },
   kecewa: {
@@ -1551,6 +1620,15 @@ const EMO_LEX = {
 'api unggun yang nggak dijaga':2,
 'jarang tambahkan kayu':2,
 'gitu-gitu aja':2,
+'sudah terlalu lama menanggung sendiri':3,
+'capek menjalani hidup yang panjang':3,
+'tidak ada yang meringankan beban':2,
+'hidup terasa berat dari muda sampai tua':3,
+'tidak pernah sempat istirahat':2,
+'selalu jadi tulang punggung':2,
+'tidak boleh kelihatan lemah di depan keluarga':2,
+'bertahan saja sudah cukup':2,
+'lelah tapi harus terus':3,
     }
   },
   harapan: {
@@ -1595,6 +1673,16 @@ const EMO_LEX = {
 'ang lah nan ka jago':2, 'jago keluarga ang':2,
 'awak mau jadi layak':2,
 'ringan yang beneran':2,
+'masih ada yang bisa saya berikan':2,
+'belum terlambat untuk berubah':3,
+'masih bisa membuat perbedaan':2,
+'ingin dikenang dengan baik':2,
+'ingin meninggalkan sesuatu yang berarti':3,
+'ingin berdamai dengan masa lalu':3,
+'ingin melihat cucu tumbuh':2,
+'masih ingin melihat':2,
+'ada yang masih ingin saya capai':2,
+'ingin memperbaiki hubungan yang renggang':3,
     }
   },
 };
@@ -1739,14 +1827,16 @@ const TOKOH_LEX = {
   'ayah':         ['ayah','papa','bapak','abah','abi','papi','pak'],
   'kakak':        ['kakak','kak','abang','bang','mbak'],
   'adik':         ['adik','dik','adek'],
-  'suami':        ['suami','pak suami','suamiku','suami saya'],
-  'istri':        ['istri','istriku','bini','isteri'],
+  'suami':        ['suami','pak suami','suamiku','suami saya','almarhum suami'],
+  'istri':        ['istri','istriku','bini','isteri','almarhumah istri'],
   'anak':         ['anak','anakku','anak saya','si kecil','putra','putri'],
   'sahabat':      ['sahabat','teman dekat','bestie','sobat','kawan lama'],
   'teman':        ['teman','temanku','teman saya'],
   'pasangan':     ['pacar','kekasih','pasangan','doi','gebetan'],
   'guru':         ['guru','pak guru','bu guru','dosen','ustaz','ustazah'],
   'atasan':       ['bos','atasan','kepala','manajer','direktur'],
+  'mertua':       ['mertua','ibu mertua','bapak mertua','orang tua suami','orang tua istri'],
+'ipar':         ['ipar','saudara ipar','kakak ipar','adik ipar'],
   'diri sendiri': ['diri sendiri','saya sendiri','diriku','hidupku'],
 };
 
@@ -1777,6 +1867,10 @@ const KEBUTUHAN_RULES = [
   { emosi:['marah'],                    topik:['percintaan','pertemanan'],  need:'ruang untuk marah dan divalidasi' },
   { emosi:['marah'],                    topik:['identitas'],                need:'diakui sebagai individu yang berharga' },
   { emosi:['marah'],                    topik:[],                           need:'didengar dan dipahami' },
+  { emosi:['sedih','kesepian'],          topik:['lansia & penuaan'],            need:'kebermaknaan di usia tua' },
+{ emosi:['sedih','malu','kecewa'],     topik:['refleksi hidup'],              need:'penerimaan dan perdamaian diri' },
+{ emosi:['takut','sedih'],             topik:['identitas gender'],            need:'penerimaan identitas diri' },
+{ emosi:['sedih','kesepian','marah'],  topik:['penolakan'],                   need:'rasa aman dan diterima' },
 ];
 
 function detectKebutuhan(emotion, topics, tokoh) {
@@ -1798,6 +1892,9 @@ const KEKUATAN_LEX = {
   'spiritualitas':['berdoa','doa','ibadah','berserah','syukur','alhamdulillah','iman','percaya tuhan'],
   'ketekunan':    ['berusaha','usaha','kerja keras','tidak menyerah','pantang menyerah','semangat','gigih'],
   'refleksi diri':['sadar','menyadari','berpikir','merenung','introspeksi','mengevaluasi','belajar dari'],
+  'penerimaan':   ['menerima','sudah menerima','bisa menerima','menerima apa adanya','merelakan','sudah ikhlas','berdamai dengan','bisa berdamai'],
+  'kebijaksanaan':['pengalaman mengajarkan','belajar dari hidup','hidup mengajarkan','sudah melewati banyak','pernah melewati','sudah merasakan','sudah kenyang pengalaman'],
+  'ketulusan':    ['tulus','dengan sepenuh hati','ikhlas melakukan','tanpa pamrih','demi keluarga','demi anak','demi orang lain'],
 };
 
 function detectKekuatan(text) {
@@ -1818,24 +1915,35 @@ const SUMMARY_TPL = {
     'istri':    'Ada kesedihan yang dalam terkait hubungan yang sangat berarti bagi Anda',
     'anak':     'Kehilangan atau kekhawatiran tentang anak meninggalkan beban yang sulit diungkapkan',
     'sahabat':  'Anda menyimpan kerinduan pada sahabat yang memiliki tempat istimewa dalam hidup Anda',
+    'mertua':   'Ada kesedihan yang dalam terkait hubungan dengan keluarga pasangan Anda',
+    'ipar':     'Ada kesedihan yang dalam terkait hubungan dengan anggota keluarga besar',
+    'diri sendiri': 'Ada kesedihan mendalam yang Anda rasakan terhadap perjalanan hidup Anda sendiri',
     '_default': 'Anda sedang menanggung kesedihan yang cukup berat dalam hidup',
+  
   },
   marah: {
     'atasan':   'Anda mengalami situasi di tempat kerja yang terasa tidak adil',
     'suami':    'Ada ketegangan dalam hubungan yang membebani Anda',
     'istri':    'Ada ketegangan dalam hubungan yang membebani Anda',
     'pasangan': 'Ada rasa kecewa dan marah pada hubungan yang tidak berjalan seperti yang diharapkan',
-    'diri sendiri': 'Ada rasa marah pada diri sendiri yang sedang Anda tanggung',
+    'diri sendiri': 'Ada rasa marah pada diri sendiri yang sedang Anda tanggung','mertua':   'Ada ketegangan dalam hubungan dengan keluarga pasangan yang terasa membebani',
+    'ipar':     'Ada gesekan dalam hubungan keluarga besar yang menyimpan rasa tidak nyaman',
     '_default': 'Ada rasa marah atau frustrasi yang sedang Anda tanggung saat ini',
   },
+  
   takut: {
     '_default': 'Ada kekhawatiran dan rasa tidak aman yang sedang Anda rasakan',
   },
   kesepian: {
+    'anak':     'Anda merindukan kehadiran anak-anak yang kini telah menjalani kehidupan masing-masing',
+    'suami':    'Ada kekosongan yang terasa sejak kehilangan pasangan yang selama ini menemani hidup',
+    'istri':    'Ada kekosongan yang terasa sejak kehilangan pasangan yang selama ini menemani hidup',
+    'sahabat':  'Anda merindukan kehadiran sahabat yang dulu selalu ada di sisi Anda',
     '_default': 'Anda sedang merasakan kesepian dan merindukan kedekatan dengan orang lain',
   },
   burnout: {
-    '_default': 'Anda sedang mengalami kelelahan yang cukup mendalam dalam menjalani hari-hari',
+    'diri sendiri': 'Anda telah menanggung begitu banyak selama bertahun-tahun, dan kelelahan itu nyata adanya',
+    '_default':     'Anda sedang mengalami kelelahan yang cukup mendalam dalam menjalani hari-hari',
   },
   kecewa: {
     '_default': 'Ada kekecewaan yang cukup dalam dari situasi yang Anda alami',
@@ -1852,10 +1960,17 @@ const SUMMARY_TPL = {
     '_default': 'Ada semangat dan harapan yang masih menyala dalam diri Anda',
   },
   trauma: {
+    'ibu':      'Ada luka lama dari hubungan dengan ibu yang masih terasa hingga hari ini',
+    'ayah':     'Ada luka lama dari hubungan dengan ayah yang masih terasa hingga hari ini',
+    'keluarga': 'Pengalaman dalam keluarga meninggalkan bekas yang belum sepenuhnya sembuh',
     '_default': 'Anda pernah melalui pengalaman berat yang meninggalkan bekas hingga sekarang',
   },
   malu: {
-    '_default': 'Ada rasa tidak percaya diri yang sedang Anda tanggung',
+    'diri sendiri': 'Ada rasa belum cukup baik yang selama ini Anda tanggung dalam diam',
+    'anak':         'Ada kekhawatiran mendalam tentang peran Anda sebagai orang tua',
+    'suami':        'Ada rasa kurang yang Anda rasakan dalam menjalani peran sebagai pasangan',
+    'istri':        'Ada rasa kurang yang Anda rasakan dalam menjalani peran sebagai pasangan',
+    '_default':     'Ada rasa tidak percaya diri yang sedang Anda tanggung',
   },
   netral: {
     '_default': 'Anda sedang berbagi perjalanan hidup yang bermakna',
@@ -1865,12 +1980,16 @@ const SUMMARY_TPL = {
 /* ── Deteksi Keterangan Waktu ── */
 function detectWaktu(text) {
   const t = text.toLowerCase();
-  if (t.match(/smp|sekolah menengah|remaja|usia \d+\s*tahun/))      return 'saat masa remaja';
-  if (t.match(/sd|sekolah dasar|waktu kecil|masa kecil|kecil dulu/)) return 'saat masih kecil';
-  if (t.match(/kuliah|mahasis/))                                      return 'di masa kuliah';
-  if (t.match(/menikah|pernikahan|setelah menikah/))                  return 'setelah menikah';
-  if (t.match(/bekerja|kerja|karir/))                                 return 'di masa bekerja';
-  if (t.match(/lama|bertahun|puluhan tahun|sejak lama/))              return 'sudah sejak lama';
+  if (t.match(/smp|sekolah menengah|remaja|usia \d+\s*tahun/))               return 'saat masa remaja';
+  if (t.match(/sd|sekolah dasar|waktu kecil|masa kecil|kecil dulu/))         return 'saat masih kecil';
+  if (t.match(/kuliah|mahasis/))                                              return 'di masa kuliah';
+  if (t.match(/menikah|pernikahan|setelah menikah/))                          return 'setelah menikah';
+  if (t.match(/bekerja|kerja|karir/))                                         return 'di masa bekerja';
+  if (t.match(/pensiun|setelah pensiun|masa pensiun/))                        return 'sejak memasuki masa pensiun';
+  if (t.match(/tua|lansia|usia lanjut|usia senja|semakin tua/))               return 'di usia saat ini';
+  if (t.match(/anak.anak kecil|anak masih kecil|anak.anak masih di rumah/))   return 'ketika anak-anak masih kecil';
+  if (t.match(/muda|masa muda|waktu muda|dulu waktu muda/))                   return 'di masa muda dulu';
+  if (t.match(/lama|bertahun|puluhan tahun|sejak lama/))                      return 'sudah sejak lama';
   return '';
 }
 
@@ -1899,6 +2018,12 @@ const POV_SHIFT_FRASA = {
   'anak saya': 'anak {SP}', 'anak aku': 'anak {SP}',
   'pekerjaan saya': 'pekerjaan {SP}', 'pekerjaan aku': 'pekerjaan {SP}',
   'milik saya': 'milik {SP}', 'punya saya': 'punya {SP}',
+  'mertua saya': 'mertua {SP}', 'mertua aku': 'mertua {SP}',
+  'ipar saya': 'ipar {SP}', 'ipar aku': 'ipar {SP}',
+  'cucu saya': 'cucu {SP}', 'cucu aku': 'cucu {SP}',
+  'masa lalu saya': 'masa lalu {SP}', 'masa lalu aku': 'masa lalu {SP}',
+  'masa muda saya': 'masa muda {SP}', 'masa muda aku': 'masa muda {SP}',
+  'perjalanan hidup saya': 'perjalanan hidup {SP}', 'perjalanan hidup aku': 'perjalanan hidup {SP}',
 };
 
 /* Kata ganti orang pertama tunggal — diganti TERAKHIR, setelah frasa di atas */
@@ -3312,11 +3437,13 @@ const SESI_META = {
       'Ceritakanlah tentang siapa saja orang yang penting bagi kamu saat masa remaja dahulu.',
       'Ceritakanlah pengalaman kamu bersekolah pada masa remaja.',
       'Ceritakanlah apakah kamu juga ikut bekerja saat masa remaja.',
-      'Ceritakanlah pengalaman sulit atau berat di kala remaja — dan bagaimana kamu melewatinya serta hikmahnya.',
+      'Ceritakanlah pengalaman sulit atau berat di kala remaja — apakah ada ketidakcukupan kebutuhan pangan atau pendidikan? Dan bagaimana kamu melewatinya serta hikmahnya?',
+      'Apakah kamu pernah merasa terbuang, sendirian, dan tidak mendapatkan perhatian atau kasih sayang dari keluarga saat masa remaja?',
+      'Apakah kamu pernah merasa diasingkan dari lingkungan sosial seperti pertemanan? Bagaimana kamu melewatinya dan apa hikmahnya pada kehidupan kamu sekarang?',
       'Ceritakanlah pengalaman yang menyenangkan saat remaja dahulu.',
       'Menurut kamu, masa remajamu apakah secara keseluruhan menyenangkan atau tidak?',
       'Apakah kamu ingat penampilan pertama yang menarik perhatian banyak orang?',
-      'Bagaimana perasaan kamu terkait aktivitas seksual (seperti mulai ingin lebih dekat dengan lawan jenis atau aktivitas seksual privasi)?',
+      'Bagaimana perasaan kamu terkait aktivitas seksual (seperti mulai ingin lebih dekat dengan lawan jenis atau aktivitas seksual privasi) dan bagaimana identitas seksual serta peran gender kamu saat itu?',
       'Ceritakanlah tentang pengalaman keberhasilan mengatasi konflik masa remaja dan maknanya.',
       'Bagaimana cara mudah kamu mengingat kemampuan positif dari keberhasilan yang dapat diterapkan hari ini?'
     ],
@@ -3326,12 +3453,12 @@ const SESI_META = {
       'Ceritakanlah pengalaman tentang apakah Anda beribadah di tempat ibadah dan mengikuti perkumpulan anak muda.',
       'Ceritakanlah tentang siapa saja orang yang penting bagi Anda saat masa remaja dahulu.',
       'Ceritakanlah pengalaman Anda bersekolah pada masa remaja.',
-      'Ceritakanlah apakah Anda juga ikut bekerja saat masa remaja.',
-      'Ceritakanlah pengalaman sulit atau berat di kala remaja — dan bagaimana Anda melewatinya serta hikmahnya.',
+      'Ceritakanlah apakah Anda juga ikut bekerja saat masa remaja.','Ceritakanlah pengalaman sulit atau berat di kala remaja — apakah ada ketidakcukupan kebutuhan pangan atau pendidikan? Dan bagaimana Anda melewatinya serta hikmahnya?',
+'Apakah Anda pernah merasa terbuang, sendirian, dan tidak mendapatkan perhatian atau kasih sayang dari keluarga dalam kehidupan usia remaja?',
+'Apakah Anda pernah merasa diasingkan dari lingkungan sosial seperti pertemanan? Bagaimana Anda melewatinya dan apa hikmahnya pada kehidupan Anda sekarang?',
       'Ceritakanlah pengalaman yang menyenangkan saat remaja dahulu.',
       'Menurut Anda, masa remaja Anda apakah secara keseluruhan menyenangkan atau tidak?',
-      'Apakah Anda ingat penampilan pertama yang menarik perhatian banyak orang?',
-      'Bagaimana perasaan Anda terkait aktivitas seksual (seperti mulai ingin lebih dekat dengan lawan jenis atau aktivitas seksual privasi)?',
+      'Apakah Anda ingat penampilan pertama yang menarik perhatian banyak orang?','Bagaimana perasaan Anda terkait aktivitas seksual (seperti mulai ingin lebih dekat dengan lawan jenis atau aktivitas seksual privasi) dan bagaimana identitas seksual serta peran gender Anda saat itu?',
       'Ceritakanlah tentang pengalaman keberhasilan mengatasi konflik masa remaja dan maknanya.',
       'Bagaimana cara mudah Anda mengingat kemampuan positif dari keberhasilan yang dapat diterapkan hari ini?'
     ]
@@ -3340,17 +3467,14 @@ const SESI_META = {
     icon:'👨', title:'Masa Dewasa',
     desc:'Sesi ini menelusuri perjalanan masa dewasa — pernikahan, pekerjaan, keluarga, persahabatan, dan pencapaian hidup yang paling berarti.',
     qs_anak: null, // tidak ada untuk remaja
-    qs_dewasa:[
-      'Ceritakanlah pengalaman yang memorable bagi Anda saat mulai menjadi dewasa usia 20-an lalu 30-an.',
+    qs_dewasa:['Di usia mana yang paling Anda sukai? Ceritakanlah pengalaman yang paling tak terlupakan bagi Anda saat mulai menjadi dewasa — satu persatu di usia 20-an, 30-an, dan 40-an.',
       'Apakah Anda menikah di usia tersebut? Tepatnya di usia berapa? Jika tidak, mengapa?',
       'Ceritakanlah tentang kehidupan pernikahan Anda, tentang pertama kali bekerja, dan tentang meninggalkan rumah orang tua.',
       'Apakah Anda bahagia dan sejahtera di kehidupan pernikahan dan pekerjaan? Jika tidak, mengapa?',
       'Siapa orang yang sangat berharga atau penting bagi hidup Anda di usia dewasa? Mengapa?',
-      'Apakah Anda memiliki anak? Seberapa dekat dengan mereka? Ceritakanlah.',
-      'Bagaimana hubungan Anda dengan anggota keluarga dan teman-teman lama di usia dewasa?',
-      'Bagaimana pertemanan dan relasi telah mengubah sudut pandang dan keseharian Anda bertahun-tahun?',
-      'Apakah Anda memiliki hobi di usia dewasa dahulu? Bagaimana hobi tersebut mempengaruhi kehidupan Anda?',
-      'Ceritakanlah pengalaman sulit dalam masa dewasa — kesepian, kehilangan, dan bagaimana Anda melewatinya.',
+      'Apakah Anda memiliki anak? Seberapa dekat dengan mereka? Ceritakanlah.','Bagaimana hubungan Anda dengan anggota keluarga termasuk ipar dan mertua, serta teman-teman lama di usia dewasa? Apakah Anda masih berkomunikasi dengan mereka?',
+      'Bagaimana pertemanan dan relasi telah mengubah sudut pandang dan keseharian Anda bertahun-tahun?','Apakah Anda memiliki hobi di usia dewasa dahulu? Bagaimana hobi tersebut mempengaruhi pertumbuhan personal Anda, menambah relasi positif, dan keputusan apa yang Anda ambil dari sana?',
+      'Ceritakanlah pengalaman sulit dalam masa dewasa — kesepian, merasa terbuang, tidak diperlukan, kehilangan orang yang dicintai, dan bagaimana Anda melewatinya.',
       'Ceritakanlah pengalaman keberhasilan mengatasi konflik masa dewasa dan maknanya.',
       'Bagaimana cara mudah Anda mengingat kemampuan positif dari keberhasilan yang dapat diterapkan hari ini?'
     ]
@@ -3370,8 +3494,16 @@ const SESI_META = {
       'Jika diberikan kesempatan memperbaiki kehidupan, apa yang berbeda yang akan Anda lakukan?',
       'Apa hal yang paling berat dilalui dalam hidup Anda selama ini?',
       'Saat kapan Anda merasa paling bahagia dan apa kejadiannya?',
+      'Saat kapan Anda merasa tidak bahagia? Dan apakah sekarang sudah lebih bahagia dari sebelumnya?',
+'Jika dapat memilih hidup di satu usia saja, Anda akan memilih usia berapa? Mengapa?',
       'Ceritakanlah hal yang membuat Anda sangat bangga sepanjang hidup.',
       'Apakah Anda punya filosofi hidup? Apa hal terpenting dalam menjalani kehidupan yang baik?',
+      'Jelaskanlah titik balik terpenting yang pernah Anda rasakan atau alami selama ini.',
+'Hal apa yang membuat Anda khawatir atau takut di usia saat ini?',
+'Apakah Anda merasa menjadi orang yang sama atau telah berubah selama hidup? Apa yang berubah dan mengapa?',
+'Telah menjadi orang tua seperti apa Anda selama ini? Apa yang Anda sesali dan apa yang Anda banggakan?',
+'Apakah Anda mempunyai ekspektasi tentang menjadi tua? Apakah harapan itu terpenuhi?',
+'Apa hal terberat dan terbaik ketika menjadi tua? Bagaimana Anda melihat diri sendiri saat ini?',
       'Bagaimana perasaan Anda ketika menjadi lansia/tua? Apa yang terberat dan terbaik?',
       'Apa yang masih ingin Anda capai dalam hidup? Apa kekhawatiran di masa depan?',
       'Ceritakanlah tentang pengalaman keberhasilan mengatasi konflik masa lansia dan maknanya.'
