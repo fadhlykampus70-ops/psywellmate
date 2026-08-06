@@ -997,7 +997,7 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
    STATE
 ════════════════════════════════════ */
 let _cu = null;
-let _allUsers = [], _allSessions = [], _allPHQ = [], _allLogs = [];
+let _allUsers = [], _allSessions = [], _allPHQ = [], _allLogs = [], _allPatientProfiles = [];
 let _currentTranscriptData = null;
 let _currentTranscriptSession = null;
 const PAGE_SIZE = 15;
@@ -1091,17 +1091,19 @@ async function loadAllData(){
   try{
     // Load semua data paralel
     // Load semua data paralel
-    const [usersRes, sessRes, phqRes, logsRes] = await Promise.all([
+    const [usersRes, sessRes, phqRes, logsRes, profilesRes] = await Promise.all([
       sb.from('profiles').select('*').order('created_at',{ascending:false}),
       sb.from('therapy_sessions').select('*').order('created_at',{ascending:false}),
       sb.from('phq_assessments').select('*').order('created_at',{ascending:false}),
-      sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(200)
+      sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(200),
+      sb.from('patient_profiles').select('user_id,phone_patient,phone_guardian')
     ]);
 
     _allUsers = usersRes.data || [];
     _allSessions = sessRes.data || [];
     _allPHQ = phqRes.data || [];
     _allLogs = logsRes.data || [];
+    _allPatientProfiles = profilesRes.data || [];
 
     renderOverview();
     renderUsers();
@@ -2111,16 +2113,18 @@ function openCrisisDetail(id){
   const d = _allCrisis.find(c=>c.id===id);
   if(!d) return;
   _activeCrisisId = id;
-  const usr  = _allUsers.find(u=>u.id===d.user_id);
+const usr  = _allUsers.find(u=>u.id===d.user_id);
   const nama = usr?.full_name||'—';
+  const prof = _allPatientProfiles.find(p=>p.user_id===d.user_id);
   const lvlClass = d.alert_level==='kritis'?'crisis-level-kritis':d.alert_level==='waspada'?'crisis-level-waspada':'crisis-level-perhatian';
   document.getElementById('mcd-title').textContent = `🚨 Crisis Alert — ${nama}`;
   document.getElementById('mcd-body').innerHTML = `
     <div class="detail-grid">
       <div class="detail-item"><div class="detail-lbl">Nama Pasien</div><div class="detail-val">${nama}</div></div>
       <div class="detail-item"><div class="detail-lbl">Level Alert</div><div class="detail-val"><span class="crisis-level-badge ${lvlClass}">${d.alert_level.toUpperCase()}</span></div></div>
-      <div class="detail-item"><div class="detail-lbl">Sesi / Pertanyaan</div><div class="detail-val">Sesi ${d.session_number} / Q${d.question_index+1}</div></div>
-      <div class="detail-item"><div class="detail-lbl">Waktu</div><div class="detail-val">${fmtDate(d.created_at)}</div></div>
+      <div class="detail-item"><div class="detail-lbl">No. HP Pasien</div><div class="detail-val">${prof?.phone_patient?`<a href="tel:${prof.phone_patient}">${prof.phone_patient}</a>`:'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">No. HP Wali</div><div class="detail-val">${prof?.phone_guardian?`<a href="tel:${prof.phone_guardian}">${prof.phone_guardian}</a>`:'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Sesi / Pertanyaan</div><div class="detail-val">Sesi ${d.session_number} / Q${d.question_index+1}</div></div>      <div class="detail-item"><div class="detail-lbl">Waktu</div><div class="detail-val">${fmtDate(d.created_at)}</div></div>
       <div class="detail-item"><div class="detail-lbl">Konfirmasi Pasien</div><div class="detail-val">${d.confirmation_status}</div></div>
       <div class="detail-item"><div class="detail-lbl">Email Terkirim</div><div class="detail-val">${d.email_sent?'✓ Ya ('+fmtDateShort(d.email_sent_at)+')':'Belum'}</div></div>
     </div>
