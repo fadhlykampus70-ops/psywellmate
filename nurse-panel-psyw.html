@@ -483,10 +483,31 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="tb-right">
       <div class="timeout-bar" id="timeout-bar" style="width:100%"></div>
       <span class="tb-user" id="tb-user"></span>
+      <button class="tb-logout" onclick="openModal('modal-panduan')" style="margin-right:6px">📖 Panduan</button>       
       <button class="tb-logout" onclick="doLogout()">Keluar</button>
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-panduan">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-head">
+        <div class="modal-title">📖 Panduan Penggunaan — Perawat</div>
+        <button class="modal-close" onclick="closeModal('modal-panduan')">✕</button>
+      </div>
+      <div class="modal-body">
+        <ol style="padding-left:18px;line-height:2;font-size:.85rem">
+          <li><strong>Daftar Pasien</strong> — lihat seluruh pasien dan status terapinya.</li>
+          <li><strong>Detail Pasien</strong> — klik pasien untuk lihat riwayat & progres.</li>
+          <li><strong>Flag / Tandai</strong> — beri penanda pada pasien yang perlu perhatian khusus.</li>
+          <li>Segera koordinasikan dengan admin/psikolog bila menemukan kondisi yang mengkhawatirkan.</li>
+        </ol>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-o" onclick="closeModal('modal-panduan')">Tutup</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- TAB NAVIGASI -->
   <div class="tab-nav">
     <button class="tab-btn act" onclick="showTab('dashboard')" id="tab-dashboard">
