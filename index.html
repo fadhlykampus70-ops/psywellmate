@@ -3339,7 +3339,7 @@ async function _eskalasi(answerText, level, words){
       try{
         await sb.from('crisis_alerts').update({
           email_sent:true, email_sent_at:new Date().toISOString(),
-          email_target:'fadhlyalfallah07@gmail.com', // ⚠️ GANTI sebelum production
+          email_target:'psywell.mate@gmail.com, aku.nandie@gmail.com',
           admin_status:'new',
         }).eq('id',window._lastCrisisAlertId);
       }catch(e){ console.warn('update crisis email_sent error:',e); }
