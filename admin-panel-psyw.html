@@ -261,6 +261,35 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="lfield"><label>Password</label><input type="password" id="lg-p" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
     <button class="lbtn" id="lg-btn" onclick="doAdminLogin()">Masuk ke Panel Admin</button>
     <div class="attempt-info" id="attempt-info"></div>
+    <div class="attempt-info"><a onclick="openModal('modal-lupa-password')" style="cursor:pointer;text-decoration:underline">Lupa password?</a></div>
+  </div>
+</div>
+
+<div id="set-password-page" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">Psy<span>Well</span>Mate</div>
+    <div class="login-badge"><span class="lb">🔑 Atur Password Baru</span></div>
+    <div class="err-box" id="sp-err"></div>
+    <div class="lfield"><label>Password Baru</label><input type="password" id="sp-p1" placeholder="Minimal 6 karakter"></div>
+    <div class="lfield"><label>Ulangi Password Baru</label><input type="password" id="sp-p2" placeholder="Ulangi password"></div>
+    <button class="lbtn" id="sp-btn" onclick="doSimpanPasswordBaru()">Simpan Password Baru</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-lupa-password">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <div class="modal-title">Lupa Password</div>
+      <button class="modal-close" onclick="closeModal('modal-lupa-password')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="err-box" id="lp-err"></div>
+      <div class="lfield"><label>Email Admin</label><input type="email" id="lp-e" placeholder="admin@psywellmate.com"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-lupa-password')">Batal</button>
+      <button class="btn btn-a btn-sm" id="lp-btn" onclick="doKirimResetPassword()">Kirim Link Reset</button>
+    </div>
   </div>
 </div>
 
@@ -886,6 +915,13 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+sb.auth.onAuthStateChange((event)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('dashboard').style.display='none';
+    document.getElementById('set-password-page').style.display='flex';
+  }
+});
 /* ════════════════════════════════════
    RATE LIMITING (localStorage)
 ════════════════════════════════════ */
@@ -1035,6 +1071,42 @@ let _realtimeChannel = null;
 /* ════════════════════════════════════
    LOGIN
 ════════════════════════════════════ */
+async function doKirimResetPassword(){
+  const e=document.getElementById('lp-e').value.trim();
+  if(!e){showErr('lp-err','⚠️ Isi email dulu');return;}
+  const btn=document.getElementById('lp-btn'); btn.disabled=true;
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:window.location.origin+window.location.pathname});
+    if(error) throw error;
+    btn.disabled=false;
+    toast('📧 Link reset password sudah dikirim, cek email');
+    closeModal('modal-lupa-password');
+  }catch(err){
+    btn.disabled=false;
+    showErr('lp-err','❌ Gagal: '+(err.message||'coba lagi'));
+  }
+}
+
+async function doSimpanPasswordBaru(){
+  const p1=document.getElementById('sp-p1').value;
+  const p2=document.getElementById('sp-p2').value;
+  if(!p1||p1.length<6){showErr('sp-err','⚠️ Password minimal 6 karakter');return;}
+  if(p1!==p2){showErr('sp-err','⚠️ Password tidak sama');return;}
+  const btn=document.getElementById('sp-btn'); btn.disabled=true;
+  try{
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error) throw error;
+    toast('✅ Password berhasil diubah, silakan masuk lagi');
+    await sb.auth.signOut();
+    document.getElementById('set-password-page').style.display='none';
+    document.getElementById('login-page').style.display='flex';
+  }catch(err){
+    btn.disabled=false;
+    showErr('sp-err','❌ Gagal: '+(err.message||'coba lagi'));
+  }
+}
+
+  
 async function doAdminLogin(){
   const locked = isLocked();
   if(locked){ toast('⏳ Akun terkunci. Coba lagi dalam '+locked+' menit.'); return; }
