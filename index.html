@@ -425,6 +425,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <div class="uav" id="uav-l"></div>
     <span id="uav-n"></span>
     <button onclick="goPage('riwayat')">Riwayat</button>
+    <button onclick="bukaPanduan()" title="Panduan Penggunaan" style="margin-left:4px">❓ Panduan</button>
     <button onclick="doLogout()" style="margin-left:4px">Keluar</button>
   </div>
 </header>
@@ -671,6 +672,29 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
     </div>
 
+    <div id="modal-panduan" class="modal-overlay" style="display:none" onclick="if(event.target===this)tutupPanduan()">
+      <div class="modal-box" style="max-width:480px;text-align:left;max-height:80vh;overflow-y:auto">
+        <span class="modal-icon" style="text-align:center;display:block">📖</span>
+        <div class="modal-title" style="text-align:center">Panduan Penggunaan PsyWellMate</div>
+        <div class="modal-body" style="text-align:left">
+          <ol style="padding-left:18px;line-height:2">
+            <li><strong>Daftar &amp; Masuk</strong> — buat akun dengan email, lalu masuk ke aplikasi.</li>
+            <li><strong>Isi Data Diri</strong> — lengkapi profil singkat (usia, kondisi, kontak) agar sesi lebih sesuai.</li>
+            <li><strong>Kuesioner Awal (PHQ)</strong> — jawab beberapa pertanyaan untuk mengukur kondisi awal.</li>
+            <li><strong>Pilih Psikolog</strong> — pilih pendamping yang akan memantau proses terapimu.</li>
+            <li><strong>Sesi Bercerita dengan Elina</strong> — ceritakan pengalamanmu, Elina akan menemani lewat percakapan.</li>
+            <li><strong>Jeda Antar Sesi</strong> — ada jeda waktu antar sesi agar prosesnya tidak terburu-buru; jadwalnya bisa dilihat di halaman sesi.</li>
+            <li><strong>Kuesioner Akhir &amp; Hasil</strong> — setelah semua sesi selesai, isi kuesioner akhir untuk melihat perkembangan.</li>
+            <li><strong>Riwayat</strong> — cek ulang seluruh sesi dan hasil kapan saja lewat menu Riwayat.</li>
+          </ol>
+          <div style="margin-top:12px;padding:10px 12px;background:var(--primary-soft);border-radius:8px;font-size:.78rem;color:var(--muted)">
+            Butuh bantuan segera? Hubungi <strong>119 ext 8 (SEJIWA)</strong> atau <strong>112</strong>.
+          </div>
+        </div>
+        <button class="btn-sm bp" onclick="tutupPanduan()" style="width:100%">Mengerti</button>
+      </div>
+    </div>
+
     <!-- MODAL: Peringatan jeda belum selesai -->
     <div id="modal-jeda" class="modal-overlay" style="display:none" onclick="if(event.target===this)tutupModalJeda()">
       <div class="modal-box">
@@ -834,9 +858,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="crisis-body" id="crisis-body">Dari yang kamu ceritakan tadi, Elina ingin memastikan kamu baik-baik saja sekarang.</div>
       <div class="crisis-hotline" id="crisis-hotline" style="display:none">
         <div class="ch-label">Bantuan Tersedia Sekarang</div>
-        <div class="ch-item">📞 <span>Hotline Kemenkes RI: <a href="tel:119">119 ext 8</a> (24 jam)</span></div>
-        <div class="ch-item">💬 <span>Chat: <a href="https://sejiwa.or.id" target="_blank">sejiwa.or.id</a></span></div>
-        <div class="ch-item"> <span>Psikolog PsyWellMate siap membantu</span></div>
+        <div class="ch-item">📞 <span>Hotline Kemenkes RI: <a href="tel:119">119 ext 8</a> (SEJIWA, 24 jam)</span></div>
+        <div class="ch-item">🚑 <span>Darurat: <a href="tel:112">112</a> (bebas pulsa)</span></div>
+        <div class="ch-item">💬 <span>Chat: <a href="https://sejiwa.or.id" target="_blank">sejiwa.or.id</a></span></div>        <div class="ch-item"> <span>Psikolog PsyWellMate siap membantu</span></div>
       </div>
       <div class="crisis-btn-wrap" id="crisis-btn-wrap"></div>
     </div>
@@ -3292,6 +3316,7 @@ async function _kirimEmailCrisis(answerText, level, words){
         <ul style="margin:0;padding-left:16px;font-size:13px;color:#555;line-height:1.8">
           <li>Hubungi pasien dalam 24 jam</li>
           <li>Cek panel admin PsyWellMate untuk detail lengkap</li>
+          <li>Jika kondisi darurat: 119 ext 8 (SEJIWA) atau 112 (bebas pulsa)</li>
         </ul>
       </div>
       <p style="font-size:11px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:12px">
@@ -3300,24 +3325,31 @@ async function _kirimEmailCrisis(answerText, level, words){
     </div>
   </div>`;
 
+  const _penerima = ['psywell.mate@gmail.com', 'aku.nandie@gmail.com'];
   try{
     const { data:{ session:_sess } } = await sb.auth.getSession();
     const _token = _sess?.access_token || '';
-    const res = await fetch(EDGE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${_token}`,
-      },
-      body: JSON.stringify({
-        to:      'fadhlykampus70@gmail.com', // ⚠️ GANTI sebelum production// ⚠️ GANTI sebelum production
-        subject: `⚠️ [URGENT] Crisis Alert — ${S.nama}, ${S.usia} thn — PsyWellMate`,
-        html:    htmlBody,
-      }),
-    });
-    if(!res.ok){
-      const err = await res.json();
-      console.warn('Edge Function error:', err);
+    for(const _tujuan of _penerima){
+      try{
+        const res = await fetch(EDGE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${_token}`,
+          },
+          body: JSON.stringify({
+            to:      _tujuan,
+            subject: `⚠️ [URGENT] Crisis Alert — ${S.nama}, ${S.usia} thn — PsyWellMate`,
+            html:    htmlBody,
+          }),
+        });
+        if(!res.ok){
+          const err = await res.json();
+          console.warn('Edge Function error ('+_tujuan+'):', err);
+        }
+      }catch(e){
+        console.warn('_kirimEmailCrisis fetch error ('+_tujuan+'):',e);
+      }
     }
   }catch(e){
     console.warn('_kirimEmailCrisis error:',e);
@@ -4896,6 +4928,9 @@ function cekDanLanjutSesi(){
   }
 }
 
+function bukaPanduan(){ document.getElementById('modal-panduan').style.display='flex'; }
+function tutupPanduan(){ document.getElementById('modal-panduan').style.display='none'; }
+  
 function tutupModalJeda(){
   document.getElementById('modal-jeda').style.display = 'none';
 }
