@@ -496,10 +496,37 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <button class="btn-full" id="lg-btn" onclick="doLogin()">Masuk</button>
       <div class="divl"><hr><span>atau</span><hr></div>
       <div class="asw">Belum punya akun? <a onclick="goPage('register')">Daftar di sini</a></div>
+      <div class="asw" style="margin-top:6px"><a onclick="goPage('lupa-password')">Lupa password?</a></div>
     </div>
   </div>
 </div>
 
+  <div class="page" id="page-lupa-password">
+  <div class="auth-wrap">
+    <div class="acard">
+      <h2>Lupa Password</h2>
+      <p class="sub">Masukkan email akunmu, kami kirim link untuk atur ulang password.</p>
+      <div class="err-box" id="lp-err"></div>
+      <div class="field"><label>Email</label><input type="email" id="lp-e" placeholder="email@contoh.com"></div>
+      <button class="btn-full" id="lp-btn" onclick="doKirimResetPassword()">Kirim Link Reset</button>
+      <div class="divl"><hr><span>atau</span><hr></div>
+      <div class="asw"><a onclick="goPage('login')">Kembali ke Masuk</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-set-password">
+  <div class="auth-wrap">
+    <div class="acard">
+      <h2>Atur Password Baru</h2>
+      <p class="sub">Buat password baru untuk akunmu.</p>
+      <div class="err-box" id="sp-err"></div>
+      <div class="field"><label>Password Baru</label><input type="password" id="sp-p1" placeholder="Minimal 6 karakter"></div>
+      <div class="field"><label>Ulangi Password Baru</label><input type="password" id="sp-p2" placeholder="Ulangi password"></div>
+      <button class="btn-full" id="sp-btn" onclick="doSimpanPasswordBaru()">Simpan Password Baru</button>
+    </div>
+  </div>
+</div>
 <!-- ═════════ RIWAYAT ═════════ -->
 <div class="page" id="page-riwayat">
   <div class="riwayat-wrap">
@@ -976,6 +1003,41 @@ async function doRegister(){
 /* ══════════════════════════════════════════
    LOGIN
 ══════════════════════════════════════════ */
+async function doKirimResetPassword(){
+  const e=document.getElementById('lp-e').value.trim();
+  if(!e){showErr('lp-err','⚠️ Isi email dulu');return;}
+  setBtnLoading('lp-btn',true);
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:window.location.origin+window.location.pathname});
+    if(error) throw error;
+    setBtnLoading('lp-btn',false,'Kirim Link Reset');
+    toast('📧 Link reset password sudah dikirim, cek email kamu');
+    goPage('login');
+  }catch(err){
+    setBtnLoading('lp-btn',false,'Kirim Link Reset');
+    showErr('lp-err','❌ Gagal kirim: '+(err.message||'coba lagi'));
+  }
+}
+
+async function doSimpanPasswordBaru(){
+  const p1=document.getElementById('sp-p1').value;
+  const p2=document.getElementById('sp-p2').value;
+  if(!p1||p1.length<6){showErr('sp-err','⚠️ Password minimal 6 karakter');return;}
+  if(p1!==p2){showErr('sp-err','⚠️ Password tidak sama');return;}
+  setBtnLoading('sp-btn',true);
+  try{
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error) throw error;
+    setBtnLoading('sp-btn',false,'Simpan Password Baru');
+    toast('✅ Password berhasil diubah, silakan masuk');
+    await sb.auth.signOut();
+    goPage('login');
+  }catch(err){
+    setBtnLoading('sp-btn',false,'Simpan Password Baru');
+    showErr('sp-err','❌ Gagal: '+(err.message||'coba lagi'));
+  }
+}
+
 async function doLogin(){
   const e=document.getElementById('lg-e').value.trim();
   const p=document.getElementById('lg-p').value;
@@ -5659,6 +5721,7 @@ async function init(){
 
 sb.auth.onAuthStateChange(async(event,session)=>{
   if(event==='SIGNED_OUT') setLoggedOut();
+  if(event==='PASSWORD_RECOVERY') goPage('set-password');
 });
 
 /* ══════════════════════════════════════════
