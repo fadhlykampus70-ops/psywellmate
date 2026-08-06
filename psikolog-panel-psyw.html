@@ -436,10 +436,31 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="tb-right">
       <div class="timeout-bar" id="timeout-bar" style="width:100%"></div>
       <span class="tb-user" id="tb-user"></span>
+      <button class="tb-logout" onclick="openModal('modal-panduan')" style="margin-right:6px">📖 Panduan</button>       
       <button class="tb-logout" onclick="doLogout()">Keluar</button>
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-panduan">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-head">
+        <div class="modal-title">📖 Panduan Penggunaan — Psikolog</div>
+        <button class="modal-close" onclick="closeModal('modal-panduan')">✕</button>
+      </div>
+      <div class="modal-body">
+        <ol style="padding-left:18px;line-height:2;font-size:.85rem">
+          <li><strong>Daftar Rujukan</strong> — lihat pasien yang dirujuk ke Anda.</li>
+          <li><strong>Detail Sesi</strong> — pantau progres & transkrip sesi tiap pasien.</li>
+          <li><strong>Catatan Klinis</strong> — tambahkan catatan profesional untuk tiap pasien.</li>
+          <li>Untuk kondisi darurat pasien, koordinasikan segera dengan admin.</li>
+        </ol>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-o" onclick="closeModal('modal-panduan')">Tutup</button>
+      </div>
+    </div>
+  </div>
+  
   <div class="layout">
 
     <!-- SIDEBAR -->
