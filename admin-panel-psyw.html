@@ -274,10 +274,35 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="tb-right">
       <div class="timeout-bar" id="timeout-bar" style="width:100%"></div>
       <span class="tb-user" id="tb-user"></span>
+      <button class="tb-logout" onclick="openModal('modal-panduan')" style="margin-right:6px">📖 Panduan</button>       
       <button class="tb-logout" onclick="doAdminLogout()">Keluar</button>
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-panduan">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-head">
+        <div class="modal-title">📖 Panduan Penggunaan — Admin</div>
+        <button class="modal-close" onclick="closeModal('modal-panduan')">✕</button>
+      </div>
+      <div class="modal-body">
+        <ol style="padding-left:18px;line-height:2;font-size:.85rem">
+          <li><strong>Overview</strong> — ringkasan jumlah pasien, sesi, dan status keseluruhan.</li>
+          <li><strong>Pasien</strong> — kelola data & profil pasien.</li>
+          <li><strong>Sesi</strong> — pantau progres tiap sesi terapi pasien.</li>
+          <li><strong>PHQ</strong> — lihat hasil kuesioner awal/akhir tiap pasien.</li>
+          <li><strong>Crisis Alert</strong> — tangani notifikasi darurat: klik baris untuk lihat detail, hubungi pasien/wali via nomor yang tampil, lalu tandai status (Dilihat/Ditangani/False Positive).</li>
+          <li><strong>Rujukan</strong> — kelola penugasan psikolog ke pasien.</li>
+          <li><strong>Assign / Checkpoint Sesi</strong> — atur jadwal buka sesi berikutnya per pasien, termasuk override manual bila diperlukan.</li>
+          <li><strong>Logs</strong> — riwayat aktivitas admin untuk audit.</li>
+        </ol>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-o" onclick="closeModal('modal-panduan')">Tutup</button>
+      </div>
+    </div>
+  </div>
+  
   <div class="layout">
     <!-- SIDEBAR -->
     <div class="sidebar">
