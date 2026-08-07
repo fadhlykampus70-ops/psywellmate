@@ -578,7 +578,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
               <input class="search-inp" type="text" placeholder="Cari nama pasien…" oninput="filterSessions(this.value)" id="sess-search">
             </div>
           </div>
-          <table><thead><tr><th>#</th><th>Pasien</th><th>Usia</th><th>Tahap</th><th>Skor Pre</th><th>Skor Post</th><th>Delta</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <table><thead><tr><th>#</th><th>Pasien</th><th>Usia</th><th>Tahap</th><th>Skor Pre</th><th>Skor Post</th><th>Delta</th><th>Status</th><th>Checkpoint Berikutnya</th><th>Tanggal</th><th>Aksi</th></tr></thead>
           <tbody id="sessions-tbody"></tbody></table>
           <div class="pagi" id="sess-pagi"></div>
         </div>
@@ -859,6 +859,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 </div>
 
 <!-- MODAL: TRANSKRIP SESI -->
+<!-- MODAL: TRANSKRIP SESI -->
 <div class="modal-overlay" id="modal-transcript">
   <div class="modal">
     <div class="modal-head">
@@ -869,6 +870,34 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="modal-foot">
       <button class="btn btn-o" onclick="closeModal('modal-transcript')">Tutup</button>
       <button class="btn btn-a" onclick="exportTranscriptPDF()">⬇ PDF Transkrip</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ATUR CHECKPOINT SESI -->
+<div class="modal-overlay" id="modal-checkpoint">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title">⏳ Atur Jadwal Sesi Berikutnya</div>
+      <button class="modal-close" onclick="closeModal('modal-checkpoint')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Pasien</div>
+        <div style="font-size:.9rem;font-weight:600;color:var(--white)" id="ck-pasien-nama">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px" id="ck-pasien-sesi">—</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">Sesi berikutnya terbuka pada</label>
+        <input type="datetime-local" id="ck-datetime" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none">
+      </div>
+      <div style="background:var(--amber-soft);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:.7rem .9rem;margin-top:1rem;font-size:.76rem;color:var(--amber);line-height:1.55">
+        ⚠️ Sistem otomatis mengunci sesi berikutnya selama 3 hari. Perubahan ini akan menimpa jadwal otomatis tersebut.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-checkpoint')">Batal</button>
+      <button class="btn btn-p" onclick="simpanCheckpoint()">Simpan Jadwal</button>
     </div>
   </div>
 </div>
@@ -1058,7 +1087,8 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
    STATE
 ════════════════════════════════════ */
 let _cu = null;
-let _allUsers = [], _allSessions = [], _allPHQ = [], _allLogs = [], _allPatientProfiles = [];
+let _allUsers = [], _allSessions = [], _allPHQ = [], _allLogs = [], _allPatientProfiles = [], _allCheckpoints = [];
+let _ckTargetSess = null;
 let _currentTranscriptData = null;
 let _currentTranscriptSession = null;
 const PAGE_SIZE = 15;
@@ -1188,12 +1218,13 @@ async function loadAllData(){
   try{
     // Load semua data paralel
     // Load semua data paralel
-    const [usersRes, sessRes, phqRes, logsRes, profilesRes] = await Promise.all([
+    const [usersRes, sessRes, phqRes, logsRes, profilesRes, checkpointsRes] = await Promise.all([
       sb.from('profiles').select('*').order('created_at',{ascending:false}),
       sb.from('therapy_sessions').select('*').order('created_at',{ascending:false}),
       sb.from('phq_assessments').select('*').order('created_at',{ascending:false}),
       sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(200),
-      sb.from('patient_profiles').select('user_id,phone_patient,phone_guardian')
+      sb.from('patient_profiles').select('user_id,phone_patient,phone_guardian'),
+      sb.from('sesi_checkpoints').select('*').order('sesi_number',{ascending:false})
     ]);
 
     _allUsers = usersRes.data || [];
@@ -1201,6 +1232,7 @@ async function loadAllData(){
     _allPHQ = phqRes.data || [];
     _allLogs = logsRes.data || [];
     _allPatientProfiles = profilesRes.data || [];
+    _allCheckpoints = checkpointsRes.data || [];
 
     renderOverview();
     renderUsers();
@@ -1438,7 +1470,7 @@ function renderSessions(filter=''){
   const slice = _filteredSessions.slice((_sessPage-1)*PAGE_SIZE, _sessPage*PAGE_SIZE);
   const tbody = document.getElementById('sessions-tbody');
 
-  if(!slice.length){ tbody.innerHTML=`<tr><td colspan="10" class="tbl-empty">Tidak ada data</td></tr>`; return; }
+  if(!slice.length){ tbody.innerHTML=`<tr><td colspan="11" class="tbl-empty">Tidak ada data</td></tr>`; return; }
 
   // Simpan ke map agar bisa diakses dari event listener
   _sessMap = {};
@@ -1458,10 +1490,27 @@ function renderSessions(filter=''){
       <td>${s.status==='completed'&&s.post_score!=null?s.post_score:'—'}</td>
       <td>${deltaHtml}</td>
       <td>${statusBadge(s.status)}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td style="font-size:.72rem">${(()=>{
+        const cks = _allCheckpoints.filter(c=>c.session_id===s.id);
+        if(cks.length===0) return '<span style="color:var(--muted)">— Tidak ada jeda aktif</span>';
+        const ck = cks[0]; // sudah diurutkan sesi_number desc dari query
+        const unlockedAt = new Date(ck.unlocked_at);
+        const sudahLewat = unlockedAt <= new Date();
+        return `<div>${sudahLewat?'<span style="color:var(--green)">✓ Terbuka</span>':'<span style="color:var(--amber)">⏳ '+fmtDate(ck.unlocked_at)+'</span>'}</div>
+          <button class="btn btn-o btn-sm ck-edit-btn" data-sessid="${s.id}" data-ckid="${ck.id}" data-unlocked="${ck.unlocked_at}" data-nama="${s.nickname||''}" data-sesinum="${ck.sesi_number}" style="margin-top:3px">Atur ulang</button>`;
+      })()}</td>
       <td style="white-space:nowrap;color:var(--muted);font-size:.72rem">${fmtDateShort(s.created_at)}</td>
       <td><button class="btn btn-p btn-sm tr-sess-btn" data-id="${s.id}">Transkrip</button></td>
     </tr>`;
   }).join('');
+
+  // Event listener untuk tombol atur ulang checkpoint
+  tbody.querySelectorAll('.ck-edit-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      bukaModalCheckpoint(btn.dataset.ckid, btn.dataset.sessid, btn.dataset.nama, btn.dataset.unlocked, btn.dataset.sesinum);
+    });
+  });
 
   // Event listener aman — tidak ada karakter yang bisa rusak
   tbody.querySelectorAll('.tr-sess-btn').forEach(btn=>{
@@ -1742,6 +1791,40 @@ async function exportTranscriptPDF(){
 
   doc.save('transkrip_'+sess.nickname+'_'+Date.now()+'.pdf');
   toast('✅ PDF transkrip berhasil diunduh');
+}
+
+/* ════════════════════════════════════
+   CHECKPOINT SESI — Atur Jadwal Manual
+════════════════════════════════════ */
+function bukaModalCheckpoint(ckId, sessionId, nama, unlockedAtIso, sesiNumber){
+  _ckTargetSess = {ckId, sessionId, nama};
+  document.getElementById('ck-pasien-nama').textContent = nama || '—';
+  document.getElementById('ck-pasien-sesi').textContent = `Checkpoint setelah Sesi ${sesiNumber}`;
+  // Format ke datetime-local (YYYY-MM-DDTHH:mm), pakai waktu lokal
+  const d = new Date(unlockedAtIso);
+  const pad = n => String(n).padStart(2,'0');
+  const localStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  document.getElementById('ck-datetime').value = localStr;
+  openModal('modal-checkpoint');
+}
+
+async function simpanCheckpoint(){
+  if(!_ckTargetSess) return;
+  const val = document.getElementById('ck-datetime').value;
+  if(!val){ toast('⚠️ Pilih tanggal & waktu terlebih dahulu'); return; }
+  const unlockedAt = new Date(val).toISOString();
+  try{
+    const {error} = await sb.from('sesi_checkpoints')
+      .update({unlocked_at:unlockedAt})
+      .eq('id',_ckTargetSess.ckId);
+    if(error) throw error;
+    await logActivity('checkpoint_edit', _ckTargetSess.sessionId, `Ubah jadwal sesi berikutnya untuk ${_ckTargetSess.nama} → ${fmtDate(unlockedAt)}`);
+    toast('✅ Jadwal sesi berikutnya berhasil diperbarui');
+    closeModal('modal-checkpoint');
+    await loadAllData();
+  }catch(e){
+    toast('❌ Gagal menyimpan: '+e.message);
+  }
 }
 
 /* ════════════════════════════════════
