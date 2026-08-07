@@ -536,6 +536,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
     <div id="riwayat-list"><div class="empty-state"><div class="ei">📋</div><p>Memuat riwayat…</p></div></div>
     <div class="brow" style="margin-top:1.5rem">
+      <button class="btn-sm bo" id="rw-kembali-btn" onclick="kembaliKeHasilDariRiwayat()" style="display:none">← Kembali ke Hasil</button>
       <button class="btn-sm bp" onclick="launchApp()">+ Mulai Sesi Baru</button>
     </div>
   </div>
@@ -5673,8 +5674,20 @@ function toggleMicSesi(){
 /* ══════════════════════════════════════════
    RIWAYAT
 ══════════════════════════════════════════ */
+
+function kembaliKeHasilDariRiwayat(){
+  if(S.sessionId && S.postScore){
+    goPage('app');
+    showSc('sc-final');
+  } else {
+    toast('⚠️ Tidak ada hasil sesi yang bisa ditampilkan');
+  }
+}  
+  
 async function loadRiwayat(){
   if(!_cu) return;
+  const rwBtn = document.getElementById('rw-kembali-btn');
+  if(rwBtn) rwBtn.style.display = (S.sessionId && S.postScore) ? 'inline-flex' : 'none';
   const el=document.getElementById('riwayat-list');
   el.innerHTML='<div class="empty-state"><div class="ei">⏳</div><p>Memuat riwayat…</p></div>';
   try{
