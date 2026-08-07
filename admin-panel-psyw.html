@@ -346,6 +346,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="sn-sep"></div>
       <div class="sn" onclick="showPanel('crisis')" id="sn-crisis"><span class="sn-icon">🚨</span> Crisis Alerts <span class="sn-badge" id="badge-crisis" style="display:none">0</span></div>
       <div class="sn" onclick="showPanel('rujukan')" id="sn-rujukan"><span class="sn-icon">📋</span> Rujukan <span class="sn-badge" id="badge-rujukan" style="display:none">0</span></div>
+      <div class="sn" onclick="showPanel('checkpoint')" id="sn-checkpoint"><span class="sn-icon">⏳</span> Checkpoint Sesi <span class="sn-badge" id="badge-checkpoint" style="display:none">0</span></div>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -444,6 +445,40 @@ tr:hover td{background:rgba(255,255,255,.015)}
           </div>
         </div>
       </div>
+
+      <!-- PANEL: CHECKPOINT SESI -->
+      <div class="panel" id="panel-checkpoint">
+        <div class="sec-hd">
+          <h2>⏳ Checkpoint Sesi</h2>
+          <p>Pasien yang sedang menunggu jeda 3 hari sebelum bisa melanjutkan sesi berikutnya. Admin bisa mengubah jadwal buka sesi secara manual.</p>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.2rem">
+          <div class="stat-card"><div class="stat-val" id="ck-total">—</div><div class="stat-lbl">Total Menunggu Jeda</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--amber)" id="ck-waiting">—</div><div class="stat-lbl">Masih Terkunci</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--green)" id="ck-ready">—</div><div class="stat-lbl">Sudah Bisa Lanjut</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head">
+            <div class="tbl-title">Daftar Checkpoint Aktif</div>
+            <div class="tbl-actions">
+              <input class="search-inp" type="text" id="ck-search" placeholder="Cari nama pasien…" oninput="renderCheckpointTable()">
+              <button class="btn btn-o btn-sm" onclick="loadAllData()">🔄 Refresh</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pasien</th><th>Tahap</th><th>Sesi Selesai</th><th>Selesai Pada</th>
+                  <th>Sesi Berikutnya Terbuka</th><th>Status</th><th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ck-tbody"><tr><td colspan="7" class="tbl-empty">Memuat data…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- OVERVIEW -->
       <div class="panel active" id="panel-overview">
         <div class="sec-hd">
@@ -892,6 +927,34 @@ tr:hover td{background:rgba(255,255,255,.015)}
         <input type="datetime-local" id="ck-datetime" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none">
       </div>
       <div style="background:var(--amber-soft);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:.7rem .9rem;margin-top:1rem;font-size:.76rem;color:var(--amber);line-height:1.55">
+        ⚠️ Sistem otomatis mengunci sesi berikutnya selama 3 hari sejak sesi sebelumnya selesai. Perubahan ini akan menimpa jadwal otomatis tersebut — bisa dipercepat (buka lebih awal) atau diperlambat.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-o" onclick="closeModal('modal-checkpoint')">Batal</button>
+      <button class="btn btn-p" onclick="simpanCheckpoint()">Simpan Jadwal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ATUR CHECKPOINT SESI -->
+<div class="modal-overlay" id="modal-checkpoint">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title">⏳ Atur Jadwal Sesi Berikutnya</div>
+      <button class="modal-close" onclick="closeModal('modal-checkpoint')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Pasien</div>
+        <div style="font-size:.9rem;font-weight:600;color:var(--white)" id="ck-pasien-nama">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px" id="ck-pasien-sesi">—</div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">Sesi berikutnya terbuka pada</label>
+        <input type="datetime-local" id="ck-datetime" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none">
+      </div>
+      <div style="background:var(--amber-soft);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:.7rem .9rem;margin-top:1rem;font-size:.76rem;color:var(--amber);line-height:1.55">
         ⚠️ Sistem otomatis mengunci sesi berikutnya selama 3 hari. Perubahan ini akan menimpa jadwal otomatis tersebut.
       </div>
     </div>
@@ -1239,6 +1302,7 @@ async function loadAllData(){
     renderSessions();
     renderPHQ();
     renderLogs();
+    renderCheckpointTable();
     // Muat data assign
     try{ await loadAssignData(); }catch(e){ console.warn('loadAssignData:',e); }
     // Muat data crisis & rujukan
@@ -1794,7 +1858,104 @@ async function exportTranscriptPDF(){
 }
 
 /* ════════════════════════════════════
-   CHECKPOINT SESI — Atur Jadwal Manual
+   CHECKPOINT SESI — Panel Tersendiri
+════════════════════════════════════ */
+function renderCheckpointTable(){
+  const search = (document.getElementById('ck-search')?.value||'').toLowerCase();
+
+  // Ambil hanya checkpoint TERBARU per session_id (sesi_number tertinggi)
+  const latestPerSession = {};
+  _allCheckpoints.forEach(ck=>{
+    const existing = latestPerSession[ck.session_id];
+    if(!existing || ck.sesi_number > existing.sesi_number) latestPerSession[ck.session_id] = ck;
+  });
+
+  // Hanya tampilkan pasien yang sesinya masih 'ongoing' (belum selesai semua sesi)
+  let rows = Object.values(latestPerSession)
+    .map(ck=>{
+      const sess = _allSessions.find(s=>s.id===ck.session_id);
+      return {ck, sess};
+    })
+    .filter(r=>r.sess && r.sess.status==='ongoing');
+
+  if(search){
+    rows = rows.filter(r=>(r.sess.nickname||'').toLowerCase().includes(search));
+  }
+
+  const total = rows.length;
+  const waiting = rows.filter(r=>new Date(r.ck.unlocked_at) > new Date()).length;
+  const ready = total - waiting;
+
+  document.getElementById('ck-total').textContent = total;
+  document.getElementById('ck-waiting').textContent = waiting;
+  document.getElementById('ck-ready').textContent = ready;
+  const badge = document.getElementById('badge-checkpoint');
+  if(badge){
+    if(ready>0){ badge.textContent=ready; badge.style.display='inline-flex'; }
+    else badge.style.display='none';
+  }
+
+  const tbody = document.getElementById('ck-tbody');
+  if(rows.length===0){
+    tbody.innerHTML = `<tr><td colspan="7" class="tbl-empty">Tidak ada pasien yang sedang menunggu checkpoint.</td></tr>`;
+    return;
+  }
+
+  // Urutkan: yang paling cepat terbuka duluan
+  rows.sort((a,b)=> new Date(a.ck.unlocked_at) - new Date(b.ck.unlocked_at));
+
+  tbody.innerHTML = rows.map(({ck,sess})=>{
+    const sudahBisa = new Date(ck.unlocked_at) <= new Date();
+    return `<tr>
+      <td><strong>${sess.nickname||'—'}</strong></td>
+      <td>${stageBadge(sess.stage)}</td>
+      <td>Sesi ${ck.sesi_number}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${fmtDate(ck.completed_at)}</td>
+      <td style="font-size:.75rem">${fmtDate(ck.unlocked_at)}</td>
+      <td>${sudahBisa?'<span class="badge b-green">✓ Bisa Lanjut</span>':'<span class="badge b-amber">⏳ Terkunci</span>'}</td>
+      <td><button class="btn btn-o btn-sm ck-edit-btn" data-ckid="${ck.id}" data-sessid="${sess.id}" data-nama="${sess.nickname||''}" data-unlocked="${ck.unlocked_at}" data-sesinum="${ck.sesi_number}">Atur ulang</button></td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('.ck-edit-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      bukaModalCheckpoint(btn.dataset.ckid, btn.dataset.sessid, btn.dataset.nama, btn.dataset.unlocked, btn.dataset.sesinum);
+    });
+  });
+}
+
+function bukaModalCheckpoint(ckId, sessionId, nama, unlockedAtIso, sesiNumber){
+  _ckTarget = {ckId, sessionId, nama};
+  document.getElementById('ck-pasien-nama').textContent = nama || '—';
+  document.getElementById('ck-pasien-sesi').textContent = `Checkpoint setelah Sesi ${sesiNumber}`;
+  const d = new Date(unlockedAtIso);
+  const pad = n => String(n).padStart(2,'0');
+  const localStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  document.getElementById('ck-datetime').value = localStr;
+  openModal('modal-checkpoint');
+}
+
+async function simpanCheckpoint(){
+  if(!_ckTarget) return;
+  const val = document.getElementById('ck-datetime').value;
+  if(!val){ toast('⚠️ Pilih tanggal & waktu terlebih dahulu'); return; }
+  const unlockedAt = new Date(val).toISOString();
+  try{
+    const {error} = await sb.from('sesi_checkpoints')
+      .update({unlocked_at:unlockedAt})
+      .eq('id',_ckTarget.ckId);
+    if(error) throw error;
+    await logActivity('checkpoint_edit', _ckTarget.sessionId, `Ubah jadwal sesi berikutnya untuk ${_ckTarget.nama} → ${fmtDate(unlockedAt)}`);
+    toast('✅ Jadwal sesi berikutnya berhasil diperbarui');
+    closeModal('modal-checkpoint');
+    await loadAllData();
+  }catch(e){
+    toast('❌ Gagal menyimpan: '+e.message);
+  }
+}
+
+/* ════════════════════════════════════
+   STATE TAMBAHAN
 ════════════════════════════════════ */
 function bukaModalCheckpoint(ckId, sessionId, nama, unlockedAtIso, sesiNumber){
   _ckTargetSess = {ckId, sessionId, nama};
@@ -2225,6 +2386,7 @@ function showPanel(id){
   }
   if(id === 'crisis')  loadCrisisData();
   if(id === 'rujukan') loadRujukanData();
+  if(id === 'checkpoint') renderCheckpointTable();
 }
   /* ════════════════════════════════════
    CRISIS ALERTS — Panel Admin
