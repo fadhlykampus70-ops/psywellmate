@@ -1256,7 +1256,7 @@ async function loadAllData(){
       sb.from('therapy_sessions').select('*').order('created_at',{ascending:false}),
       sb.from('phq_assessments').select('*').order('created_at',{ascending:false}),
       sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(200),
-      sb.from('patient_profiles').select('user_id,phone_patient,phone_guardian'),
+      sb.from('patient_profiles').select('*'),
       sb.from('sesi_checkpoints').select('*').order('sesi_number',{ascending:false})
     ]);
 
@@ -1445,21 +1445,71 @@ function renderUsers(filter=''){
 
 function filterUsers(v){ _userPage=1; renderUsers(v); }
 
+let _bioTargetUserId = null;
+
 async function viewUserDetail(uid){
   await logActivity('view_user', uid, 'Melihat detail user');
   const user = _allUsers.find(u=>u.id===uid);
   const userSessions = _allSessions.filter(s=>s.user_id===uid);
-  const userPHQ = _allPHQ.filter(p=>p.user_id===uid);
+  const prof = _allPatientProfiles.find(p=>p.user_id===uid);
+  _bioTargetUserId = uid;
 
   document.getElementById('mu-title').textContent = 'Detail: '+(user?.full_name||uid);
   const body = document.getElementById('mu-body');
-
   body.innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-item"><div class="detail-lbl">Nama Lengkap</div><div class="detail-val">${user?.full_name||'—'}</div></div>
-      <div class="detail-item"><div class="detail-lbl">Username</div><div class="detail-val">@${user?.username||'—'}</div></div>
-      <div class="detail-item"><div class="detail-lbl">Email</div><div class="detail-val">${user?.email||'—'}</div></div>
-      <div class="detail-item"><div class="detail-lbl">Bergabung</div><div class="detail-val">${fmtDateShort(user?.created_at)}</div></div>
+    <div style="font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.65rem">Biodata Pasien</div>
+    <div class="detail-grid" style="margin-bottom:.85rem">
+      <div class="detail-item"><div class="detail-lbl">Username (akun)</div><div class="detail-val">@${user?.username||'—'}</div></div>
+      <div class="detail-item"><div class="detail-lbl">Email (akun)</div><div class="detail-val">${user?.email||'—'}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem">
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Nama Lengkap (Akun)</label>
+        <input type="text" id="bio-fullname" value="${(user?.full_name||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Nama Panggilan</label>
+        <input type="text" id="bio-nickname" value="${(prof?.nickname||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Usia</label>
+        <input type="number" id="bio-age" value="${prof?.age??''}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Jenis Kelamin</label>
+        <select id="bio-gender" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+          <option value="" ${!prof?.gender?'selected':''}>-- Pilih --</option>
+          <option value="Laki-laki" ${prof?.gender==='Laki-laki'?'selected':''}>Laki-laki</option>
+          <option value="Perempuan" ${prof?.gender==='Perempuan'?'selected':''}>Perempuan</option>
+          <option value="Lainnya / Prefer not to say" ${prof?.gender==='Lainnya / Prefer not to say'?'selected':''}>Lainnya / Prefer not to say</option>
+        </select>
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Penyakit Kronis</label>
+        <input type="text" id="bio-chronic" value="${(prof?.chronic_disease||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Status Pasangan Serumah</label>
+        <input type="text" id="bio-partner" value="${(prof?.has_partner||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Jumlah Anak Serumah</label>
+        <input type="text" id="bio-children" value="${(prof?.children_count||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">No. HP Pasien</label>
+        <input type="tel" id="bio-phone-patient" value="${(prof?.phone_patient||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+      <div class="lfield" style="margin-bottom:0">
+        <label style="display:block;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">No. HP Wali</label>
+        <input type="tel" id="bio-phone-guardian" value="${(prof?.phone_guardian||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none">
+      </div>
+    </div>
+    <div class="ibox" id="bio-noprofile-warn" style="display:${prof?'none':'flex'};align-items:center;font-size:.72rem">
+      ⚠️ Pasien ini belum punya data biodata tersimpan (belum pernah menyelesaikan tes PHQ awal). Isi dan simpan untuk membuat data baru.
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1.2rem">
+      <button class="btn btn-p btn-sm" onclick="simpanBiodataUser()">💾 Simpan Perubahan Biodata</button>
     </div>
     <div style="font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.65rem">Riwayat Sesi (${userSessions.length})</div>
     ${userSessions.length ? userSessions.map(s=>`
@@ -1475,7 +1525,6 @@ async function viewUserDetail(uid){
       </div>`).join('') : '<div style="color:var(--muted);font-size:.8rem">Belum ada sesi</div>'}
   `;
   openModal('modal-user');
-
   // Event listener untuk tombol transkrip di modal user detail
   setTimeout(()=>{
     document.querySelectorAll('.tr-user-btn').forEach(btn=>{
@@ -1487,6 +1536,49 @@ async function viewUserDetail(uid){
       });
     });
   }, 50);
+}
+
+async function simpanBiodataUser(){
+  if(!_bioTargetUserId) return;
+  const fullName = document.getElementById('bio-fullname').value.trim();
+  const nickname = document.getElementById('bio-nickname').value.trim();
+  const age      = document.getElementById('bio-age').value ? parseInt(document.getElementById('bio-age').value) : null;
+  const gender   = document.getElementById('bio-gender').value;
+  const chronic  = document.getElementById('bio-chronic').value.trim();
+  const partner  = document.getElementById('bio-partner').value.trim();
+  const children = document.getElementById('bio-children').value.trim();
+  const phonePat = document.getElementById('bio-phone-patient').value.trim();
+  const phoneGrd = document.getElementById('bio-phone-guardian').value.trim();
+
+  try{
+    // Update nama akun di profiles
+    if(fullName){
+      const {error:errProf} = await sb.from('profiles')
+        .update({full_name: fullName}).eq('id', _bioTargetUserId);
+      if(errProf) throw errProf;
+    }
+
+    // Upsert biodata pasien di patient_profiles
+    const {error:errPP} = await sb.from('patient_profiles').upsert({
+      user_id: _bioTargetUserId,
+      nickname: nickname,
+      age: age,
+      gender: gender,
+      chronic_disease: chronic,
+      has_partner: partner,
+      children_count: children,
+      phone_patient: phonePat,
+      phone_guardian: phoneGrd,
+      updated_at: new Date().toISOString()
+    }, {onConflict:'user_id'});
+    if(errPP) throw errPP;
+
+    await logActivity('biodata_edit', _bioTargetUserId, `Ubah biodata pasien: ${nickname||fullName||_bioTargetUserId}`);
+    toast('✅ Biodata pasien berhasil disimpan');
+    await loadAllData();
+  }catch(err){
+    toast('❌ Gagal menyimpan biodata: ' + err.message);
+  }
 }
 
 /* ════════════════════════════════════
