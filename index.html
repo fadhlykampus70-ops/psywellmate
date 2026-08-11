@@ -3434,7 +3434,7 @@ async function _kirimEmailCrisis(answerText, level, words){
           },
           body: JSON.stringify({
             to:      _tujuan,
-            subject: `⚠️ [URGENT] Crisis Alert — ${S.nama}, ${S.usia} thn — PsyWellMate`,
+            subject: `[URGENT] Crisis Alert - ${S.nama}, ${S.usia} thn - PsyWellMate`,
             html:    htmlBody,
           }),
         });
@@ -5299,7 +5299,7 @@ async function _kirimEmailRujukan(psi, data){
       },
       body: JSON.stringify({
         to:      psi.email,
-        subject: ` Rujukan Pasien — ${data.nama}, ${data.usia} thn — PsyWellMate`,
+        subject: `Rujukan Pasien — ${data.nama}, ${data.usia} thn — PsyWellMate`,
         html:    htmlBody,
       }),
     });
