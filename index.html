@@ -3800,6 +3800,13 @@ async function doResumeSesi(){
   S.sesiList    = getSesiListByStage(ongoingSess.stage, ongoingSess.age);
   S.preScore    = ongoingSess.pre_score||0;
 
+  // Ambil nomor HP dari patient_profiles (tidak tersimpan di therapy_sessions)
+  const {data:_profResume} = await sb.from('patient_profiles')
+    .select('phone_patient,phone_guardian')
+    .eq('user_id',_cu.id).maybeSingle();
+  S.phonePatient  = _profResume?.phone_patient  || '';
+  S.phoneGuardian = _profResume?.phone_guardian || '';
+
   // Cari progress
   const {data:progress} = await sb.from('life_review_progress')
     .select('*').eq('user_id',_cu.id).eq('session_id',ongoingSess.id)
