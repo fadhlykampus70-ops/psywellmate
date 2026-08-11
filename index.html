@@ -3384,6 +3384,20 @@ async function _kirimEmailCrisis(answerText, level, words){
   // Pakai Supabase Edge Function — API key aman di server
   const EDGE_URL = 'https://xxcxygdssveddjonwxat.supabase.co/functions/v1/send-email';
 
+  // Ambil nomor HP terbaru dari patient_profiles (source of truth di database),
+  // jangan hanya andalkan S yang tergantung form Data Diri diisi ulang atau tidak
+  let _phonePatient  = S.phonePatient  || '';
+  let _phoneGuardian = S.phoneGuardian || '';
+  if((!_phonePatient || !_phoneGuardian) && _cu){
+    try{
+      const {data:_prof} = await sb.from('patient_profiles')
+        .select('phone_patient,phone_guardian')
+        .eq('user_id',_cu.id).maybeSingle();
+      _phonePatient  = _phonePatient  || _prof?.phone_patient  || '';
+      _phoneGuardian = _phoneGuardian || _prof?.phone_guardian || '';
+    }catch(e){ console.warn('_kirimEmailCrisis: gagal ambil phone dari patient_profiles:', e); }
+  }
+
   const htmlBody = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
     <div style="background:#c95c5c;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
       <h2 style="margin:0">⚠️ Crisis Alert — PsyWellMate</h2>
@@ -3394,8 +3408,8 @@ async function _kirimEmailCrisis(answerText, level, words){
         <tr><td style="padding:6px 0;color:#888;width:140px">Nama</td><td style="font-weight:600">${S.nama||'—'}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Usia</td><td>${S.usia||'—'} tahun</td></tr>
         <tr><td style="padding:6px 0;color:#888">Jenis Kelamin</td><td>${S.jk||'—'}</td></tr>
-        <tr><td style="padding:6px 0;color:#888">No. HP Pasien</td><td>${S.phonePatient||'—'}</td></tr>
-        <tr><td style="padding:6px 0;color:#888">No. HP Wali</td><td>${S.phoneGuardian||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">No. HP Pasien</td><td>${_phonePatient||'—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#888">No. HP Wali</td><td>${_phoneGuardian||'—'}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Skor PHQ Awal</td><td>${S.preScore||'—'}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Sesi Saat Ini</td><td>Sesi ${S.currentSesiNum}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Level Alert</td><td><strong style="color:#c95c5c">${level.toUpperCase()}</strong></td></tr>
