@@ -596,7 +596,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
           <div class="tbl-title">⚠️ Prioritas — Skor Berat</div>
           <div class="tbl-actions">
             <span style="font-size:.72rem;color:var(--muted)">
-              Pasien dengan gejala berat yang perlu diperhatikan
+              Pasien dengan kategori Depresi Berat yang perlu diperhatikan
             </span>
           </div>
         </div>
@@ -944,10 +944,10 @@ function getSevLabel(score, tahap){
   const qLen = {anak:7,remaja:8,dewasa:9,lansia:9};
   const mx   = (qLen[tahap]||9)*3;
   const p    = score/mx;
-  if(p<=0.22) return 'Minimal / Tidak Ada Gejala';
-  if(p<=0.44) return 'Gejala Ringan';
-  if(p<=0.67) return 'Gejala Sedang';
-  return 'Gejala Berat';
+  if(p<=0.22) return 'Minimal / Tidak Ada Depresi';
+  if(p<=0.44) return 'Depresi Ringan';
+  if(p<=0.67) return 'Depresi Sedang';
+  return 'Depresi Berat';
 }
 
 /* ── Hitung hari tidak aktif ── */
@@ -1145,7 +1145,7 @@ function hasFlag(patientUserId){
 function renderDashboard(){
   const total    = _allSessions.length;
   const berat    = _allSessions.filter(s =>
-    getSevLabel(s.pre_score||0, s.stage) === 'Gejala Berat'
+    getSevLabel(s.pre_score||0, s.stage) === 'Depresi Berat'
   ).length;
   const nonaktif = _allSessions.filter(s =>
     s.status === 'ongoing' && hariTidakAktif(s) > 7
@@ -1159,7 +1159,7 @@ function renderDashboard(){
 
   /* ── Tabel Prioritas Berat ── */
   const beratList = _allSessions.filter(s =>
-    getSevLabel(s.pre_score||0, s.stage) === 'Gejala Berat'
+    getSevLabel(s.pre_score||0, s.stage) === 'Depresi Berat'
   );
   const beratTbody = document.getElementById('berat-tbody');
   if(beratList.length === 0){
@@ -1230,7 +1230,7 @@ function renderMonitoring(){
   let data = [..._allSessions];
 
   if(filter === 'berat'){
-    data = data.filter(s => getSevLabel(s.pre_score||0,s.stage) === 'Gejala Berat');
+    data = data.filter(s => getSevLabel(s.pre_score||0,s.stage) === 'Depresi Berat');
   } else if(filter === 'nonaktif'){
     data = data.filter(s => s.status==='ongoing' && hariTidakAktif(s) > 7);
   } else if(filter === 'ongoing'){
