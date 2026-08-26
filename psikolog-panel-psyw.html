@@ -888,10 +888,10 @@ function getSevLabel(score, tahap){
   const qLen = {anak:7, remaja:8, dewasa:9, lansia:9};
   const mx = (qLen[tahap]||9) * 3;
   const p = score / mx;
-  if(p <= 0.22) return 'Minimal / Tidak Ada Gejala';
-  if(p <= 0.44) return 'Gejala Ringan';
-  if(p <= 0.67) return 'Gejala Sedang';
-  return 'Gejala Berat';
+  if(p <= 0.22) return 'Minimal / Tidak Ada Depresi ';
+  if(p <= 0.44) return 'Depresi  Ringan';
+  if(p <= 0.67) return 'Depresi  Sedang';
+  return 'Depresi  Berat';
 }
 
 /* ════════════════════════════════════
@@ -1079,7 +1079,7 @@ function renderDashboard(){
   const pasienku     = _allSessions.filter(s => _myAssigned.includes(s.user_id)).length;
   const skorBerat    = _allSessions.filter(s => {
     const sev = getSevLabel(s.pre_score||0, s.stage);
-    return sev === 'Gejala Berat';
+    return sev === 'Depresi  Berat';
   }).length;
   const ongoing      = _allSessions.filter(s => s.status === 'ongoing').length;
 
@@ -1091,7 +1091,7 @@ function renderDashboard(){
   // Tabel prioritas skor berat
   const beratList = _allSessions.filter(s => {
     const sev = getSevLabel(s.pre_score||0, s.stage);
-    return sev === 'Gejala Berat';
+    return sev === 'Depresi  Berat';
   });
 
   const tbody = document.getElementById('berat-tbody');
@@ -1136,7 +1136,7 @@ function renderSemuaPasien(){
 
   // Filter
   if(filter === 'berat'){
-    data = data.filter(s => getSevLabel(s.pre_score||0, s.stage) === 'Gejala Berat');
+    data = data.filter(s => getSevLabel(s.pre_score||0, s.stage) === 'Depresi  Berat');
   } else if(filter === 'unassigned'){
     data = data.filter(s => !getAssignedPsikologName(s.user_id));
   } else if(filter === 'completed'){
@@ -1253,10 +1253,10 @@ function renderPHQ(){
   if(filterFase !== 'all') data = data.filter(p => p.phase === filterFase);
   if(filterSev  !== 'all'){
     const sevMap = {
-      berat:   'Gejala Berat',
-      sedang:  'Gejala Sedang',
-      ringan:  'Gejala Ringan',
-      minimal: 'Minimal / Tidak Ada Gejala'
+      berat:   'Depresi Berat',
+      sedang:  'Depresi Sedang',
+      ringan:  'Depresi Ringan',
+      minimal: 'Minimal / Tidak Ada Depresi'
     };
     data = data.filter(p => p.severity === sevMap[filterSev]);
   }
