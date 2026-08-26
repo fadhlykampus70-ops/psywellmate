@@ -3519,10 +3519,10 @@ const PHQ_OPTS = [{l:'😊 Tidak pernah',v:0},{l:'😐 Beberapa hari',v:1},{l:'�
 function getSev(score, tahap){
   const mx=PHQ[tahap].qs.length*3, p=score/mx;
   const sp=getSapaan();
-  if(p<=0.22) return{l:'Minimal / Tidak Ada Gejala',cls:'sev-none',col:'var(--green)',adv:`Kondisi ${sp} saat ini terlihat baik. Pertahankan gaya hidup sehat dan koneksi sosial ya!`};
-  if(p<=0.44) return{l:'Gejala Ringan',cls:'sev-mild',col:'var(--amber)',adv:`Ada beberapa tanda yang perlu diperhatikan. Berbagi dengan orang terpercaya bisa sangat membantu ${sp}.`};
-  if(p<=0.67) return{l:'Gejala Sedang',cls:'sev-mod',col:'var(--orange)',adv:`${sp.charAt(0).toUpperCase()+sp.slice(1)} butuh dukungan lebih. Pertimbangkan untuk berbicara dengan konselor atau psikolog.`};
-  return{l:'Gejala Berat',cls:'sev-sev',col:'var(--red)',adv:`Sangat disarankan untuk ${sp} segera berkonsultasi dengan profesional kesehatan mental.`};
+  if(p<=0.22) return{l:'Minimal / Tidak Ada Depresi',cls:'sev-none',col:'var(--green)',adv:`Kondisi ${sp} saat ini terlihat baik. Pertahankan gaya hidup sehat dan koneksi sosial ya!`};
+  if(p<=0.44) return{l:'Depresi Ringan',cls:'sev-mild',col:'var(--amber)',adv:`Ada beberapa tanda yang perlu diperhatikan. Berbagi dengan orang terpercaya bisa sangat membantu ${sp}.`};
+  if(p<=0.67) return{l:'Depresi Sedang',cls:'sev-mod',col:'var(--orange)',adv:`${sp.charAt(0).toUpperCase()+sp.slice(1)} butuh dukungan lebih. Pertimbangkan untuk berbicara dengan konselor atau psikolog.`};
+  return{l:'Depresi Berat',cls:'sev-sev',col:'var(--red)',adv:`Sangat disarankan untuk ${sp} segera berkonsultasi dengan profesional kesehatan mental.`};
 }
 
 /* ══════════════════════════════════════════
