@@ -1199,9 +1199,9 @@ function renderDashboard(){
         <td><strong>${s.nickname||'—'}</strong></td>
         <td>${s.age||'—'}</td>
         <td>${stageBadge(s.stage)}</td>
-        <td><span style= <td>${s.status==='completed'
+        <td>${s.status==='completed'
           ? `<span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span> → <strong style="color:var(--green)">${s.post_score??'—'}</strong>`
-          : `<span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span>`}</td>"color:var(--red);font-weight:600">${s.pre_score??'—'}</span></td>
+          : `<span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span>`}</td>
         <td>${sevBadge(sev)}</td>
         <td>${statusBadge(s.status)}</td>
         <td style="font-size:.72rem">${asgnName
@@ -1231,9 +1231,9 @@ function renderDashboard(){
         <td><strong>${s.nickname||'—'}</strong></td>
         <td>${s.age||'—'}</td>
         <td>${stageBadge(s.stage)}</td>
-        <td>${s.pre_<td>${s.status==='completed'
+        <td>${s.status==='completed'
           ? `${s.pre_score??'—'} → <strong style="color:var(--green)">${s.post_score??'—'}</strong>`
-          : `${s.pre_score??'—'}`}</td>score??'—'}</td>
+          : `${s.pre_score??'—'}`}</td>
         <td>${sevBadge(sev)}</td>
         <td>
           <span style="color:var(--amber);font-size:.78rem;font-weight:600">
