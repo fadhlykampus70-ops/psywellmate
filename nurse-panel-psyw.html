@@ -532,10 +532,13 @@ tr:hover td{background:rgba(255,255,255,.015)}
       </div>
       <div class="modal-body">
         <ol style="padding-left:18px;line-height:2;font-size:.85rem">
-          <li><strong>Daftar Pasien</strong> — lihat seluruh pasien dan status terapinya.</li>
-          <li><strong>Detail Pasien</strong> — klik pasien untuk lihat riwayat & progres.</li>
-          <li><strong>Flag / Tandai</strong> — beri penanda pada pasien yang perlu perhatian khusus.</li>
-          <li>Segera koordinasikan dengan admin/psikolog bila menemukan kondisi yang mengkhawatirkan.</li>
+          <li><strong>Dashboard</strong> — ringkasan cepat: Total Pasien Aktif, Skor Berat (Depresi Berat, perlu perhatian), Tidak Aktif &gt;7 Hari (belum lanjut sesi), dan Flag Belum Selesai. Klik angka pada kartu untuk langsung melihat daftarnya.</li>
+          <li><strong>Monitoring Pasien</strong> — daftar lengkap semua pasien beserta skor PHQ. Untuk pasien yang sudah selesai terapi, skor ditampilkan Sebelum → Sesudah agar terlihat perkembangannya.</li>
+          <li><strong>Kategori PHQ</strong>: Minimal (tidak ada indikasi), Depresi Ringan, Depresi Sedang, Depresi Berat — sesuai standar penilaian PHQ.</li>
+          <li><strong>Follow-up</strong> — daftar pasien yang perlu ditindaklanjuti (tidak aktif &gt;7 hari atau ditandai/flag). Klik tombol 📱 WA untuk langsung mengirim pesan pengingat ke pasien lewat WhatsApp.</li>
+          <li><strong>Flag</strong> — tandai pasien yang butuh perhatian khusus dengan catatan; hanya terlihat oleh perawat & admin.</li>
+          <li><strong>Lupa password?</strong> Jika muncul pesan "terlalu banyak percobaan", tunggu sesuai waktu yang ditampilkan (biasanya 1 jam) sebelum minta link reset lagi — ini batasan dari sistem email, bukan error aplikasi.</li>
+          <li>Segera koordinasikan dengan admin/psikolog bila menemukan kondisi pasien yang mengkhawatirkan.</li>
         </ol>
       </div>
       <div class="modal-foot">
@@ -579,14 +582,15 @@ tr:hover td{background:rgba(255,255,255,.015)}
           <div class="stat-lbl">Skor Berat 🔴</div>
           <div class="stat-sub" style="font-size:.72rem;color:var(--muted)">Butuh perhatian</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer" onclick="showTab('monitoring');document.getElementById('filter-monitoring').value='nonaktif';renderMonitoring();">
           <div class="stat-val" id="st-nonaktif" style="color:var(--amber)">—</div>
           <div class="stat-lbl">Tidak Aktif &gt;7 Hari</div>
-          <div class="stat-sub" style="font-size:.72rem;color:var(--muted)">Perlu follow-up</div>
+          <div class="stat-sub" style="font-size:.72rem;color:var(--muted)">Perlu follow-up · klik untuk lihat</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer" onclick="showTab('followup')">
           <div class="stat-val" id="st-flag" style="color:var(--accent)">—</div>
           <div class="stat-lbl">Flag Belum Selesai</div>
+          <div class="stat-sub" style="font-size:.72rem;color:var(--muted)">Klik untuk lihat daftar</div>
         </div>
       </div>
 
@@ -966,6 +970,7 @@ let _allSessions    = [];
 let _allAssignments = [];
 let _allProfiles    = [];
 let _allFlags       = [];
+let _allPatientProfiles = [];
 let _currentPatient = null;
 let _flagFilter     = 'all';
 const PAGE_SIZE = 15;
@@ -974,7 +979,7 @@ let _monitoringPage = 1, _flagPage = 1;
 /* ════════════════════════════════════
    LOGIN
 ════════════════════════════════════ */
-async function doKirimResetPassword(){
+  async function doKirimResetPassword(){
   const e=document.getElementById('lp-e').value.trim();
   if(!e){showErr('lp-err','⚠️ Isi email dulu');return;}
   const btn=document.getElementById('lp-btn'); btn.disabled=true;
@@ -986,9 +991,16 @@ async function doKirimResetPassword(){
     closeModal('modal-lupa-password');
   }catch(err){
     btn.disabled=false;
-    showErr('lp-err','❌ Gagal: '+(err.message||'coba lagi'));
+    const pesan = (err.message||'').toLowerCase();
+    if(pesan.includes('rate limit') || err.status===429){
+      const j = new Date(Date.now()+60*60*1000);
+      const jam = String(j.getHours()).padStart(2,'0')+':'+String(j.getMinutes()).padStart(2,'0');
+      showErr('lp-err','⏳ Terlalu banyak percobaan kirim email. Silakan coba lagi setelah pukul '+jam+' (sekitar 1 jam lagi).');
+    } else {
+      showErr('lp-err','❌ Gagal: '+(err.message||'coba lagi'));
+    }
   }
-}
+}  
 
 async function doSimpanPasswordBaru(){
   const p1=document.getElementById('sp-p1').value;
@@ -1086,7 +1098,9 @@ async function loadAllData(){
       .eq('nurse_user_id', _cuId)
       .order('flagged_at',{ascending:false});
     _allFlags = flags || [];
-
+        const {data:pprof} = await sb.from('patient_profiles')
+      .select('user_id, phone_patient, phone_guardian');
+    _allPatientProfiles = pprof || [];
     renderDashboard();
     renderMonitoring();
     renderFollowup();
@@ -1139,6 +1153,18 @@ function hasFlag(patientUserId){
   );
 }
 
+// ⬅ 2 FUNGSI BARU disisipkan di sini:
+function getPatientPhone(userId){
+  const pp = _allPatientProfiles.find(p => p.user_id === userId);
+  return pp?.phone_patient || pp?.phone_guardian || '';
+}
+function waLink(phone, nama){
+  if(!phone) return '';
+  let p = phone.replace(/[^0-9]/g,'');
+  if(p.startsWith('0')) p = '62'+p.slice(1);
+  const msg = encodeURIComponent(`Halo ${nama}, kami dari tim PsyWellMate mengingatkan untuk melanjutkan sesi terapi kamu. Ada kendala? Silakan hubungi kami ya 🙏`);
+  return `https://wa.me/${p}?text=${msg}`;
+}
 /* ════════════════════════════════════
    RENDER: DASHBOARD
 ════════════════════════════════════ */
@@ -1173,7 +1199,9 @@ function renderDashboard(){
         <td><strong>${s.nickname||'—'}</strong></td>
         <td>${s.age||'—'}</td>
         <td>${stageBadge(s.stage)}</td>
-        <td><span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span></td>
+        <td><span style= <td>${s.status==='completed'
+          ? `<span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span> → <strong style="color:var(--green)">${s.post_score??'—'}</strong>`
+          : `<span style="color:var(--red);font-weight:600">${s.pre_score??'—'}</span>`}</td>"color:var(--red);font-weight:600">${s.pre_score??'—'}</span></td>
         <td>${sevBadge(sev)}</td>
         <td>${statusBadge(s.status)}</td>
         <td style="font-size:.72rem">${asgnName
@@ -1203,7 +1231,9 @@ function renderDashboard(){
         <td><strong>${s.nickname||'—'}</strong></td>
         <td>${s.age||'—'}</td>
         <td>${stageBadge(s.stage)}</td>
-        <td>${s.pre_score??'—'}</td>
+        <td>${s.pre_<td>${s.status==='completed'
+          ? `${s.pre_score??'—'} → <strong style="color:var(--green)">${s.post_score??'—'}</strong>`
+          : `${s.pre_score??'—'}`}</td>score??'—'}</td>
         <td>${sevBadge(sev)}</td>
         <td>
           <span style="color:var(--amber);font-size:.78rem;font-weight:600">
@@ -1214,12 +1244,14 @@ function renderDashboard(){
         <td style="white-space:nowrap">
           <button class="btn btn-p btn-sm" onclick="openDetail('${s.id}')">Lihat</button>
           <button class="btn btn-a btn-sm" onclick="bukaModalFlagDari('${s.id}','${s.user_id}','${s.nickname||''}')">🚩 Flag</button>
+          ${getPatientPhone(s.user_id)
+            ? `<a class="btn btn-g btn-sm" href="${waLink(getPatientPhone(s.user_id), s.nickname||'Pasien')}" target="_blank">📱 WA</a>`
+            : ''}
         </td>
       </tr>`;
     }).join('');
   }
 }
-
 /* ════════════════════════════════════
    RENDER: MONITORING
 ════════════════════════════════════ */
@@ -1255,7 +1287,9 @@ function renderMonitoring(){
     tbody.innerHTML = `<tr><td colspan="11" class="tbl-empty">Tidak ada data.</td></tr>`;
   } else {
     tbody.innerHTML = slice.map((s,i) => {
-      const sev      = getSevLabel(s.pre_score||0, s.stage);
+      const sev = s.status==='completed'
+      ? getSevLabel(s.post_score||0, s.stage)
+      : getSevLabel(s.pre_score||0, s.stage);
       const asgnName = getAssignedPsikologName(s.user_id);
       const hari     = hariTidakAktif(s);
       const flagAda  = hasFlag(s.user_id);
@@ -1264,7 +1298,9 @@ function renderMonitoring(){
         <td><strong>${s.nickname||'—'}</strong></td>
         <td>${s.age||'—'}</td>
         <td>${stageBadge(s.stage)}</td>
-        <td><strong>${s.pre_score??'—'}</strong></td>
+        <td>${s.status==='completed'
+          ? `<strong>${s.pre_score??'—'}</strong> → <strong style="color:var(--green)">${s.post_score??'—'}</strong>`
+          : `<strong>${s.pre_score??'—'}</strong>`}</td>
         <td>${sevBadge(sev)}</td>
         <td>${statusBadge(s.status)}</td>
         <td style="font-size:.72rem">
@@ -1363,6 +1399,9 @@ function renderFollowup(){
                 ✅ Selesai
               </button>`
             : `<span style="color:var(--muted);font-size:.72rem">—</span>`}
+          ${getPatientPhone(f.patient_user_id)
+            ? `<a class="btn btn-a btn-sm" href="${waLink(getPatientPhone(f.patient_user_id), nama)}" target="_blank">📱 WA</a>`
+            : ''}
         </td>
       </tr>`;
     }).join('');
