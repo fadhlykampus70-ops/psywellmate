@@ -923,8 +923,15 @@ async function doKirimResetPassword(){
     closeModal('modal-lupa-password');
   }catch(err){
     btn.disabled=false;
-    showErr('lp-err','❌ Gagal: '+(err.message||'coba lagi'));
-  }
+    const pesan = (err.message||'').toLowerCase();
+    if(pesan.includes('rate limit') || err.status===429){
+      const j = new Date(Date.now()+60*60*1000);
+      const jam = String(j.getHours()).padStart(2,'0')+':'+String(j.getMinutes()).padStart(2,'0');
+      showErr('lp-err','⏳ Terlalu banyak percobaan kirim email. Silakan coba lagi setelah pukul '+jam+' (sekitar 1 jam lagi).');
+    } else {
+      showErr('lp-err','❌ Gagal: '+(err.message||'coba lagi'));
+    }
+  }  
 }
 
 async function doSimpanPasswordBaru(){
@@ -1079,7 +1086,7 @@ function renderDashboard(){
   const pasienku     = _allSessions.filter(s => _myAssigned.includes(s.user_id)).length;
   const skorBerat    = _allSessions.filter(s => {
     const sev = getSevLabel(s.pre_score||0, s.stage);
-    return sev === 'Depresi  Berat';
+    return sev === 'Depresi Berat';
   }).length;
   const ongoing      = _allSessions.filter(s => s.status === 'ongoing').length;
 
@@ -1091,7 +1098,7 @@ function renderDashboard(){
   // Tabel prioritas skor berat
   const beratList = _allSessions.filter(s => {
     const sev = getSevLabel(s.pre_score||0, s.stage);
-    return sev === 'Depresi  Berat';
+    return sev === 'Depresi Berat';
   });
 
   const tbody = document.getElementById('berat-tbody');
@@ -1136,7 +1143,7 @@ function renderSemuaPasien(){
 
   // Filter
   if(filter === 'berat'){
-    data = data.filter(s => getSevLabel(s.pre_score||0, s.stage) === 'Depresi  Berat');
+    data = data.filter(s => getSevLabel(s.pre_score||0, s.stage) === 'Depresi Berat');
   } else if(filter === 'unassigned'){
     data = data.filter(s => !getAssignedPsikologName(s.user_id));
   } else if(filter === 'completed'){
