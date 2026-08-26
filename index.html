@@ -1052,7 +1052,14 @@ async function doKirimResetPassword(){
     goPage('login');
   }catch(err){
     setBtnLoading('lp-btn',false,'Kirim Link Reset');
-    showErr('lp-err','❌ Gagal kirim: '+(err.message||'coba lagi'));
+    const pesan = (err.message||'').toLowerCase();
+    if(pesan.includes('rate limit') || err.status===429){
+      const j = new Date(Date.now()+60*60*1000);
+      const jam = String(j.getHours()).padStart(2,'0')+':'+String(j.getMinutes()).padStart(2,'0');
+      showErr('lp-err','⏳ Terlalu banyak percobaan kirim email. Silakan coba lagi setelah pukul '+jam+' (sekitar 1 jam lagi).');
+    } else {
+      showErr('lp-err','❌ Gagal kirim: '+(err.message||'coba lagi'));
+    }
   }
 }
 
