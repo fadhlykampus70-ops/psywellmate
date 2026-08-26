@@ -2111,7 +2111,7 @@ function renderAssignTable(){
           <strong>${s.pre_score??'—'}</strong>
           ${sevLabel !== '—'
             ? `<span class="badge ${sevCls}" style="margin-left:4px;font-size:.6rem">
-               ${sevLabel.replace('Gejala ','').replace('Minimal / Tidak Ada Gejala','Minimal')}
+               ${sevLabel.replace('Depresi ','').replace('Minimal / Tidak Ada Depresi','Minimal')}
                </span>`
             : ''}
         </td>
@@ -2205,10 +2205,11 @@ function getSevLabelAdmin(score, tahap){
   const qLen = {anak:7,remaja:8,dewasa:9,lansia:9};
   const mx   = (qLen[tahap]||9)*3;
   const p    = score/mx;
-  if(p<=0.22) return 'Minimal / Tidak Ada Gejala';
-  if(p<=0.44) return 'Gejala Ringan';
-  if(p<=0.67) return 'Gejala Sedang';
-  return 'Gejala Berat';
+// JADI:
+  if(p<=0.22) return 'Minimal / Tidak Ada Depresi';
+  if(p<=0.44) return 'Depresi Ringan';
+  if(p<=0.67) return 'Depresi Sedang';
+  return 'Depresi Berat';
 }
 
 /* ════════════════════════════════════
