@@ -888,10 +888,10 @@ function getSevLabel(score, tahap){
   const qLen = {anak:7, remaja:8, dewasa:9, lansia:9};
   const mx = (qLen[tahap]||9) * 3;
   const p = score / mx;
-  if(p <= 0.22) return 'Minimal / Tidak Ada Depresi ';
-  if(p <= 0.44) return 'Depresi  Ringan';
-  if(p <= 0.67) return 'Depresi  Sedang';
-  return 'Depresi  Berat';
+  if(p <= 0.22) return 'Minimal / Tidak Ada Depresi';
+  if(p <= 0.44) return 'Depresi Ringan';
+  if(p <= 0.67) return 'Depresi Sedang';
+  return 'Depresi Berat';
 }
 
 /* ════════════════════════════════════
